@@ -12,10 +12,8 @@ import parser.Parser;
 import control.CommandLine;
 import control.Control;
 
-public class Tiger
-{
-  public static void main(String[] args)
-  {
+public class Tiger {
+  public static void main(String[] args) {
     InputStream fstream;
     Parser parser;
 
@@ -76,7 +74,7 @@ public class Tiger
       e.printStackTrace();
       System.exit(1);
     }
-    
+
     // pretty printing the AST, if necessary
     if (dumpAst) {
       ast.PrettyPrintVisitor pp = new ast.PrettyPrintVisitor();
@@ -86,7 +84,5 @@ public class Tiger
     // elaborate the AST, report all possible errors.
     elaborator.ElaboratorVisitor elab = new elaborator.ElaboratorVisitor();
     theAst.accept(elab);
-    
-    return;
   }
 }
