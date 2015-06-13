@@ -8,10 +8,8 @@ import parser.Parser;
 import control.CommandLine;
 import control.Control;
 
-public class Tiger
-{
-  public static void main(String[] args)
-  {
+public class Tiger {
+  public static void main(String[] args) {
     InputStream fstream;
     Parser parser;
 
@@ -22,25 +20,25 @@ public class Tiger
 
     // /////////////////////////////////////////////
     // the straight-line interpreter (and compiler)    
-    switch (Control.ConSlp.action){
-    case NONE:
-      System.exit(0);
-      break;
-    default:
-      slp.Main slpmain = new slp.Main();
-      if (Control.ConSlp.div) {
-        slpmain.doit(slp.Samples.dividebyzero);
-        System.exit(0);
-      }
-      slpmain.doit(slp.Samples.prog);
-      System.exit(0);
-    }
-
-    
-    if (fname == null) {
-      cmd.usage();
-      return;
-    }
+//    switch (Control.ConSlp.action) {
+//    case NONE:
+//      System.exit(0);
+//      break;
+//    default:
+//      slp.Main slpmain = new slp.Main();
+//      if (Control.ConSlp.div) {
+//        slpmain.doit(slp.Samples.dividebyzero);
+//        System.exit(0);
+//      }
+//      slpmain.doit(slp.Samples.prog);
+//      System.exit(0);
+//    }
+//
+//
+//    if (fname == null) {
+//      cmd.usage();
+//      return;
+//    }
 
     // /////////////////////////////////////////////////////
     // it would be helpful to be able to test the lexer
@@ -75,6 +73,5 @@ public class Tiger
       e.printStackTrace();
       System.exit(1);
     }
-    return;
   }
 }

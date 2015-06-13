@@ -2,6 +2,7 @@ package slp;
 
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import slp.Slp.Exp;
@@ -15,19 +16,34 @@ import util.Bug;
 import util.Todo;
 import control.Control;
 
-public class Main
-{
+public class Main {
   // ///////////////////////////////////////////
   // maximum number of args
 
-  private int maxArgsExp(Exp.T exp)
-  {
-    new Todo();
-    return -1;
+  private int maxArgsExp(Exp.T exp) {
+    if (exp instanceof Exp.Eseq) {
+      Exp.Eseq eseq = (Exp.Eseq)exp;
+      int left = maxArgsStm(eseq.stm);
+      int right = maxArgsExp(eseq.exp);
+      return left > right ? left : right;
+    } else {
+        return 1;
+    }
   }
 
-  private int maxArgsStm(Stm.T stm)
-  {
+    private int maxArgsExpList(ExpList.T explist) {
+       if (explist instanceof ExpList.Pair) {
+           ExpList.Pair pair = (ExpList.Pair)explist;
+           return maxArgsExp(pair.exp) + maxArgsExpList(pair.list);
+       } else if (explist instanceof ExpList.Last) {
+           return maxArgsExp(((ExpList.Last)explist).exp);
+       } else {
+           new Bug();
+       }
+        return 0;
+    }
+
+  private int maxArgsStm(Stm.T stm) {
     if (stm instanceof Stm.Compound) {
       Stm.Compound s = (Stm.Compound) stm;
       int n1 = maxArgsStm(s.s1);
@@ -35,11 +51,9 @@ public class Main
 
       return n1 >= n2 ? n1 : n2;
     } else if (stm instanceof Stm.Assign) {
-      new Todo();
-      return -1;
+      return maxArgsExp(((Stm.Assign)stm).exp);
     } else if (stm instanceof Stm.Print) {
-      new Todo();
-      return -1;
+      return maxArgsExpList(((Stm.Print)stm).explist);
     } else
       new Bug();
     return 0;
@@ -48,19 +62,55 @@ public class Main
   // ////////////////////////////////////////
   // interpreter
 
-  private void interpExp(Exp.T exp)
-  {
-    new Todo();
+  HashMap<String, Integer> localVariables = new HashMap<>();
+
+  private int interpExp(Exp.T exp) {
+      if (exp instanceof Exp.Op) {
+          Exp.Op op = (Exp.Op)exp;
+          switch (op.op) {
+              case ADD: return interpExp(op.left) + interpExp(op.right);
+              case SUB: return interpExp(op.left) - interpExp(op.right);
+              case TIMES: return interpExp(op.left) * interpExp(op.right);
+              case DIVIDE: return interpExp(op.left) / interpExp(op.right);
+          }
+      } else if (exp instanceof Exp.Num) {
+          Exp.Num num = (Exp.Num)exp;
+          return num.num;
+      } else if (exp instanceof Exp.Id) {
+          Exp.Id id = (Exp.Id)exp;
+          return localVariables.get(id.id);
+      } else if (exp instanceof Exp.Eseq) {
+          Exp.Eseq eseq = (Exp.Eseq)exp;
+          interpStm(eseq.stm);
+          return interpExp(eseq.exp);
+      } else {
+          new Bug();
+      }
+      return 0;
   }
 
-  private void interpStm(Stm.T prog)
-  {
+  private void printExpList(ExpList.T explist) {
+      if (explist instanceof ExpList.Last) {
+          ExpList.Last last = (ExpList.Last)explist;
+          System.out.println(interpExp(last.exp));
+      } else if (explist instanceof ExpList.Pair) {
+          ExpList.Pair pair = (ExpList.Pair)explist;
+          System.out.print(interpExp(pair.exp) + " ");
+          printExpList(pair.list);
+      }
+  }
+
+  private void interpStm(Stm.T prog) {
     if (prog instanceof Stm.Compound) {
-      new Todo();
+        Stm.Compound compound = (Stm.Compound)prog;
+        interpStm(compound.s1);
+        interpStm(compound.s2);
     } else if (prog instanceof Stm.Assign) {
-      new Todo();
+        Stm.Assign assign = (Stm.Assign)prog;
+        localVariables.put(assign.id, interpExp(assign.exp));
     } else if (prog instanceof Stm.Print) {
-      new Todo();
+        Stm.Print print = (Stm.Print)prog;
+        printExpList(print.explist);
     } else
       new Bug();
   }
@@ -75,8 +125,7 @@ public class Main
     buf.append(s);
   }
 
-  private void compileExp(Exp.T exp)
-  {
+  private void compileExp(Exp.T exp) {
     if (exp instanceof Id) {
       Exp.Id e = (Exp.Id) exp;
       String id = e.id;
@@ -140,8 +189,7 @@ public class Main
       new Bug();
   }
 
-  private void compileExpList(ExpList.T explist)
-  {
+  private void compileExpList(ExpList.T explist) {
     if (explist instanceof ExpList.Pair) {
       ExpList.Pair pair = (ExpList.Pair) explist;
       Exp.T exp = pair.exp;
@@ -166,8 +214,7 @@ public class Main
       new Bug();
   }
 
-  private void compileStm(Stm.T prog)
-  {
+  private void compileStm(Stm.T prog) {
     if (prog instanceof Stm.Compound) {
       Stm.Compound s = (Stm.Compound) prog;
       Stm.T s1 = s.s1;
@@ -196,8 +243,7 @@ public class Main
   }
 
   // ////////////////////////////////////////
-  public void doit(Stm.T prog)
-  {
+  public void doit(Stm.T prog) {
     // return the maximum number of arguments
     if (Control.ConSlp.action == Control.ConSlp.T.ARGS) {
       int numArgs = maxArgsStm(prog);
