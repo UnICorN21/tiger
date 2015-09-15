@@ -4,6 +4,7 @@ import ast.Ast;
 import lexer.Lexer;
 import lexer.Token;
 import lexer.Token.Kind;
+import util.Pos;
 
 import java.util.LinkedList;
 
@@ -39,6 +40,10 @@ public class Parser {
 //      System.exit(1);
     }
     return ret;
+  }
+
+  private Pos getCurrentPos() {
+    return new Pos(current.lineRow, current.lineCol);
   }
 
   private void error() {
@@ -79,6 +84,7 @@ public class Parser {
   // -> new id ()
   private Ast.Exp.T parseAtomExp() {
     Ast.Exp.T ret = null;
+    Pos pos = getCurrentPos();
     switch (current.kind) {
     case TOKEN_LPAREN: {
       advance();
@@ -88,27 +94,27 @@ public class Parser {
     }
     case TOKEN_NUM: {
       String num = eatToken(Kind.TOKEN_NUM);
-      ret = new Ast.Exp.Num(Integer.valueOf(num));
+      ret = new Ast.Exp.Num(Integer.valueOf(num), pos);
       break;
     }
     case TOKEN_TRUE: {
       advance();
-      ret = new Ast.Exp.True();
+      ret = new Ast.Exp.True(pos);
       break;
     }
     case TOKEN_FALSE: {
       advance();
-      ret = new Ast.Exp.False();
+      ret = new Ast.Exp.False(pos);
       break;
     }
     case TOKEN_THIS: {
       advance();
-      ret = new Ast.Exp.This();
+      ret = new Ast.Exp.This(pos);
       break;
     }
     case TOKEN_ID: {
       String id = eatToken(Kind.TOKEN_ID);
-      ret = new Ast.Exp.Id(id);
+      ret = new Ast.Exp.Id(id, pos);
       break;
     }
     case TOKEN_NEW: {
@@ -119,14 +125,14 @@ public class Parser {
         eatToken(Kind.TOKEN_LBRACK);
         Ast.Exp.T exp = parseExp();
         eatToken(Kind.TOKEN_RBRACK);
-        ret = new Ast.Exp.NewIntArray(exp);
+        ret = new Ast.Exp.NewIntArray(exp, pos);
         break;
       }
       case TOKEN_ID: {
         String id = eatToken(Kind.TOKEN_ID);
         eatToken(Kind.TOKEN_LPAREN);
         eatToken(Kind.TOKEN_RPAREN);
-        ret = new Ast.Exp.NewObject(id);
+        ret = new Ast.Exp.NewObject(id, pos);
         break;
       }
       default:
@@ -147,23 +153,24 @@ public class Parser {
   private Ast.Exp.T parseNotExp() {
     Ast.Exp.T ret = parseAtomExp();
     while (current.kind == Kind.TOKEN_DOT || current.kind == Kind.TOKEN_LBRACK) {
+      Pos pos = getCurrentPos();
       if (current.kind == Kind.TOKEN_DOT) {
         advance();
         if (current.kind == Kind.TOKEN_LENGTH) {
           advance();
-          ret = new Ast.Exp.Length(ret);
+          ret = new Ast.Exp.Length(ret, pos);
           return ret;
         }
         String id = eatToken(Kind.TOKEN_ID);
         eatToken(Kind.TOKEN_LPAREN);
         LinkedList<Ast.Exp.T> params = parseExpList();
         eatToken(Kind.TOKEN_RPAREN);
-        ret = new Ast.Exp.Call(ret, id, params);
+        ret = new Ast.Exp.Call(ret, id, params, pos);
       } else {
         advance();
         Ast.Exp.T exp = parseExp();
         eatToken(Kind.TOKEN_RBRACK);
-        ret = new Ast.Exp.ArraySelect(ret, exp);
+        ret = new Ast.Exp.ArraySelect(ret, exp, pos);
       }
     }
     return ret;
@@ -174,15 +181,16 @@ public class Parser {
   private Ast.Exp.T parseTimesExp() {
     Ast.Exp.T ret = null;
     int cnt = 0;
+    Pos pos = getCurrentPos();
     while (current.kind == Kind.TOKEN_NOT) {
       advance();
       ++cnt;
     }
     Ast.Exp.T exp = parseNotExp();
-    if (cnt-- > 0) ret = new Ast.Exp.Not(exp);
+    if (cnt-- > 0) ret = new Ast.Exp.Not(exp, pos);
     else ret = exp;
     while (cnt-- > 0) {
-      ret = new Ast.Exp.Not(ret);
+      ret = new Ast.Exp.Not(ret, pos);
     }
     return ret;
   }
@@ -192,9 +200,10 @@ public class Parser {
   private Ast.Exp.T parseAddSubExp() {
     Ast.Exp.T ret = parseTimesExp();
     while (current.kind == Kind.TOKEN_TIMES) {
+      Pos pos = getCurrentPos();
       advance();
       Ast.Exp.T exp = parseTimesExp();
-      ret = new Ast.Exp.Times(ret, exp);
+      ret = new Ast.Exp.Times(ret, exp, pos);
     }
     return ret;
   }
@@ -207,10 +216,11 @@ public class Parser {
     while (current.kind == Kind.TOKEN_ADD || current.kind == Kind.TOKEN_SUB) {
       boolean select = true;
       if (current.kind == Kind.TOKEN_SUB) select = false;
+      Pos pos = getCurrentPos();
       advance();
       Ast.Exp.T exp = parseAddSubExp();
-      if (select) ret = new Ast.Exp.Add(ret, exp);
-      else ret = new Ast.Exp.Sub(ret, exp);
+      if (select) ret = new Ast.Exp.Add(ret, exp, pos);
+      else ret = new Ast.Exp.Sub(ret, exp, pos);
     }
     return ret;
   }
@@ -220,9 +230,10 @@ public class Parser {
   private Ast.Exp.T parseAndExp() {
     Ast.Exp.T ret = parseLtExp();
     while (current.kind == Kind.TOKEN_LT) {
+      Pos pos = getCurrentPos();
       advance();
       Ast.Exp.T exp = parseLtExp();
-      ret = new Ast.Exp.Lt(ret, exp);
+      ret = new Ast.Exp.Lt(ret, exp, pos);
     }
     return ret;
   }
@@ -232,9 +243,10 @@ public class Parser {
   private Ast.Exp.T parseExp() {
     Ast.Exp.T ret = parseAndExp();
     while (current.kind == Kind.TOKEN_AND) {
+      Pos pos = getCurrentPos();
       advance();
       Ast.Exp.T ele = parseAndExp();
-      ret = new Ast.Exp.And(ret, ele);
+      ret = new Ast.Exp.And(ret, ele, pos);
     }
     return ret;
   }
@@ -359,9 +371,10 @@ public class Parser {
     // to parse the "Type" nonterminal in this method, instead of writing
     // a fresh one.
     Ast.Type.T type = parseType();
+    Pos pos = getCurrentPos();
     String id = eatToken(Kind.TOKEN_ID);
     eatToken(Kind.TOKEN_SEMI);
-    return new Ast.Dec.DecSingle(type, id);
+    return new Ast.Dec.DecSingle(type, id, pos);
   }
 
   // VarDecls -> VarDecl VarDecls
@@ -384,13 +397,15 @@ public class Parser {
     if (current.kind == Kind.TOKEN_INT || current.kind == Kind.TOKEN_BOOLEAN
         || current.kind == Kind.TOKEN_ID) {
       Ast.Type.T type = parseType();
+      Pos pos = getCurrentPos();
       String id = eatToken(Kind.TOKEN_ID);
-      ret.add(new Ast.Dec.DecSingle(type, id));
+      ret.add(new Ast.Dec.DecSingle(type, id, pos));
       while (current.kind == Kind.TOKEN_COMMER) {
         advance();
         type = parseType();
+        pos = getCurrentPos();
         id = eatToken(Kind.TOKEN_ID);
-        ret.add(new Ast.Dec.DecSingle(type, id));
+        ret.add(new Ast.Dec.DecSingle(type, id, pos));
       }
     }
     return ret;

@@ -1,5 +1,7 @@
 package ast;
 
+import util.Pos;
+
 import java.util.LinkedList;
 
 public class Ast {
@@ -105,13 +107,17 @@ public class Ast {
   // ///////////////////////////////////////////////////
   // declaration
   public static class Dec {
-    public static abstract class T implements ast.Acceptable { /* null */ }
+    public static abstract class T implements ast.Acceptable {
+      public Pos pos;
+      protected T(Pos pos) { this.pos = pos; }
+    }
 
     public static class DecSingle extends T {
       public Type.T type;
       public String id;
 
-      public DecSingle(Type.T type, String id) {
+      public DecSingle(Type.T type, String id, Pos pos) {
+        super(pos);
         this.type = type;
         this.id = id;
       }
@@ -126,14 +132,20 @@ public class Ast {
   // /////////////////////////////////////////////////////////
   // expression
   public static class Exp {
-    public static abstract class T implements ast.Acceptable { /* null */ }
+    public static abstract class T implements ast.Acceptable {
+      public Pos pos;
+      protected T(Pos pos) {
+        this.pos = pos;
+      }
+    }
 
     // +
     public static class Add extends T {
       public T left;
       public T right;
 
-      public Add(T left, T right) {
+      public Add(T left, T right, Pos pos) {
+        super(pos);
         this.left = left;
         this.right = right;
       }
@@ -141,7 +153,6 @@ public class Ast {
       @Override
       public void accept(ast.Visitor v) {
         v.visit(this);
-        return;
       }
     }
 
@@ -150,7 +161,8 @@ public class Ast {
       public T left;
       public T right;
 
-      public And(T left, T right) {
+      public And(T left, T right, Pos pos) {
+        super(pos);
         this.left = left;
         this.right = right;
       }
@@ -158,7 +170,6 @@ public class Ast {
       @Override
       public void accept(ast.Visitor v) {
         v.visit(this);
-        return;
       }
     }
 
@@ -167,7 +178,8 @@ public class Ast {
       public T array;
       public T index;
 
-      public ArraySelect(T array, T index) {
+      public ArraySelect(T array, T index, Pos pos) {
+        super(pos);
         this.array = array;
         this.index = index;
       }
@@ -175,7 +187,6 @@ public class Ast {
       @Override
       public void accept(ast.Visitor v) {
         v.visit(this);
-        return;
       }
     }
 
@@ -188,7 +199,8 @@ public class Ast {
       public java.util.LinkedList<Type.T> at; // arg's type
       public Type.T rt;
 
-      public Call(T exp, String id, java.util.LinkedList<T> args) {
+      public Call(T exp, String id, java.util.LinkedList<T> args, Pos pos) {
+        super(pos);
         this.exp = exp;
         this.id = id;
         this.args = args;
@@ -198,18 +210,16 @@ public class Ast {
       @Override
       public void accept(ast.Visitor v) {
         v.visit(this);
-        return;
       }
     }
 
     // False
     public static class False extends T {
-      public False() { /* null */ }
+      public False(Pos pos) { super(pos); }
 
       @Override
       public void accept(ast.Visitor v) {
         v.visit(this);
-        return;
       }
     }
 
@@ -219,13 +229,15 @@ public class Ast {
       public Type.T type; // type of the id
       public boolean isField; // whether or not this is a class field
 
-      public Id(String id) {
+      public Id(String id, Pos pos) {
+        super(pos);
         this.id = id;
         this.type = null;
         this.isField = false;
       }
 
-      public Id(String id, Type.T type, boolean isField) {
+      public Id(String id, Type.T type, boolean isField, Pos pos) {
+        super(pos);
         this.id = id;
         this.type = type;
         this.isField = isField;
@@ -234,7 +246,6 @@ public class Ast {
       @Override
       public void accept(ast.Visitor v) {
         v.visit(this);
-        return;
       }
     }
 
@@ -242,15 +253,14 @@ public class Ast {
     public static class Length extends T {
       public T array;
 
-      public Length(T array)
-      {
+      public Length(T array, Pos pos) {
+        super(pos);
         this.array = array;
       }
 
       @Override
       public void accept(ast.Visitor v) {
         v.visit(this);
-        return;
       }
     }
 
@@ -259,7 +269,8 @@ public class Ast {
       public T left;
       public T right;
 
-      public Lt(T left, T right) {
+      public Lt(T left, T right, Pos pos) {
+        super(pos);
         this.left = left;
         this.right = right;
       }
@@ -267,7 +278,6 @@ public class Ast {
       @Override
       public void accept(ast.Visitor v) {
         v.visit(this);
-        return;
       }
     }
 
@@ -275,15 +285,14 @@ public class Ast {
     public static class NewIntArray extends T {
       public T exp;
 
-      public NewIntArray(T exp)
-      {
+      public NewIntArray(T exp, Pos pos) {
+        super(pos);
         this.exp = exp;
       }
 
       @Override
       public void accept(ast.Visitor v) {
         v.visit(this);
-        return;
       }
     }
 
@@ -291,15 +300,14 @@ public class Ast {
     public static class NewObject extends T {
       public String id;
 
-      public NewObject(String id)
-      {
+      public NewObject(String id, Pos pos) {
+        super(pos);
         this.id = id;
       }
 
       @Override
       public void accept(ast.Visitor v) {
         v.visit(this);
-        return;
       }
     }
 
@@ -307,15 +315,14 @@ public class Ast {
     public static class Not extends T {
       public T exp;
 
-      public Not(T exp)
-      {
+      public Not(T exp, Pos pos) {
+        super(pos);
         this.exp = exp;
       }
 
       @Override
       public void accept(ast.Visitor v) {
         v.visit(this);
-        return;
       }
     }
 
@@ -323,15 +330,14 @@ public class Ast {
     public static class Num extends T {
       public int num;
 
-      public Num(int num)
-      {
+      public Num(int num, Pos pos) {
+        super(pos);
         this.num = num;
       }
 
       @Override
       public void accept(ast.Visitor v) {
         v.visit(this);
-        return;
       }
     }
 
@@ -340,7 +346,8 @@ public class Ast {
       public T left;
       public T right;
 
-      public Sub(T left, T right) {
+      public Sub(T left, T right, Pos pos) {
+        super(pos);
         this.left = left;
         this.right = right;
       }
@@ -348,18 +355,16 @@ public class Ast {
       @Override
       public void accept(ast.Visitor v) {
         v.visit(this);
-        return;
       }
     }
 
     // this
     public static class This extends T {
-      public This() { /* null */ }
+      public This(Pos pos) { super(pos); }
 
       @Override
       public void accept(ast.Visitor v) {
         v.visit(this);
-        return;
       }
     }
 
@@ -368,7 +373,8 @@ public class Ast {
       public T left;
       public T right;
 
-      public Times(T left, T right) {
+      public Times(T left, T right, Pos pos) {
+        super(pos);
         this.left = left;
         this.right = right;
       }
@@ -376,18 +382,16 @@ public class Ast {
       @Override
       public void accept(ast.Visitor v) {
         v.visit(this);
-        return;
       }
     }
 
     // True
     public static class True extends T {
-      public True() { /* null */ }
+      public True(Pos pos) { super(pos); }
 
       @Override
       public void accept(ast.Visitor v) {
         v.visit(this);
-        return;
       }
     }
 
@@ -596,7 +600,6 @@ public class Ast {
       @Override
       public void accept(Visitor v) {
         v.visit(this);
-        return;
       }
     }
 

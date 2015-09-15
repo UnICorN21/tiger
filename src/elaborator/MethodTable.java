@@ -2,11 +2,13 @@ package elaborator;
 
 import ast.Ast.Dec;
 import ast.Ast.Type;
+import util.VarInfo;
 
 import java.util.LinkedList;
+import java.util.List;
 
 public class MethodTable {
-  private java.util.Hashtable<String, Type.T> table;
+  private java.util.Hashtable<String, VarInfo> table;
 
   public MethodTable() {
     this.table = new java.util.Hashtable<>();
@@ -21,7 +23,7 @@ public class MethodTable {
         System.out.println("duplicated parameter: " + decc.id);
         System.exit(1);
       }
-      this.table.put(decc.id, decc.type);
+      this.table.put(decc.id, new VarInfo(decc.id, decc.type, decc.pos));
     }
 
     for (Dec.T dec : locals) {
@@ -30,19 +32,29 @@ public class MethodTable {
         System.out.println("duplicated variable: " + decc.id);
         System.exit(1);
       }
-      this.table.put(decc.id, decc.type);
+      this.table.put(decc.id, new VarInfo(decc.id, decc.type, decc.pos));
     }
 
   }
 
   // return null for non-existing keys
   public Type.T get(String id) {
-    return this.table.get(id);
+    VarInfo ret = this.table.get(id);
+    if (null != ret) ret.used = true;
+    return null == ret ? null : ret.type;
+  }
+
+  public List<VarInfo> getUnusedVars() {
+    List<VarInfo> ret = new util.Flist<VarInfo>().list();
+    this.table.forEach((id, info) -> {
+      if (!info.used) ret.add(info);
+    });
+    return ret;
   }
 
   public void dump() {
-    this.table.forEach((name, type) -> {
-      System.out.println(String.format("variable(%s, %s)", name, type));
+    this.table.forEach((name, info) -> {
+      System.out.println(String.format("variable(%s, %s)", name, info.type));
     });
   }
 
