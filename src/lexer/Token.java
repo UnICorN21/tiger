@@ -64,7 +64,7 @@ public class Token {
   public Kind kind; // kind of the token
   public String lexeme; // extra lexeme for this token, if any
   public Integer lineRow; // on which line of the source file this token appears
-  public Integer lineCol;
+  public Integer lineCol; // on which column of the source file this token appears
 
   public static final HashMap<String, Kind> keywords = new HashMap<String, Kind>() {
     {

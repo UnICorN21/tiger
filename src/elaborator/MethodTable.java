@@ -1,24 +1,20 @@
 package elaborator;
 
-import java.util.LinkedList;
-
 import ast.Ast.Dec;
 import ast.Ast.Type;
-import util.Todo;
 
-public class MethodTable
-{
+import java.util.LinkedList;
+
+public class MethodTable {
   private java.util.Hashtable<String, Type.T> table;
 
-  public MethodTable()
-  {
-    this.table = new java.util.Hashtable<String, Type.T>();
+  public MethodTable() {
+    this.table = new java.util.Hashtable<>();
   }
 
   // Duplication is not allowed
   public void put(LinkedList<Dec.T> formals,
-      LinkedList<Dec.T> locals)
-  {
+      LinkedList<Dec.T> locals) {
     for (Dec.T dec : formals) {
       Dec.DecSingle decc = (Dec.DecSingle) dec;
       if (this.table.get(decc.id) != null) {
@@ -40,19 +36,22 @@ public class MethodTable
   }
 
   // return null for non-existing keys
-  public Type.T get(String id)
-  {
+  public Type.T get(String id) {
     return this.table.get(id);
   }
 
-  public void dump()
-  {
-    new Todo();
+  public void dump() {
+    this.table.forEach((name, type) -> {
+      System.out.println(String.format("variable(%s, %s)", name, type));
+    });
+  }
+
+  public void clear() {
+    this.table.clear();
   }
 
   @Override
-  public String toString()
-  {
+  public String toString() {
     return this.table.toString();
   }
 }

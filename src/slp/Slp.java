@@ -1,12 +1,10 @@
 package slp;
 
-import java.util.LinkedList;
-
 public class Slp {
   // ////////////////////////////////////////////////
   // expression
   public static class Exp {
-    // base class
+    // base class, standing for `token`
     public static abstract class T { /* null */ }
 
     // id
@@ -27,7 +25,7 @@ public class Slp {
       }
     }
 
-    // op
+    // op type
     public enum OP_T {
       ADD, SUB, TIMES, DIVIDE
     };

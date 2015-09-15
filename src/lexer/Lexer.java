@@ -1,15 +1,17 @@
 package lexer;
 
-import static control.Control.ConLexer.dump;
-
-import java.io.InputStream;
-
 import lexer.Token.Kind;
 import util.Bug;
+
+import java.io.InputStream;
+import java.util.Stack;
+
+import static control.Control.ConLexer.dump;
 
 public class Lexer {
   String fname; // the input file name to be compiled
   InputStream fstream; // input stream for the above file
+  Stack<Token> buffer; // buffer for the rollback token
 
   int lineRow = 1;
   int lineCol = 0;
@@ -21,6 +23,7 @@ public class Lexer {
   public Lexer(String fname, InputStream fstream) {
     this.fname = fname;
     this.fstream = fstream;
+    this.buffer = new Stack<>();
   }
 
   private int read() throws Exception {
@@ -121,7 +124,7 @@ public class Lexer {
       case '.': return new Token(Kind.TOKEN_DOT, lineRow, lineCol);
       case '!': return new Token(Kind.TOKEN_NOT, lineRow, lineCol);
       case ':': return new Token(Kind.TOKEN_COLON, lineRow, lineCol);
-      case ';': return new Token(Kind.TOKEN_COMMER, lineRow, lineCol);
+      case ';': return new Token(Kind.TOKEN_SEMI, lineRow, lineCol);
       case '=': return new Token(Kind.TOKEN_ASSIGN, lineRow, lineCol);
       case '&':
         c = read();
@@ -159,10 +162,17 @@ public class Lexer {
     }
   }
 
+ public Token lookAhead() {
+   Token t = this.nextToken();
+   buffer.push(t);
+   return t;
+ }
+
   public Token nextToken() {
     Token t = null;
-
-    try {
+    if (!buffer.isEmpty()) {
+      t = this.buffer.pop();
+    } else try {
       t = this.nextTokenInternal();
     } catch (Exception e) {
       e.printStackTrace();
