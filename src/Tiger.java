@@ -12,10 +12,8 @@ import parser.Parser;
 import control.CommandLine;
 import control.Control;
 
-public class Tiger
-{
-  public static void main(String[] args)
-  {
+public class Tiger {
+  public static void main(String[] args) {
     InputStream fstream;
     Parser parser;
 
@@ -156,6 +154,5 @@ public class Tiger
     // or dalvik to run the dalvik bytecode.
     // Your code here:
 
-    return;
   }
 }

@@ -3,18 +3,14 @@ package codegen.C;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-public class Ast
-{
+public class Ast {
   // /////////////////////////////////////////////
   // type
-  public static class Type
-  {
-    public static abstract class T implements codegen.C.Acceptable
-    {
+  public static class Type {
+    public static abstract class T implements codegen.C.Acceptable {
     }
 
-    public static class ClassType extends T
-    {
+    public static class ClassType extends T {
       public String id;
 
       public ClassType(String id)
@@ -35,10 +31,8 @@ public class Ast
       }
     }
 
-    public static class Int extends T
-    {
-      public Int()
-      {
+    public static class Int extends T {
+      public Int() {
       }
 
       @Override
@@ -618,14 +612,11 @@ public class Ast
 
   // ////////////////////////////////////////////
   // program
-  public static class Program
-  {
-    public static abstract class T implements codegen.C.Acceptable
-    {
+  public static class Program {
+    public static abstract class T implements codegen.C.Acceptable {
     }
 
-    public static class ProgramSingle extends T
-    {
+    public static class ProgramSingle extends T {
       public LinkedList<Class.T> classes;
       public LinkedList<Vtable.T> vtables;
       public LinkedList<Method.T> methods;
@@ -633,8 +624,7 @@ public class Ast
 
       public ProgramSingle(LinkedList<Class.T> classes,
           LinkedList<Vtable.T> vtables, LinkedList<Method.T> methods,
-          MainMethod.T mainMethod)
-      {
+          MainMethod.T mainMethod) {
         this.classes = classes;
         this.vtables = vtables;
         this.methods = methods;
@@ -642,10 +632,8 @@ public class Ast
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
-        return;
       }
     }
   }// end of program

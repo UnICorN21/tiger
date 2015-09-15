@@ -1,7 +1,8 @@
 package lexer;
 
-public class Token
-{
+import java.util.HashMap;
+
+public class Token {
   // Lab 1, exercise 1: read the MiniJava specification
   // carefully, and answer these two questions:
   //   1. whether or not one should add other token kinds?
@@ -15,12 +16,15 @@ public class Token
     TOKEN_ASSIGN, // "="
     TOKEN_BOOLEAN, // "boolean"
     TOKEN_CLASS, // "class"
+    TOKEN_COLON, // ":"
     TOKEN_COMMER, // ","
     TOKEN_DOT, // "."
     TOKEN_ELSE, // "else"
     TOKEN_EOF, // EOF
     TOKEN_EXTENDS, // "extends"
     TOKEN_FALSE, // "false"
+    TOKEN_GT, // ">"
+    TOKEN_GE, // ">="
     TOKEN_ID, // Identifier
     TOKEN_IF, // "if"
     TOKEN_INT, // "int"
@@ -29,6 +33,7 @@ public class Token
     TOKEN_LENGTH, // "length"
     TOKEN_LPAREN, // "("
     TOKEN_LT, // "<"
+    TOKEN_LE, // "<="
     TOKEN_MAIN, // "main"
     TOKEN_NEW, // "new"
     TOKEN_NOT, // "!"
@@ -58,33 +63,57 @@ public class Token
 
   public Kind kind; // kind of the token
   public String lexeme; // extra lexeme for this token, if any
-  public Integer lineNum; // on which line of the source file this token appears
+  public Integer lineRow; // on which line of the source file this token appears
+  public Integer lineCol; // on which column of the source file this token appears
+
+  public static final HashMap<String, Kind> keywords = new HashMap<String, Kind>() {
+    {
+      put("boolean", Kind.TOKEN_BOOLEAN);
+      put("class", Kind.TOKEN_CLASS);
+      put("else", Kind.TOKEN_ELSE);
+      put("extends", Kind.TOKEN_EXTENDS);
+      put("false", Kind.TOKEN_FALSE);
+      put("if", Kind.TOKEN_IF);
+      put("int", Kind.TOKEN_INT);
+      put("length", Kind.TOKEN_LENGTH);
+      put("main", Kind.TOKEN_MAIN);
+      put("new", Kind.TOKEN_NEW);
+      put("out", Kind.TOKEN_OUT);
+      put("println", Kind.TOKEN_PRINTLN);
+      put("public", Kind.TOKEN_PUBLIC);
+      put("return", Kind.TOKEN_RETURN);
+      put("static", Kind.TOKEN_STATIC);
+      put("String", Kind.TOKEN_STRING);
+      put("System", Kind.TOKEN_SYSTEM);
+      put("this", Kind.TOKEN_THIS);
+      put("true", Kind.TOKEN_TRUE);
+      put("void", Kind.TOKEN_VOID);
+      put("while", Kind.TOKEN_WHILE);
+    }
+  };
 
   // Some tokens don't come with lexeme but 
   // others do.
-  public Token(Kind kind, Integer lineNum)
-  {
+  public Token(Kind kind, Integer lineRow, Integer lineCol) {
     this.kind = kind;
-    this.lineNum = lineNum;
+    this.lineRow = lineRow;
+    this.lineCol = lineCol;
   }
 
-  public Token(Kind kind, Integer lineNum, String lexeme)
-  {
-    this(kind, lineNum);
+  public Token(Kind kind, Integer lineRow, Integer lineCol, String lexeme) {
+    this(kind, lineRow, lineCol);
     this.lexeme = lexeme;
   }
 
   @Override
-  public String toString()
-  {
+  public String toString() {
     String s;
 
-    // to check that the "lineNum" field has been properly set.
-    if (this.lineNum == null)
+    // to check that the "lineRow" field has been properly set.
+    if (this.lineRow == null)
       new util.Todo();
 
-    s = ": " + ((this.lexeme == null) ? "<NONE>" : this.lexeme) + " : at line "
-        + this.lineNum.toString();
+    s = ": " + ((this.lexeme == null) ? "<NONE>" : this.lexeme) + " : at (" + this.lineRow + ", " + this.lineCol + ")";
     return this.kind.toString() + s;
   }
 }

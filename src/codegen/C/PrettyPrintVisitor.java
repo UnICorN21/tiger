@@ -36,8 +36,7 @@ import codegen.C.Ast.Vtable;
 import codegen.C.Ast.Vtable.VtableSingle;
 import control.Control;
 
-public class PrettyPrintVisitor implements Visitor
-{
+public class PrettyPrintVisitor implements Visitor {
   private int indentLevel;
   private java.io.BufferedWriter writer;
 
@@ -56,15 +55,13 @@ public class PrettyPrintVisitor implements Visitor
     this.indentLevel -= 2;
   }
 
-  private void printSpaces()
-  {
+  private void printSpaces() {
     int i = this.indentLevel;
     while (i-- != 0)
       this.say(" ");
   }
 
-  private void sayln(String s)
-  {
+  private void sayln(String s) {
     say(s);
     try {
       this.writer.write("\n");
@@ -74,8 +71,7 @@ public class PrettyPrintVisitor implements Visitor
     }
   }
 
-  private void say(String s)
-  {
+  private void say(String s) {
     try {
       this.writer.write(s);
     } catch (Exception e) {
@@ -87,23 +83,19 @@ public class PrettyPrintVisitor implements Visitor
   // /////////////////////////////////////////////////////
   // expressions
   @Override
-  public void visit(Add e)
-  {
+  public void visit(Add e) {
   }
 
   @Override
-  public void visit(And e)
-  {
+  public void visit(And e) {
   }
 
   @Override
-  public void visit(ArraySelect e)
-  {
+  public void visit(ArraySelect e) {
   }
 
   @Override
-  public void visit(Call e)
-  {
+  public void visit(Call e) {
     this.say("(" + e.assign + "=");
     e.exp.accept(this);
     this.say(", ");
@@ -122,19 +114,16 @@ public class PrettyPrintVisitor implements Visitor
   }
 
   @Override
-  public void visit(Id e)
-  {
+  public void visit(Id e) {
     this.say(e.id);
   }
 
   @Override
-  public void visit(Length e)
-  {
+  public void visit(Length e) {
   }
 
   @Override
-  public void visit(Lt e)
-  {
+  public void visit(Lt e) {
     e.left.accept(this);
     this.say(" < ");
     e.right.accept(this);
@@ -142,78 +131,62 @@ public class PrettyPrintVisitor implements Visitor
   }
 
   @Override
-  public void visit(NewIntArray e)
-  {
+  public void visit(NewIntArray e) {
   }
 
   @Override
-  public void visit(NewObject e)
-  {
+  public void visit(NewObject e) {
     this.say("((struct " + e.id + "*)(Tiger_new (&" + e.id
         + "_vtable_, sizeof(struct " + e.id + "))))");
-    return;
   }
 
   @Override
-  public void visit(Not e)
-  {
+  public void visit(Not e) {
   }
 
   @Override
-  public void visit(Num e)
-  {
+  public void visit(Num e) {
     this.say(Integer.toString(e.num));
-    return;
   }
 
   @Override
-  public void visit(Sub e)
-  {
+  public void visit(Sub e) {
     e.left.accept(this);
     this.say(" - ");
     e.right.accept(this);
-    return;
   }
 
   @Override
-  public void visit(This e)
-  {
+  public void visit(This e) {
     this.say("this");
   }
 
   @Override
-  public void visit(Times e)
-  {
+  public void visit(Times e) {
     e.left.accept(this);
     this.say(" * ");
     e.right.accept(this);
-    return;
   }
 
   // statements
   @Override
-  public void visit(Assign s)
-  {
+  public void visit(Assign s) {
     this.printSpaces();
     this.say(s.id + " = ");
     s.exp.accept(this);
     this.say(";");
-    return;
   }
 
   @Override
-  public void visit(AssignArray s)
-  {
+  public void visit(AssignArray s) {
   }
 
   @Override
-  public void visit(Block s)
-  {
+  public void visit(Block s) {
   }
 
   @Override
-  public void visit(If s)
-  {
+  public void visit(If s) {
     this.printSpaces();
     this.say("if (");
     s.condition.accept(this);
@@ -228,52 +201,43 @@ public class PrettyPrintVisitor implements Visitor
     s.elsee.accept(this);
     this.sayln("");
     this.unIndent();
-    return;
   }
 
   @Override
-  public void visit(Print s)
-  {
+  public void visit(Print s) {
     this.printSpaces();
     this.say("System_out_println (");
     s.exp.accept(this);
     this.sayln(");");
-    return;
   }
 
   @Override
-  public void visit(While s)
-  {
+  public void visit(While s) {
   }
 
   // type
   @Override
-  public void visit(ClassType t)
-  {
+  public void visit(ClassType t) {
     this.say("struct " + t.id + " *");
   }
 
   @Override
-  public void visit(Int t)
-  {
+  public void visit(Int t) {
     this.say("int");
   }
 
   @Override
-  public void visit(IntArray t)
-  {
+  public void visit(IntArray t) {
   }
 
   // dec
   @Override
-  public void visit(DecSingle d)
-  {
+  public void visit(DecSingle d) {
   }
 
   // method
   @Override
-  public void visit(MethodSingle m)
-  {
+  public void visit(MethodSingle m) {
     m.retType.accept(this);
     this.say(" " + m.classId + "_" + m.id + "(");
     int size = m.formals.size();
@@ -301,12 +265,10 @@ public class PrettyPrintVisitor implements Visitor
     m.retExp.accept(this);
     this.sayln(";");
     this.sayln("}");
-    return;
   }
 
   @Override
-  public void visit(MainMethodSingle m)
-  {
+  public void visit(MainMethodSingle m) {
     this.sayln("int Tiger_main ()");
     this.sayln("{");
     for (Dec.T dec : m.locals) {
@@ -318,13 +280,11 @@ public class PrettyPrintVisitor implements Visitor
     }
     m.stm.accept(this);
     this.sayln("}\n");
-    return;
   }
 
   // vtables
   @Override
-  public void visit(VtableSingle v)
-  {
+  public void visit(VtableSingle v) {
     this.sayln("struct " + v.id + "_vtable");
     this.sayln("{");
     for (codegen.C.Ftuple t : v.ms) {
@@ -333,11 +293,9 @@ public class PrettyPrintVisitor implements Visitor
       this.sayln(" (*" + t.id + ")();");
     }
     this.sayln("};\n");
-    return;
   }
 
-  private void outputVtable(VtableSingle v)
-  {
+  private void outputVtable(VtableSingle v) {
     this.sayln("struct " + v.id + "_vtable " + v.id + "_vtable_ = ");
     this.sayln("{");
     for (codegen.C.Ftuple t : v.ms) {
@@ -345,13 +303,11 @@ public class PrettyPrintVisitor implements Visitor
       this.sayln(t.classs + "_" + t.id + ",");
     }
     this.sayln("};\n");
-    return;
   }
 
   // class
   @Override
-  public void visit(ClassSingle c)
-  {
+  public void visit(ClassSingle c) {
     this.sayln("struct " + c.id);
     this.sayln("{");
     this.sayln("  struct " + c.id + "_vtable *vptr;");
@@ -362,13 +318,11 @@ public class PrettyPrintVisitor implements Visitor
       this.sayln(t.id + ";");
     }
     this.sayln("};");
-    return;
   }
 
   // program
   @Override
-  public void visit(ProgramSingle p)
-  {
+  public void visit(ProgramSingle p) {
     // we'd like to output to a file, rather than the "stdout".
     try {
       String outputName = null;
