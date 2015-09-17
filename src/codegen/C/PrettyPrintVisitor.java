@@ -104,9 +104,9 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(Length e) {
-    this.say("sizeof(");
+    this.say("(*((");
     e.array.accept(this);
-    this.say(")/sizeof(int)");
+    this.say(")-1))");
   }
 
   @Override
@@ -119,7 +119,7 @@ public class PrettyPrintVisitor implements Visitor {
   @Override
   public void visit(NewIntArray e) {
     this.say("Tiger_new_array(");
-    e.accept(this);
+    e.exp.accept(this);
     this.say(")");
   }
 
@@ -231,7 +231,7 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(IntArray t) {
-
+    this.say("int*");
   }
 
   // dec
