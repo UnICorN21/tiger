@@ -54,7 +54,8 @@ public class ElaboratorVisitor implements ast.Visitor {
 
   private void report() {
     System.out.println("Parse finished.");
-    System.out.println(String.format("Found %d error(s), %d warn(s).", errorCnt, warnCnt));
+    System.out.println(String.format("Found %d error(s), %d warn(s).\n", errorCnt, warnCnt));
+    if (0 < errorCnt) System.exit(1);
   }
 
   // /////////////////////////////////////////////////////
@@ -94,7 +95,12 @@ public class ElaboratorVisitor implements ast.Visitor {
     e.exp.accept(this);
     leftty = this.type;
     if (leftty instanceof ClassType) {
+      // check whether can find the correspond class
       ty = (ClassType) leftty;
+      if (null == this.classTable.get(ty.toString())) {
+        error("Can't resolve class named " + ty.toString(), e.exp.pos);
+        return;
+      }
       e.type = ty.id;
     } else error("Can't call methods on a no class object", e.exp.pos);
     MethodType mty = this.classTable.getm(ty.id, e.id);

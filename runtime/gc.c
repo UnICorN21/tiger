@@ -12,8 +12,7 @@
       |
       p (returned address)
 */
-void *Tiger_new (void *vtable, int size)
-{
+void *Tiger_new (void *vtable, int size) {
   // You should write 4 statements for this function.
   // #1: "malloc" a chunk of memory (be careful of the size) :
   
@@ -38,8 +37,7 @@ void *Tiger_new (void *vtable, int size)
                |
                p (returned address)
 */
-void *Tiger_new_array (int length)
-{
+void *Tiger_new_array (int length) {
   // You can use the C "malloc" facilities, as above.
   // Your code here:
   

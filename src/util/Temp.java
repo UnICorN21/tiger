@@ -1,16 +1,12 @@
 package util;
 
-public class Temp
-{
+public class Temp {
   private static int count = 0;
 
-  private Temp()
-  {
-  }
+  private Temp() { /* null */ }
 
   // Factory pattern
-  public static String next()
-  {
+  public static String next() {
     return "x_" + (Temp.count++);
   }
 }

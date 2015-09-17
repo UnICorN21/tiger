@@ -1,38 +1,16 @@
 package codegen.C;
 
 import codegen.C.Ast.Class.ClassSingle;
-import codegen.C.Ast.Dec;
+import codegen.C.Ast.*;
 import codegen.C.Ast.Dec.DecSingle;
-import codegen.C.Ast.Exp;
-import codegen.C.Ast.Exp.Add;
-import codegen.C.Ast.Exp.And;
-import codegen.C.Ast.Exp.ArraySelect;
-import codegen.C.Ast.Exp.Call;
-import codegen.C.Ast.Exp.Id;
-import codegen.C.Ast.Exp.Length;
-import codegen.C.Ast.Exp.Lt;
-import codegen.C.Ast.Exp.NewIntArray;
-import codegen.C.Ast.Exp.NewObject;
-import codegen.C.Ast.Exp.Not;
-import codegen.C.Ast.Exp.Num;
-import codegen.C.Ast.Exp.Sub;
-import codegen.C.Ast.Exp.This;
-import codegen.C.Ast.Exp.Times;
+import codegen.C.Ast.Exp.*;
 import codegen.C.Ast.MainMethod.MainMethodSingle;
-import codegen.C.Ast.Method;
 import codegen.C.Ast.Method.MethodSingle;
 import codegen.C.Ast.Program.ProgramSingle;
-import codegen.C.Ast.Stm;
-import codegen.C.Ast.Stm.Assign;
-import codegen.C.Ast.Stm.AssignArray;
-import codegen.C.Ast.Stm.Block;
-import codegen.C.Ast.Stm.If;
-import codegen.C.Ast.Stm.Print;
-import codegen.C.Ast.Stm.While;
+import codegen.C.Ast.Stm.*;
 import codegen.C.Ast.Type.ClassType;
 import codegen.C.Ast.Type.Int;
 import codegen.C.Ast.Type.IntArray;
-import codegen.C.Ast.Vtable;
 import codegen.C.Ast.Vtable.VtableSingle;
 import control.Control;
 
@@ -40,18 +18,15 @@ public class PrettyPrintVisitor implements Visitor {
   private int indentLevel;
   private java.io.BufferedWriter writer;
 
-  public PrettyPrintVisitor()
-  {
+  public PrettyPrintVisitor() {
     this.indentLevel = 2;
   }
 
-  private void indent()
-  {
+  private void indent() {
     this.indentLevel += 2;
   }
 
-  private void unIndent()
-  {
+  private void unIndent() {
     this.indentLevel -= 2;
   }
 
@@ -84,14 +59,24 @@ public class PrettyPrintVisitor implements Visitor {
   // expressions
   @Override
   public void visit(Add e) {
+    e.left.accept(this);
+    this.say(" + ");
+    e.right.accept(this);
   }
 
   @Override
   public void visit(And e) {
+    e.left.accept(this);
+    this.say(" && ");
+    e.right.accept(this);
   }
 
   @Override
   public void visit(ArraySelect e) {
+    e.array.accept(this);
+    this.say("[");
+    e.index.accept(this);
+    this.say("]");
   }
 
   @Override
@@ -110,7 +95,6 @@ public class PrettyPrintVisitor implements Visitor {
       x.accept(this);
     }
     this.say("))");
-    return;
   }
 
   @Override
@@ -120,6 +104,9 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(Length e) {
+    this.say("sizeof(");
+    e.array.accept(this);
+    this.say(")/sizeof(int)");
   }
 
   @Override
@@ -127,11 +114,13 @@ public class PrettyPrintVisitor implements Visitor {
     e.left.accept(this);
     this.say(" < ");
     e.right.accept(this);
-    return;
   }
 
   @Override
   public void visit(NewIntArray e) {
+    this.say("Tiger_new_array(");
+    e.accept(this);
+    this.say(")");
   }
 
   @Override
@@ -142,6 +131,8 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(Not e) {
+    this.say("!");
+    e.exp.accept(this);
   }
 
   @Override
@@ -174,7 +165,7 @@ public class PrettyPrintVisitor implements Visitor {
     this.printSpaces();
     this.say(s.id + " = ");
     s.exp.accept(this);
-    this.say(";");
+    this.sayln(";");
   }
 
   @Override
@@ -183,6 +174,13 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(Block s) {
+    this.printSpaces();
+    this.sayln("{");
+    this.indent();
+    s.stms.stream().forEach(stm -> stm.accept(this));
+    this.unIndent();
+    this.printSpaces();
+    this.sayln("}");
   }
 
   @Override
@@ -213,6 +211,11 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(While s) {
+    this.printSpaces();
+    this.say("while (");
+    s.condition.accept(this);
+    this.sayln(")");
+    s.body.accept(this);
   }
 
   // type
@@ -228,11 +231,14 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(IntArray t) {
+
   }
 
   // dec
   @Override
   public void visit(DecSingle d) {
+    d.type.accept(this);
+    this.sayln(" " + d.id);
   }
 
   // method
@@ -325,7 +331,7 @@ public class PrettyPrintVisitor implements Visitor {
   public void visit(ProgramSingle p) {
     // we'd like to output to a file, rather than the "stdout".
     try {
-      String outputName = null;
+      String outputName;
       if (Control.ConCodeGen.outputName != null)
         outputName = Control.ConCodeGen.outputName;
       else if (Control.ConCodeGen.fileName != null)
@@ -378,7 +384,5 @@ public class PrettyPrintVisitor implements Visitor {
       e.printStackTrace();
       System.exit(1);
     }
-
   }
-
 }

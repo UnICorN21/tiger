@@ -578,7 +578,6 @@ public class Ast {
       @Override
       public void accept(Visitor v) {
         v.visit(this);
-        return;
       }
     }
 
