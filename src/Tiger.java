@@ -1,16 +1,15 @@
-import static control.Control.ConAst.dumpAst;
-import static control.Control.ConAst.testFac;
-
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.InputStream;
-
 import ast.Ast.Program;
+import codegen.C.PrettyPrintVisitor;
+import control.CommandLine;
+import control.Control;
 import lexer.Lexer;
 import lexer.Token;
 import parser.Parser;
-import control.CommandLine;
-import control.Control;
+
+import java.io.*;
+
+import static control.Control.ConAst.dumpAst;
+import static control.Control.ConAst.testFac;
 
 public class Tiger {
   public static void main(String[] args) {
@@ -153,6 +152,28 @@ public class Tiger {
     // file, or call java to run the bytecode file,
     // or dalvik to run the dalvik bytecode.
     // Your code here:
-
+    Runtime rt = Runtime.getRuntime();
+    try {
+      switch (Control.ConCodeGen.codegen) {
+        case Bytecode:
+        case C:
+          String outputFileName = PrettyPrintVisitor.getOutputFileName();
+          Process process = rt.exec("gcc -w " + outputFileName);
+          int exitVal = process.waitFor();
+          InputStreamReader reader = new InputStreamReader(process.getErrorStream());
+          LineNumberReader inr = new LineNumberReader(reader);
+          String procOutput;
+          while ((procOutput = inr.readLine()) != null) {
+            System.out.println(procOutput);
+          }
+          System.out.println(String.format("Compiled %s.", 0 == exitVal ? "succeed" : "failed"));
+        case Dalvik:
+        case X86:
+        default:
+          break;
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 }

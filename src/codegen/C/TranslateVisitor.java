@@ -75,7 +75,11 @@ public class TranslateVisitor implements ast.Visitor {
 
   @Override
   public void visit(ast.Ast.Exp.ArraySelect e) {
-
+    e.array.accept(this);
+    Exp.T array = this.exp;
+    e.index.accept(this);
+    Exp.T index = this.exp;
+    this.exp = new Exp.ArraySelect(array, index);
   }
 
   @Override
@@ -99,7 +103,8 @@ public class TranslateVisitor implements ast.Visitor {
 
   @Override
   public void visit(ast.Ast.Exp.Id e) {
-    this.exp = new Id(e.id);
+    if (e.isField) this.exp = new Id(String.format("this->%s", e.id));
+    else this.exp = new Id(e.id);
   }
 
   @Override
@@ -172,7 +177,7 @@ public class TranslateVisitor implements ast.Visitor {
   @Override
   public void visit(ast.Ast.Stm.Assign s) {
     s.exp.accept(this);
-    this.stm = new Assign(s.id, this.exp);
+    this.stm = new Assign(s.isField ? "this->" + s.id: s.id, this.exp);
   }
 
   @Override
@@ -181,7 +186,7 @@ public class TranslateVisitor implements ast.Visitor {
     Exp.T exp = this.exp;
     s.index.accept(this);
     Exp.T index = this.exp;
-    this.stm = new Stm.AssignArray(s.id, index, exp);
+    this.stm = new Stm.AssignArray(s.isField ? "this->" + s.id : s.id, index, exp);
   }
 
   @Override
@@ -273,9 +278,9 @@ public class TranslateVisitor implements ast.Visitor {
       s.accept(this);
       newStm.add(this.stm);
     }
+    this.tmpVars.stream().forEach(locals::add);
     m.retExp.accept(this);
     Exp.T retExp = this.exp;
-    this.tmpVars.stream().forEach(locals::add);
     this.method = new MethodSingle(newRetType, this.classId, m.id,
         newFormals, locals, newStm, retExp);
   }

@@ -408,11 +408,13 @@ public class Ast {
       public String id;
       public Exp.T exp;
       public Type.T type; // type of the id
+      public boolean isField; // is id a class field.
 
       public Assign(String id, Exp.T exp) {
         this.id = id;
         this.exp = exp;
         this.type = null;
+        this.isField = false;
       }
 
       @Override
@@ -426,11 +428,13 @@ public class Ast {
       public String id;
       public Exp.T index;
       public Exp.T exp;
+      public boolean isField;
 
       public AssignArray(String id, Exp.T index, Exp.T exp) {
         this.id = id;
         this.index = index;
         this.exp = exp;
+        this.isField = false;
       }
 
       @Override

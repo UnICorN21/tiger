@@ -228,8 +228,10 @@ public class ElaboratorVisitor implements ast.Visitor {
     // first look up the id in method table
     Type.T type = this.methodTable.get(s.id);
     // if search failed, then s.id must be a class field
-    if (type == null)
+    if (type == null) {
+      s.isField = true;
       type = this.classTable.get(this.currentClass, s.id);
+    }
     if (type == null) error("Can't resolve variable " + s.id, s.exp.pos);
     s.exp.accept(this);
     s.type = this.type;
@@ -239,7 +241,10 @@ public class ElaboratorVisitor implements ast.Visitor {
   @Override
   public void visit(AssignArray s) {
     Type.T leftArrayType = this.methodTable.get(s.id);
-    if (null == leftArrayType) leftArrayType = this.classTable.get(this.currentClass, s.id);
+    if (null == leftArrayType) {
+      s.isField = true;
+      leftArrayType = this.classTable.get(this.currentClass, s.id);
+    }
     if (null == leftArrayType) error("Can't resolve variable " + s.id, s.index.pos);
     s.index.accept(this);
     if (!this.type.toString().equals("@int")) error(this.type, TYPE_INT, s.index.pos);
