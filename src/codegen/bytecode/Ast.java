@@ -1,75 +1,57 @@
 package codegen.bytecode;
 
-import java.util.LinkedList;
-
 import util.Label;
 
-public class Ast
-{
+import java.util.LinkedList;
+
+public class Ast {
   // ////////////////////////////////////////////////
   // type
-  public static class Type
-  {
-    public static abstract class T implements codegen.bytecode.Acceptable
-    {
-    }
+  public static class Type {
+    public static abstract class T implements codegen.bytecode.Acceptable { /* null */ }
 
-    public static class ClassType extends T
-    {
+    public static class ClassType extends T {
       public String id;
 
-      public ClassType(String id)
-      {
+      public ClassType(String id) {
         this.id = id;
       }
 
       @Override
-      public String toString()
-      {
+      public String toString() {
         return this.id;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Int extends T
-    {
-      public Int()
-      {
-      }
+    public static class Int extends T {
+      public Int() { /* null */ }
 
       @Override
-      public String toString()
-      {
+      public String toString() {
         return "@int";
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class IntArray extends T
-    {
-      public IntArray()
-      {
-      }
+    public static class IntArray extends T {
+      public IntArray() { /* null */ }
 
       @Override
-      public String toString()
-      {
+      public String toString() {
         return "@int[]";
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
@@ -77,171 +59,166 @@ public class Ast
 
   // ////////////////////////////////////////////////
   // dec
-  public static class Dec
-  {
-    public static abstract class T implements codegen.bytecode.Acceptable
-    {
-    }
+  public static class Dec {
+    public static abstract class T implements codegen.bytecode.Acceptable { /* null */ }
 
-    public static class DecSingle extends T
-    {
+    public static class DecSingle extends T {
       public Type.T type;
       public String id;
 
-      public DecSingle(Type.T type, String id)
-      {
+      public DecSingle(Type.T type, String id) {
         this.type = type;
         this.id = id;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
-
   }// end of dec
 
   // ////////////////////////////////////////////////
   // statement
-  public static class Stm
-  {
-    public static abstract class T implements codegen.bytecode.Acceptable
-    {
-    }
+  public static class Stm {
+    public static abstract class T implements codegen.bytecode.Acceptable { /* null */ }
 
-    public static class Aload extends T
-    {
+    public static class Aload extends T {
       public int index;
 
-      public Aload(int index)
-      {
+      public Aload(int index) {
         this.index = index;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Areturn extends T
-    {
-      public Areturn()
-      {
-      }
+    public static class Areturn extends T {
+      public Areturn() { /* null */ }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Astore extends T
-    {
+    public static class Astore extends T {
       public int index;
 
-      public Astore(int index)
-      {
+      public Astore(int index) {
         this.index = index;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Goto extends T
-    {
+    /**
+     * Translate to `iconst_0`.
+     */
+    public static class False extends T {
+      public False() { /* null */ }
+
+      @Override
+      public void accept(Visitor v) {
+        v.visit(this);
+      }
+    }
+
+    /**
+     * Translate to `iconst_1`
+     */
+    public static class True extends T {
+      public True() { /* null */ }
+
+      @Override
+      public void accept(Visitor v) {
+        v.visit(this);
+      }
+    }
+
+    public static class Goto extends T {
       public Label l;
 
-      public Goto(Label l)
-      {
+      public Goto(Label l) {
         this.l = l;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Ificmplt extends T
-    {
+    public static class Ificmplt extends T {
       public Label l;
 
-      public Ificmplt(Label l)
-      {
+      public Ificmplt(Label l) {
         this.l = l;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Ifne extends T
-    {
+    public static class Ifne extends T {
       public Label l;
 
-      public Ifne(Label l)
-      {
+      public Ifne(Label l) {
         this.l = l;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Iload extends T
-    {
+    public static class Iload extends T {
       public int index;
 
-      public Iload(int index)
-      {
+      public Iload(int index) {
         this.index = index;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Imul extends T
-    {
-      public Imul()
-      {
-      }
+    public static class Imul extends T {
+      public Imul() { /* null */ }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Invokevirtual extends T
-    {
-      public String f;
-      public String c;
-      public LinkedList<Type.T> at;
-      public Type.T rt;
+    public static class IAnd extends T {
+      public IAnd() { /* null */ }
 
-      public Invokevirtual(String f, String c, LinkedList<Type.T> at, Type.T rt)
-      {
+      @Override
+      public void accept(Visitor v) {
+        v.visit(this);
+      }
+    }
+
+    public static class Invokevirtual extends T {
+      public String f; // function name
+      public String c; // class name
+      public LinkedList<Type.T> at; // types of parameters
+      public Type.T rt; // return type
+
+      public Invokevirtual(String f, String c, LinkedList<Type.T> at, Type.T rt) {
         this.f = f;
         this.c = c;
         this.at = at;
@@ -249,127 +226,175 @@ public class Ast
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Ireturn extends T
-    {
-      public Ireturn()
-      {
-      }
+    public static class Ireturn extends T {
+      public Ireturn() { /* null */ }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Istore extends T
-    {
+    public static class Istore extends T {
       public int index;
 
-      public Istore(int index)
-      {
+      public Istore(int index) {
         this.index = index;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Isub extends T
-    {
-      public Isub()
-      {
-      }
+    public static  class IAdd extends T {
+      public IAdd() { /* null */ }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class LabelJ extends T
-    {
+    public static class Isub extends T {
+      public Isub() { /* null */ }
+
+      @Override
+      public void accept(Visitor v) {
+        v.visit(this);
+      }
+    }
+
+    public static class LabelJ extends T {
       public util.Label l;
 
-      public LabelJ(util.Label l)
-      {
+      public LabelJ(util.Label l) {
         this.l = l;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Ldc extends T
-    {
-      public int i;
+    /**
+     * Stands for `ldc`/`ldc_w`/`ldc2_w` instruction, but using the constant itself
+     * other than the index of the constant pool.
+     */
+    public static class Ldc extends T {
+      public int i; // a constant number
 
-      public Ldc(int i)
-      {
+      public Ldc(int i) {
         this.i = i;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class New extends T
-    {
+    /**
+     * Stands for `new` instruction. For example, new #1, where #1 is the index in the run-time constant pool.
+     */
+    public static class New extends T {
       public String c;
 
-      public New(String c)
-      {
+      public New(String c) {
         this.c = c;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Print extends T
-    {
-      public Print()
-      {
-      }
+    /**
+     * The standard newarray instruction for jasmin.
+     */
+    public static class NewArray extends T {
+      public String type; // will always be `int` in this application
+
+      public NewArray() { this.type = "int"; }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
+    /**
+     * Stands for a compensate of instructions.
+     */
+    public static class Print extends T {
+      public Print() { /* null */ }
+
+      @Override
+      public void accept(Visitor v) {
+        v.visit(this);
+      }
+    }
+
+    public static class ArrayLength extends T {
+      public ArrayLength() { /* null */ }
+
+      @Override
+      public void accept(Visitor v) {
+        v.visit(this);
+      }
+    }
+
+    // debug info
+    public static class Debug {
+
+      public static abstract class D extends T { /* null */ }
+
+      public static class Line extends D {
+        public int num;
+
+        public Line(int num) {
+          this.num = num;
+        }
+
+        @Override
+        public void accept(Visitor v) {
+          v.visit(this);
+        }
+      }
+
+      /**
+       * Generate comments in jasmin.
+       * For every statements in `Ast` package, there must be some comments to make things clear.
+       */
+      public static class Comment extends D {
+        public String[] content;
+
+        public Comment(String content) {
+          this.content = content.split("\n");
+        }
+
+        @Override
+        public void accept(Visitor v) {
+          v.visit(this);
+        }
+      }
+    }
   }// end of statement
 
   // ////////////////////////////////////////////////
   // method
-  public static class Method
-  {
-    public static abstract class T implements codegen.bytecode.Acceptable
-    {
-    }
+  public static class Method {
+    public static abstract class T implements codegen.bytecode.Acceptable { /* null */ }
 
-    public static class MethodSingle extends T
-    {
+    public static class MethodSingle extends T {
       public Type.T retType;
       public String id;
       public String classId;
@@ -381,21 +406,19 @@ public class Ast
 
       public MethodSingle(Type.T retType, String id, String classId,
           LinkedList<Dec.T> formals, LinkedList<Dec.T> locals,
-          LinkedList<Stm.T> stms, int retExp, int index)
-      {
+          LinkedList<Stm.T> stms, int retExp, int index) {
         this.retType = retType;
         this.id = id;
         this.classId = classId;
         this.formals = formals;
         this.locals = locals;
         this.stms = stms;
-        retExp = 0;
+        this.retExp = retExp;
         this.index = index;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
@@ -404,14 +427,10 @@ public class Ast
 
   // ////////////////////////////////////////////////
   // class
-  public static class Class
-  {
-    public static abstract class T implements codegen.bytecode.Acceptable
-    {
-    }
+  public static class Class {
+    public static abstract class T implements codegen.bytecode.Acceptable { /* null */ }
 
-    public static class ClassSingle extends T
-    {
+    public static class ClassSingle extends T {
       public String id;
       public String extendss; // null for non-existing "extends"
       public LinkedList<Dec.T> decs;
@@ -419,8 +438,7 @@ public class Ast
 
       public ClassSingle(String id, String extendss,
           LinkedList<Dec.T> decs,
-          LinkedList<Method.T> methods)
-      {
+          LinkedList<Method.T> methods) {
         this.id = id;
         this.extendss = extendss;
         this.decs = decs;
@@ -428,8 +446,7 @@ public class Ast
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
@@ -438,64 +455,48 @@ public class Ast
 
   // ////////////////////////////////////////////////
   // main class
-  public static class MainClass
-  {
-    public static abstract class T implements codegen.bytecode.Acceptable
-    {
-    }
+  public static class MainClass {
+    public static abstract class T implements codegen.bytecode.Acceptable { /* null */ }
 
-    public static class MainClassSingle extends T
-    {
+    public static class MainClassSingle extends T {
       public String id;
       public String arg;
       public LinkedList<Stm.T> stms;
 
       public MainClassSingle(String id, String arg,
-          LinkedList<Stm.T> stms)
-      {
+          LinkedList<Stm.T> stms) {
         this.id = id;
         this.arg = arg;
         this.stms = stms;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
-        return;
       }
-
     }
-
   }// end of main class
 
   // ////////////////////////////////////////////////
   // program
-  public static class Program
-  {
-    public static abstract class T implements codegen.bytecode.Acceptable
-    {
-    }
+  public static class Program {
+    public static abstract class T implements codegen.bytecode.Acceptable { /* null */ }
 
-    public static class ProgramSingle extends T
-    {
+    public static class ProgramSingle extends T {
       public MainClass.T mainClass;
       public LinkedList<Class.T> classes;
 
       public ProgramSingle(MainClass.T mainClass,
-          java.util.LinkedList<Class.T> classes)
-      {
+          java.util.LinkedList<Class.T> classes) {
         this.mainClass = mainClass;
         this.classes = classes;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
-        return;
       }
     }
-
   }// end of program
+
 }
