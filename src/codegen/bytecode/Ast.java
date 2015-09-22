@@ -8,13 +8,20 @@ public class Ast {
   // ////////////////////////////////////////////////
   // type
   public static class Type {
-    public static abstract class T implements codegen.bytecode.Acceptable { /* null */ }
+    public static abstract class T implements codegen.bytecode.Acceptable {
+      public abstract String desc();
+    }
 
     public static class ClassType extends T {
       public String id;
 
       public ClassType(String id) {
         this.id = id;
+      }
+
+      @Override
+      public String desc() {
+        return String.format("L%s;", id);
       }
 
       @Override
@@ -32,6 +39,11 @@ public class Ast {
       public Int() { /* null */ }
 
       @Override
+      public String desc() {
+        return "I";
+      }
+
+      @Override
       public String toString() {
         return "@int";
       }
@@ -44,6 +56,11 @@ public class Ast {
 
     public static class IntArray extends T {
       public IntArray() { /* null */ }
+
+      @Override
+      public String desc() {
+        return "[I";
+      }
 
       @Override
       public String toString() {
@@ -98,6 +115,15 @@ public class Ast {
 
     public static class Areturn extends T {
       public Areturn() { /* null */ }
+
+      @Override
+      public void accept(Visitor v) {
+        v.visit(this);
+      }
+    }
+
+    public static class This extends T {
+      public This() { /* null */ }
 
       @Override
       public void accept(Visitor v) {
@@ -168,12 +194,56 @@ public class Ast {
       }
     }
 
+    public static class Ificmpgt extends T {
+      public Label l;
+
+      public Ificmpgt(Label l) { this.l = l; }
+
+      @Override
+      public void accept(Visitor v) {
+        v.visit(this);
+      }
+    }
+
+    public static class Iflt extends T {
+      public Label l;
+
+      public Iflt(Label l) { this.l = l; }
+
+      @Override
+      public void accept(Visitor v) {
+        v.visit(this);
+      }
+    }
+
+    public static class Ifgt extends T {
+      public Label l;
+
+      public Ifgt(Label l) { this.l = l; }
+
+      @Override
+      public void accept(Visitor v) {
+        v.visit(this);
+      }
+    }
+
     public static class Ifne extends T {
       public Label l;
 
       public Ifne(Label l) {
         this.l = l;
       }
+
+      @Override
+      public void accept(Visitor v) {
+        v.visit(this);
+      }
+    }
+
+    public static class Ifeq extends T {
+      public Label l;
+
+      public Ifeq(Label l) { this.l = l; }
 
       @Override
       public void accept(Visitor v) {
@@ -345,6 +415,36 @@ public class Ast {
 
     public static class ArrayLength extends T {
       public ArrayLength() { /* null */ }
+
+      @Override
+      public void accept(Visitor v) {
+        v.visit(this);
+      }
+    }
+
+    public static class PutField extends T {
+      public String fieldspec;
+      public String descriptor;
+
+      public PutField(String fieldspec, String descriptor) {
+        this.fieldspec = fieldspec;
+        this.descriptor = descriptor;
+      }
+
+      @Override
+      public void accept(Visitor v) {
+        v.visit(this);
+      }
+    }
+
+    public static class GetField extends T {
+      public String fieldspce;
+      public String descriptor;
+
+      public GetField(String fieldspec, String descriptor) {
+        this.fieldspce = fieldspec;
+        this.descriptor = descriptor;
+      }
 
       @Override
       public void accept(Visitor v) {

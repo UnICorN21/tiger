@@ -281,6 +281,23 @@ public class Ast {
       }
     }
 
+    // >
+    public static class Gt extends T {
+      public T left;
+      public T right;
+
+      public Gt(T left, T right, Pos pos) {
+        super(pos);
+        this.left = left;
+        this.right = right;
+      }
+
+      @Override
+      public void accept(Visitor v) {
+        v.visit(this);
+      }
+    }
+
     // new int [e]
     public static class NewIntArray extends T {
       public T exp;

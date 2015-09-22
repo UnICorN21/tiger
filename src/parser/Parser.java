@@ -229,11 +229,17 @@ public class Parser {
   // -> LtExp
   private Ast.Exp.T parseAndExp() {
     Ast.Exp.T ret = parseLtExp();
-    while (current.kind == Kind.TOKEN_LT) {
+    while (current.kind == Kind.TOKEN_LT || current.kind == Kind.TOKEN_LE
+            || current.kind == Kind.TOKEN_GT || current.kind == Kind.TOKEN_GE) {
       Pos pos = getCurrentPos();
+      Kind tokenKind = current.kind;
       advance();
       Ast.Exp.T exp = parseLtExp();
-      ret = new Ast.Exp.Lt(ret, exp, pos);
+      switch (tokenKind) {
+        case TOKEN_LT: ret = new Ast.Exp.Lt(ret, exp, pos); break;
+        case TOKEN_GT: ret = new Ast.Exp.Gt(ret, exp, pos); break;
+        default: break;
+      }
     }
     return ret;
   }

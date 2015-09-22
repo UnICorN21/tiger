@@ -1,5 +1,4 @@
 import ast.Ast.Program;
-import codegen.C.PrettyPrintVisitor;
 import control.CommandLine;
 import control.Control;
 import lexer.Lexer;
@@ -7,6 +6,7 @@ import lexer.Token;
 import parser.Parser;
 
 import java.io.*;
+import java.util.List;
 
 import static control.Control.ConAst.dumpAst;
 import static control.Control.ConAst.testFac;
@@ -121,6 +121,8 @@ public class Tiger {
     elaborator.ElaboratorVisitor elab = new elaborator.ElaboratorVisitor();
     theAst.accept(elab);
 
+    List<String> outputFilenames = null;
+
     // code generation
     switch (control.Control.ConCodeGen.codegen) {
     case Bytecode:
@@ -129,6 +131,7 @@ public class Tiger {
       codegen.bytecode.Ast.Program.T bytecodeAst = trans.program;
       codegen.bytecode.PrettyPrintVisitor ppbc = new codegen.bytecode.PrettyPrintVisitor();
       bytecodeAst.accept(ppbc);
+      outputFilenames = ppbc.getOutputFileNames();
       break;
     case C:
       codegen.C.TranslateVisitor transC = new codegen.C.TranslateVisitor();
@@ -136,6 +139,7 @@ public class Tiger {
       codegen.C.Ast.Program.T cAst = transC.program;
       codegen.C.PrettyPrintVisitor ppc = new codegen.C.PrettyPrintVisitor();
       cAst.accept(ppc);
+      outputFilenames = ppc.getOutputFileNames();
       break;
     case Dalvik:
       // similar
@@ -147,6 +151,10 @@ public class Tiger {
       break;
     }
 
+    System.out.println("Generated IR files are:");
+    outputFilenames.stream().forEach(System.out::println);
+    System.out.println();
+
     // Lab3, exercise 6: add some glue code to
     // call gcc to compile the generated C or x86
     // file, or call java to run the bytecode file,
@@ -154,24 +162,29 @@ public class Tiger {
     // Your code here:
     Runtime rt = Runtime.getRuntime();
     try {
+      Process process = null;
       switch (Control.ConCodeGen.codegen) {
         case Bytecode:
+          process = rt.exec("java -jar jasmin.jar " + outputFilenames.stream().reduce("", (all, name) -> all + " " + name));
+          break;
         case C:
-          String outputFileName = PrettyPrintVisitor.getOutputFileName();
-          Process process = rt.exec("gcc -w " + outputFileName);
-          int exitVal = process.waitFor();
-          InputStreamReader reader = new InputStreamReader(process.getErrorStream());
-          LineNumberReader inr = new LineNumberReader(reader);
-          String procOutput;
-          while ((procOutput = inr.readLine()) != null) {
-            System.out.println(procOutput);
-          }
-          System.out.println(String.format("Compiled %s.", 0 == exitVal ? "succeed" : "failed"));
+          process = rt.exec("gcc -w " + outputFilenames.get(0));
+          break;
         case Dalvik:
+          break;
         case X86:
+          break;
         default:
           break;
       }
+      int exitVal = process.waitFor();
+      InputStreamReader reader = new InputStreamReader(process.getErrorStream());
+      LineNumberReader inr = new LineNumberReader(reader);
+      String procOutput;
+      while ((procOutput = inr.readLine()) != null) {
+        System.out.println(procOutput);
+      }
+      System.out.println(String.format("Compiled %s.", 0 == exitVal ? "succeed" : "failed"));
     } catch (Exception e) {
       e.printStackTrace();
     }

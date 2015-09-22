@@ -28,6 +28,8 @@ public interface Visitor {
 
   void visit(Lt e);
 
+  void visit(Gt e);
+
   void visit(NewIntArray e);
 
   void visit(NewObject e);

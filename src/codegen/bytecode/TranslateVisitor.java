@@ -9,6 +9,7 @@ import codegen.bytecode.Ast.Method.MethodSingle;
 import codegen.bytecode.Ast.Program.ProgramSingle;
 import codegen.bytecode.Ast.Stm.*;
 import codegen.bytecode.Ast.Type.Int;
+import org.jetbrains.annotations.NotNull;
 import util.Label;
 
 import java.util.Hashtable;
@@ -18,7 +19,7 @@ import java.util.LinkedList;
 public class TranslateVisitor implements ast.Visitor {
   private String classId;
   private int index;
-  private Hashtable<String, Integer> indexTable;
+  private Hashtable<String, Integer> indexTable; // local variables
   private Type.T type; // type after translation
   private Dec.T dec;
   private LinkedList<Stm.T> stms;
@@ -37,6 +38,18 @@ public class TranslateVisitor implements ast.Visitor {
     this.classs = null;
     this.mainClass = null;
     this.program = null;
+  }
+
+  private String getFieldSpec(String id) { return String.format("%s/%s", classId, id); }
+
+  @NotNull
+  private Type.T transformType(ast.Ast.Type.T type) {
+    switch (type.getNum()) {
+      case -1:case 0: return new Type.Int();
+      case 1: return new Type.IntArray();
+      case 2: return new Type.ClassType(((ast.Ast.Type.ClassType)type).id);
+      default: return null; // this should never happen
+    }
   }
 
   private void emit(Stm.T s) {
@@ -69,9 +82,7 @@ public class TranslateVisitor implements ast.Visitor {
   @Override
   public void visit(ast.Ast.Exp.Call e) {
     e.exp.accept(this);
-    for (ast.Ast.Exp.T x : e.args) {
-      x.accept(this);
-    }
+    e.args.stream().forEach(arg -> arg.accept(this));
     e.rt.accept(this);
     Type.T rt = this.type;
     LinkedList<Type.T> at = new LinkedList<>();
@@ -89,13 +100,17 @@ public class TranslateVisitor implements ast.Visitor {
 
   @Override
   public void visit(ast.Ast.Exp.Id e) {
-    int index = this.indexTable.get(e.id);
-    ast.Ast.Type.T type = e.type;
-    if (type.getNum() > 0)// a reference
-      emit(new Aload(index));
-    else
-      emit(new Iload(index));
-    // but what about this is a field?
+    if (e.isField) {
+      emit(new This());
+      emit(new GetField(getFieldSpec(e.id), transformType(e.type).desc()));
+    } else {
+      int index = this.indexTable.get(e.id);
+      ast.Ast.Type.T type = e.type;
+      if (type.getNum() > 0)// a reference
+        emit(new Aload(index));
+      else
+        emit(new Iload(index));
+    }
   }
 
   @Override
@@ -110,6 +125,21 @@ public class TranslateVisitor implements ast.Visitor {
     e.left.accept(this);
     e.right.accept(this);
     emit(new Ificmplt(tl));
+    emit(new LabelJ(fl));
+    emit(new False());
+    emit(new Goto(el));
+    emit(new LabelJ(tl));
+    emit(new True());
+    emit(new Goto(el));
+    emit(new LabelJ(el));
+  }
+
+  @Override
+  public void visit(ast.Ast.Exp.Gt e) {
+    Label tl = new Label(), fl = new Label(), el = new Label();
+    e.left.accept(this);
+    e.right.accept(this);
+    emit(new Ificmpgt(tl));
     emit(new LabelJ(fl));
     emit(new False());
     emit(new Goto(el));
@@ -148,7 +178,7 @@ public class TranslateVisitor implements ast.Visitor {
 
   @Override
   public void visit(ast.Ast.Exp.This e) {
-    emit(new Aload(0));
+    emit(new This());
   }
 
   @Override
@@ -168,24 +198,38 @@ public class TranslateVisitor implements ast.Visitor {
   @Override
   public void visit(ast.Ast.Stm.Assign s) {
     emit(new Debug.Line(s.exp.pos.lineRow));
-    s.exp.accept(this);
-    int index = this.indexTable.get(s.id);
-    ast.Ast.Type.T type = s.type;
-    if (type.getNum() > 0)
-      emit(new Astore(index));
-    else
-      emit(new Istore(index));
+    if (s.isField) {
+      emit(new This());
+      s.exp.accept(this);
+      emit(new PutField(getFieldSpec(s.id), transformType(s.type).desc()));
+    } else {
+      s.exp.accept(this);
+      int index = this.indexTable.get(s.id);
+      ast.Ast.Type.T type = s.type;
+      if (type.getNum() > 0)
+        emit(new Astore(index));
+      else
+        emit(new Istore(index));
+    }
   }
 
   @Override
   public void visit(ast.Ast.Stm.AssignArray s) {
     emit(new Debug.Line(s.exp.pos.lineRow));
-    // TODO
+    if (s.isField) {
+      emit(new This());
+      s.exp.accept(this);
+      emit(new PutField(getFieldSpec(s.id), "[I"));
+    } else {
+      s.exp.accept(this);
+      int index = this.indexTable.get(s.id);
+      emit(new Astore(index));
+    }
   }
 
   @Override
   public void visit(ast.Ast.Stm.Block s) {
-    // TODO
+    s.stms.stream().forEach(stm -> stm.accept(this));
   }
 
   @Override
@@ -214,7 +258,13 @@ public class TranslateVisitor implements ast.Visitor {
   @Override
   public void visit(ast.Ast.Stm.While s) {
     emit(new Debug.Line(s.condition.pos.lineRow));
-    // TODO
+    Label wl = new Label(), el = new Label();
+    emit(new LabelJ(wl));
+    s.condition.accept(this);
+    emit(new Ifeq(el));
+    s.body.accept(this);
+    emit(new Goto(wl));
+    emit(new LabelJ(el));
   }
 
   // type
@@ -243,7 +293,7 @@ public class TranslateVisitor implements ast.Visitor {
   public void visit(ast.Ast.Dec.DecSingle d) {
     d.type.accept(this);
     this.dec = new DecSingle(this.type, d.id);
-    this.indexTable.put(d.id, index++);
+    if (null != indexTable) indexTable.put(d.id, index++);
   }
 
   // method
@@ -266,10 +316,8 @@ public class TranslateVisitor implements ast.Visitor {
       d.accept(this);
       locals.add(this.dec);
     }
-    this.stms = new LinkedList<Stm.T>();
-    for (ast.Ast.Stm.T s : m.stms) {
-      s.accept(this);
-    }
+    this.stms = new LinkedList<>();
+    m.stms.stream().forEach(stm -> stm.accept(this));
 
     // return statement is specially treated
     m.retExp.accept(this);

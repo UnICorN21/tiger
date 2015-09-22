@@ -12,12 +12,15 @@ import codegen.bytecode.Ast.Type.ClassType;
 import codegen.bytecode.Ast.Type.Int;
 import codegen.bytecode.Ast.Type.IntArray;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class PrettyPrintVisitor implements Visitor {
   private java.io.BufferedWriter writer;
+  private List<String> filenames;
 
-  public PrettyPrintVisitor() { /* null */ }
+  public PrettyPrintVisitor() { filenames = new ArrayList<>(); }
 
   private void sayln(String s) {
     say(s);
@@ -30,7 +33,7 @@ public class PrettyPrintVisitor implements Visitor {
   }
 
   private void isayln(String s) {
-    say("    ");
+    say("\t");
     say(s);
     try {
       this.writer.write("\n");
@@ -51,6 +54,11 @@ public class PrettyPrintVisitor implements Visitor {
 
   // /////////////////////////////////////////////////////
   // statements
+  @Override
+  public void visit(This s) {
+    this.isayln("aload_0");
+  }
+
   @Override
   public void visit(Aload s) {
     this.isayln("aload " + s.index);
@@ -77,8 +85,28 @@ public class PrettyPrintVisitor implements Visitor {
   }
 
   @Override
+  public void visit(Ificmpgt s) {
+    this.isayln("if_icmpgt " + s.l.toString());
+  }
+
+  @Override
+  public void visit(Ifgt s) {
+    this.isayln("ifgt " + s.l.toString());
+  }
+
+  @Override
+  public void visit(Iflt s) {
+    this.isayln("iflt " + s.l.toString());
+  }
+
+  @Override
   public void visit(Ifne s) {
     this.isayln("ifne " + s.l.toString());
+  }
+
+  @Override
+  public void visit(Ifeq s) {
+    this.isayln("ifeq " + s.l.toString());
   }
 
   @Override
@@ -143,32 +171,42 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(ArrayLength s) {
-
+    this.isayln("arraylength");
   }
 
   @Override
   public void visit(False s) {
-
+    this.isayln("iconst_0");
   }
 
   @Override
   public void visit(IAdd s) {
-
+    this.isayln("iadd");
   }
 
   @Override
   public void visit(IAnd s) {
-
+    this.isayln("iand");
   }
 
   @Override
   public void visit(NewArray s) {
-
+    this.isayln("newarray " + s.type);
   }
 
   @Override
   public void visit(True s) {
+    this.isayln("iconst_1");
+  }
 
+  @Override
+  public void visit(GetField s) {
+    this.isayln(String.format("getfield %s %s", s.fieldspce, s.descriptor));
+  }
+
+  @Override
+  public void visit(PutField s) {
+    this.isayln(String.format("putfield %s %s", s.fieldspec, s.descriptor));
   }
 
   // type
@@ -217,7 +255,7 @@ public class PrettyPrintVisitor implements Visitor {
     // Every class must go into its own class file.
     try {
       this.writer = new java.io.BufferedWriter(new java.io.OutputStreamWriter(
-          new java.io.FileOutputStream(c.id + ".j")));
+          new java.io.FileOutputStream(generateFilename(c.id))));
     } catch (Exception e) {
       e.printStackTrace();
       System.exit(1);
@@ -236,7 +274,7 @@ public class PrettyPrintVisitor implements Visitor {
     // fields
     for (Dec.T d : c.decs) {
       DecSingle dd = (DecSingle) d;
-      this.say(".field public " + dd.id);
+      this.say(String.format(".field public %s ", dd.id));
       dd.type.accept(this);
       this.sayln("");
     }
@@ -269,7 +307,7 @@ public class PrettyPrintVisitor implements Visitor {
     // Every class must go into its own class file.
     try {
       this.writer = new java.io.BufferedWriter(new java.io.OutputStreamWriter(
-          new java.io.FileOutputStream(c.id + ".j")));
+          new java.io.FileOutputStream(generateFilename(c.id))));
     } catch (Exception e) {
       e.printStackTrace();
       System.exit(1);
@@ -315,5 +353,19 @@ public class PrettyPrintVisitor implements Visitor {
   @Override
   public void visit(Debug.Comment c) {
     Arrays.stream(c.content).forEach(line -> this.sayln(" ; " + line));
+  }
+
+  private String generateFilename(String classname) {
+    String ret = classname + ".j";
+    filenames.add(ret);
+    return ret;
+  }
+
+  /**
+   * Get all generated filenames.
+   * Should be invoked after the whole pass.
+   */
+  public List<String> getOutputFileNames() {
+    return this.filenames;
   }
 }

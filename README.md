@@ -3,6 +3,7 @@
 ----
 ### Status
 Complete part A.
+Nearly complete part B.
 
 ### Notes
 #### Generate C code:
@@ -17,3 +18,6 @@ Or force to add it as the prefix of `Id`s.)
 in resolving the symbols and another is missing `Id` class in some sub trees' constructions.
 
 #### Generate Java bytecode:
++ Same procedure with generating C code.
++ Can refer to [JVM Specification](http://docs.oracle.com/javase/specs/jvms/se8/html/index.html)'s first 4 chapters to
+make a better understand of jasmin and the generation details.

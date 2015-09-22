@@ -17,6 +17,9 @@ import codegen.C.Ast.Vtable;
 import codegen.C.Ast.Vtable.VtableSingle;
 import control.Control;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PrettyPrintVisitor implements Visitor {
   private int indentLevel;
   private java.io.BufferedWriter writer;
@@ -116,6 +119,13 @@ public class PrettyPrintVisitor implements Visitor {
   public void visit(Lt e) {
     e.left.accept(this);
     this.say(" < ");
+    e.right.accept(this);
+  }
+
+  @Override
+  public void visit(Gt e) {
+    e.left.accept(this);
+    this.say(" > ");
     e.right.accept(this);
   }
 
@@ -339,13 +349,7 @@ public class PrettyPrintVisitor implements Visitor {
   public void visit(ProgramSingle p) {
     // we'd like to output to a file, rather than the "stdout".
     try {
-      String outputName = getOutputFileName();
-//      if (Control.ConCodeGen.outputName != null)
-//        outputName = Control.ConCodeGen.outputName;
-//      else if (Control.ConCodeGen.fileName != null)
-//        outputName = Control.ConCodeGen.fileName + ".c";
-//      else
-//        outputName = "a.c";
+      String outputName = getOutputFileNames().get(0);
 
       this.writer = new java.io.BufferedWriter(new java.io.OutputStreamWriter(
           new java.io.FileOutputStream(outputName)));
@@ -396,7 +400,7 @@ public class PrettyPrintVisitor implements Visitor {
     }
   }
 
-  public static String getOutputFileName() {
+  public List<String> getOutputFileNames() {
     String outputName;
     if (Control.ConCodeGen.outputName != null)
       outputName = Control.ConCodeGen.outputName;
@@ -404,6 +408,8 @@ public class PrettyPrintVisitor implements Visitor {
       outputName = Control.ConCodeGen.fileName + ".c";
     else
       outputName = "a.c";
-    return outputName;
+    List<String> ret = new ArrayList<>(1);
+    ret.add(outputName);
+    return ret;
   }
 }

@@ -1,22 +1,17 @@
 package codegen.dalvik;
 
-import java.util.LinkedList;
-
 import codegen.dalvik.Ast.Class;
 import codegen.dalvik.Ast.Class.ClassSingle;
-import codegen.dalvik.Ast.Dec;
+import codegen.dalvik.Ast.*;
 import codegen.dalvik.Ast.Dec.DecSingle;
-import codegen.dalvik.Ast.MainClass;
 import codegen.dalvik.Ast.MainClass.MainClassSingle;
-import codegen.dalvik.Ast.Method;
 import codegen.dalvik.Ast.Method.MethodSingle;
-import codegen.dalvik.Ast.Program;
 import codegen.dalvik.Ast.Program.ProgramSingle;
-import codegen.dalvik.Ast.Stm;
 import codegen.dalvik.Ast.Stm.*;
-import codegen.dalvik.Ast.Type;
 import util.Label;
 import util.Temp;
+
+import java.util.LinkedList;
 
 // Given a Java AST, translate it into Dalvik bytecode.
 
@@ -152,6 +147,11 @@ public class TranslateVisitor implements ast.Visitor
     emit(new Goto32(el));
     emit(new LabelJ(el));
     return;
+  }
+
+  @Override
+  public void visit(ast.Ast.Exp.Gt e) {
+    // TODO
   }
 
   @Override

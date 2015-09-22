@@ -123,6 +123,15 @@ public class TranslateVisitor implements ast.Visitor {
   }
 
   @Override
+  public void visit(ast.Ast.Exp.Gt e) {
+    e.left.accept(this);
+    Exp.T left = this.exp;
+    e.right.accept(this);
+    Exp.T right = this.exp;
+    this.exp = new Gt(left, right);
+  }
+
+  @Override
   public void visit(ast.Ast.Exp.NewIntArray e) {
     e.exp.accept(this);
     this.exp = new Exp.NewIntArray(this.exp);

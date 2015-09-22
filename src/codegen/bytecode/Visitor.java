@@ -12,6 +12,8 @@ import codegen.bytecode.Ast.Type.IntArray;
 
 public interface Visitor {
   // statements
+  void visit(This s);
+
   void visit(Aload s);
 
   void visit(Areturn s);
@@ -26,7 +28,15 @@ public interface Visitor {
 
   void visit(Ificmplt s);
 
+  void visit(Ificmpgt s);
+
+  void visit(Iflt s);
+
+  void visit(Ifgt s);
+
   void visit(Ifne s);
+
+  void visit(Ifeq s);
 
   void visit(Iload s);
 
@@ -55,6 +65,10 @@ public interface Visitor {
   void visit(NewArray s);
 
   void visit(ArrayLength s);
+
+  void visit(PutField s);
+
+  void visit(GetField s);
 
   // type
   void visit(ClassType t);
