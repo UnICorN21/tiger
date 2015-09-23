@@ -251,6 +251,24 @@ public class Ast {
       }
     }
 
+    public static class Iaload extends T {
+      public Iaload() { /* null */ }
+
+      @Override
+      public void accept(Visitor v) {
+        v.visit(this);
+      }
+    }
+
+    public static class Iastore extends T {
+      public Iastore() { /* null */ }
+
+      @Override
+      public void accept(Visitor v) {
+        v.visit(this);
+      }
+    }
+
     public static class Iload extends T {
       public int index;
 

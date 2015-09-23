@@ -111,7 +111,24 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(Iload s) {
-    this.isayln("iload " + s.index);
+    if (s.index <= 3) this.isayln("iload_" + s.index);
+    else this.isayln("iload " + s.index);
+  }
+
+  @Override
+  public void visit(Istore s) {
+    if (s.index <= 3) this.isayln("istore_" + s.index);
+    else this.isayln("istore " + s.index);
+  }
+
+  @Override
+  public void visit(Iaload s) {
+    this.isayln("iaload");
+  }
+
+  @Override
+  public void visit(Iastore s) {
+    this.isayln("iastore");
   }
 
   @Override
@@ -133,11 +150,6 @@ public class PrettyPrintVisitor implements Visitor {
   @Override
   public void visit(Ireturn s) {
     this.isayln("ireturn");
-  }
-
-  @Override
-  public void visit(Istore s) {
-    this.isayln("istore " + s.index);
   }
 
   @Override

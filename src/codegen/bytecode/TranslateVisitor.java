@@ -77,6 +77,8 @@ public class TranslateVisitor implements ast.Visitor {
     // push arrayref, index into the operand stack
     e.array.accept(this);
     e.index.accept(this);
+    // here should be a iaload or iastore?
+    emit(new Iaload());
   }
 
   @Override
@@ -130,7 +132,6 @@ public class TranslateVisitor implements ast.Visitor {
     emit(new Goto(el));
     emit(new LabelJ(tl));
     emit(new True());
-    emit(new Goto(el));
     emit(new LabelJ(el));
   }
 
@@ -145,7 +146,6 @@ public class TranslateVisitor implements ast.Visitor {
     emit(new Goto(el));
     emit(new LabelJ(tl));
     emit(new True());
-    emit(new Goto(el));
     emit(new LabelJ(el));
   }
 
@@ -162,6 +162,15 @@ public class TranslateVisitor implements ast.Visitor {
 
   @Override
   public void visit(ast.Ast.Exp.Not e) {
+    Label tl = new Label(), fl = new Label(), el = new Label();
+    e.exp.accept(this);
+    emit(new Ifne(fl));
+    emit(new LabelJ(tl));
+    emit(new True());
+    emit(new Goto(el));
+    emit(new LabelJ(fl));
+    emit(new False());
+    emit(new LabelJ(el));
   }
 
   @Override
@@ -218,13 +227,14 @@ public class TranslateVisitor implements ast.Visitor {
     emit(new Debug.Line(s.exp.pos.lineRow));
     if (s.isField) {
       emit(new This());
-      s.exp.accept(this);
-      emit(new PutField(getFieldSpec(s.id), "[I"));
+      emit(new GetField(getFieldSpec(s.id), "[I"));
     } else {
-      s.exp.accept(this);
       int index = this.indexTable.get(s.id);
-      emit(new Astore(index));
+      emit(new Aload(index));
     }
+    s.index.accept(this);
+    s.exp.accept(this);
+    emit(new Iastore());
   }
 
   @Override

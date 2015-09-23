@@ -40,13 +40,17 @@ public interface Visitor {
 
   void visit(Iload s);
 
+  void visit(Istore s);
+
+  void visit(Iaload s);
+
+  void visit(Iastore s);
+
   void visit(Imul s);
 
   void visit(IAnd s);
 
   void visit(Ireturn s);
-
-  void visit(Istore s);
 
   void visit(IAdd s);
 
