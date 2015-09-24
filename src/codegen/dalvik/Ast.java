@@ -1,75 +1,57 @@
 package codegen.dalvik;
 
-import java.util.LinkedList;
-
 import util.Label;
 
-public class Ast
-{
+import java.util.LinkedList;
+
+public class Ast {
   // ////////////////////////////////////////////////
   // type
-  public static class Type
-  {
-    public static abstract class T implements codegen.dalvik.Acceptable
-    {
-    }
+  public static class Type {
+    public static abstract class T implements codegen.dalvik.Acceptable { /* null */ }
 
-    public static class ClassType extends T
-    {
+    public static class ClassType extends T {
       public String id;
 
-      public ClassType(String id)
-      {
+      public ClassType(String id) {
         this.id = id;
       }
 
       @Override
-      public String toString()
-      {
+      public String toString() {
         return this.id;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Int extends T
-    {
-      public Int()
-      {
-      }
+    public static class Int extends T {
+      public Int() { /* null */ }
 
       @Override
-      public String toString()
-      {
+      public String toString() {
         return "@int";
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class IntArray extends T
-    {
-      public IntArray()
-      {
-      }
+    public static class IntArray extends T {
+      public IntArray() { /* null */ }
 
       @Override
-      public String toString()
-      {
+      public String toString() {
         return "@int[]";
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
@@ -77,26 +59,20 @@ public class Ast
 
   // ////////////////////////////////////////////////
   // dec
-  public static class Dec
-  {
-    public static abstract class T implements codegen.dalvik.Acceptable
-    {
-    }
+  public static class Dec {
+    public static abstract class T implements codegen.dalvik.Acceptable { /* null */ }
 
-    public static class DecSingle extends T
-    {
+    public static class DecSingle extends T {
       public Type.T type;
       public String id;
 
-      public DecSingle(Type.T type, String id)
-      {
+      public DecSingle(Type.T type, String id) {
         this.type = type;
         this.id = id;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
@@ -105,111 +81,91 @@ public class Ast
 
   // ////////////////////////////////////////////////
   // statement
-  public static class Stm
-  {
-    public static abstract class T implements codegen.dalvik.Acceptable
-    {
-    }
+  public static class Stm {
+    public static abstract class T implements codegen.dalvik.Acceptable { /* null */ }
 
-    public static class Const extends T
-    {
+    public static class Const extends T {
       public String dst;
       public int i;
 
-      public Const(String dst, int i)
-      {
+      public Const(String dst, int i) {
         this.dst = dst;
         this.i = i;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Goto32 extends T
-    {
+    public static class Goto32 extends T {
       public Label l;
 
-      public Goto32(Label l)
-      {
+      public Goto32(Label l) {
         this.l = l;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Iflt extends T
-    {
+    public static class Iflt extends T {
       public String left, right;
       public Label l;
 
-      public Iflt(String left, String right, Label l)
-      {
+      public Iflt(String left, String right, Label l) {
         this.left = left;
         this.right = right;
         this.l = l;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Ifne extends T
-    {
+    public static class Ifne extends T {
       String left, right;
       public Label l;
 
-      public Ifne(String left, String right, Label l)
-      {
+      public Ifne(String left, String right, Label l) {
         this.left = left;
         this.right = right;
         this.l = l;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Ifnez extends T
-    {
+    public static class Ifnez extends T {
       public String left;
       public Label l;
 
-      public Ifnez(String left, Label l)
-      {
+      public Ifnez(String left, Label l) {
         this.left = left;
         this.l = l;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Invokevirtual extends T
-    {
+    public static class Invokevirtual extends T {
       public String f;
       public String c;
       public LinkedList<Type.T> at;
       public Type.T rt;
 
-      public Invokevirtual(String f, String c, LinkedList<Type.T> at, Type.T rt)
-      {
+      public Invokevirtual(String f, String c, LinkedList<Type.T> at, Type.T rt) {
         this.f = f;
         this.c = c;
         this.at = at;
@@ -217,162 +173,134 @@ public class Ast
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class LabelJ extends T
-    {
+    public static class LabelJ extends T {
       public util.Label l;
 
-      public LabelJ(util.Label l)
-      {
+      public LabelJ(util.Label l) {
         this.l = l;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Move16 extends T
-    {
+    public static class Move16 extends T {
       public String left, right;
 
-      public Move16(String left, String right)
-      {
+      public Move16(String left, String right) {
         this.left = left;
         this.right = right;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Moveobject16 extends T
-    {
+    public static class Moveobject16 extends T {
       public String left, right;
 
-      public Moveobject16(String left, String right)
-      {
+      public Moveobject16(String left, String right) {
         this.left = left;
         this.right = right;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Mulint extends T
-    {
+    public static class Mulint extends T {
       public String dst, src1, src2;
       
-      public Mulint(String dst, String src1, String src2)
-      {
+      public Mulint(String dst, String src1, String src2) {
         this.dst = dst;
         this.src1 = src1;
         this.src2 = src2;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
     
-    public static class NewInstance extends T
-    {
+    public static class NewInstance extends T {
       public String dst;
       public String c;
 
-      public NewInstance(String dst, String c)
-      {
+      public NewInstance(String dst, String c) {
         this.dst = dst;
         this.c = c;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Print extends T
-    {
+    public static class Print extends T {
       public String stream;
       public String src;
       
-      public Print(String stream, String src)
-      {
+      public Print(String stream, String src) {
         this.stream = stream;
         this.src = src;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Return extends T
-    {
+    public static class Return extends T {
       String src;
       
-      public Return(String src)
-      {
+      public Return(String src) {
         this.src = src;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class ReturnObject extends T
-    {
+    public static class ReturnObject extends T {
       public String src;
       
-      public ReturnObject(String src)
-      {
+      public ReturnObject(String src) {
         this.src = src;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
 
-    public static class Subint extends T
-    {
+    public static class Subint extends T {
       public String dst, src1, src2;
       
-      public Subint(String dst, String src1, String src2)
-      {
+      public Subint(String dst, String src1, String src2) {
         this.dst = dst;
         this.src1 = src1;
         this.src2 = src2;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }    
@@ -380,14 +308,10 @@ public class Ast
 
   // ////////////////////////////////////////////////
   // method
-  public static class Method
-  {
-    public static abstract class T implements codegen.dalvik.Acceptable
-    {
-    }
+  public static class Method {
+    public static abstract class T implements codegen.dalvik.Acceptable { /* null */ }
 
-    public static class MethodSingle extends T
-    {
+    public static class MethodSingle extends T {
       public Type.T retType;
       public String id;
       public String classId;
@@ -399,8 +323,7 @@ public class Ast
 
       public MethodSingle(Type.T retType, String id, String classId,
           LinkedList<Dec.T> formals, LinkedList<Dec.T> locals,
-          LinkedList<Stm.T> stms, int retExp, int index)
-      {
+          LinkedList<Stm.T> stms, int retExp, int index) {
         this.retType = retType;
         this.id = id;
         this.classId = classId;
@@ -412,8 +335,7 @@ public class Ast
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
@@ -422,22 +344,17 @@ public class Ast
 
   // ////////////////////////////////////////////////
   // class
-  public static class Class
-  {
-    public static abstract class T implements codegen.dalvik.Acceptable
-    {
-    }
+  public static class Class {
+    public static abstract class T implements codegen.dalvik.Acceptable { /* null */ }
 
-    public static class ClassSingle extends T
-    {
+    public static class ClassSingle extends T {
       public String id;
       public String extendss; // null for non-existing "extends"
       public LinkedList<Dec.T> decs;
       public LinkedList<Method.T> methods;
 
       public ClassSingle(String id, String extendss, LinkedList<Dec.T> decs,
-          LinkedList<Method.T> methods)
-      {
+          LinkedList<Method.T> methods) {
         this.id = id;
         this.extendss = extendss;
         this.decs = decs;
@@ -445,8 +362,7 @@ public class Ast
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
@@ -455,63 +371,46 @@ public class Ast
 
   // ////////////////////////////////////////////////
   // main class
-  public static class MainClass
-  {
-    public static abstract class T implements codegen.dalvik.Acceptable
-    {
-    }
+  public static class MainClass {
+    public static abstract class T implements codegen.dalvik.Acceptable { /* null */ }
 
-    public static class MainClassSingle extends T
-    {
+    public static class MainClassSingle extends T {
       public String id;
       public String arg;
       public LinkedList<Stm.T> stms;
 
-      public MainClassSingle(String id, String arg, LinkedList<Stm.T> stms)
-      {
+      public MainClassSingle(String id, String arg, LinkedList<Stm.T> stms) {
         this.id = id;
         this.arg = arg;
         this.stms = stms;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
-        return;
       }
-
     }
-
   }// end of main class
 
   // ////////////////////////////////////////////////
   // program
-  public static class Program
-  {
-    public static abstract class T implements codegen.dalvik.Acceptable
-    {
-    }
+  public static class Program {
+    public static abstract class T implements codegen.dalvik.Acceptable { /* null */ }
 
-    public static class ProgramSingle extends T
-    {
+    public static class ProgramSingle extends T {
       public MainClass.T mainClass;
       public LinkedList<Class.T> classes;
 
       public ProgramSingle(MainClass.T mainClass,
-          java.util.LinkedList<Class.T> classes)
-      {
+          java.util.LinkedList<Class.T> classes) {
         this.mainClass = mainClass;
         this.classes = classes;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
-        return;
       }
     }
-
   }// end of program
 }

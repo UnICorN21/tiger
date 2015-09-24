@@ -2,27 +2,26 @@ package codegen.dalvik;
 
 import codegen.dalvik.Ast.Class;
 import codegen.dalvik.Ast.Class.ClassSingle;
-import codegen.dalvik.Ast.Dec;
+import codegen.dalvik.Ast.*;
 import codegen.dalvik.Ast.Dec.DecSingle;
 import codegen.dalvik.Ast.MainClass.MainClassSingle;
-import codegen.dalvik.Ast.Method;
 import codegen.dalvik.Ast.Method.MethodSingle;
 import codegen.dalvik.Ast.Program.ProgramSingle;
-import codegen.dalvik.Ast.Stm;
-import codegen.dalvik.Ast.Type;
-import codegen.dalvik.Ast.Type.*;
 import codegen.dalvik.Ast.Stm.*;
+import codegen.dalvik.Ast.Type.ClassType;
+import codegen.dalvik.Ast.Type.Int;
+import codegen.dalvik.Ast.Type.IntArray;
 
-public class PrettyPrintVisitor implements Visitor
-{
+import java.util.ArrayList;
+import java.util.List;
+
+public class PrettyPrintVisitor implements Visitor {
   private java.io.BufferedWriter writer;
+  private List<String> filenames;
 
-  public PrettyPrintVisitor()
-  {
-  }
+  public PrettyPrintVisitor() { filenames = new ArrayList<>(); }
 
-  private void sayln(String s)
-  {
+  private void sayln(String s) {
     say(s);
     try {
       this.writer.write("\n");
@@ -32,8 +31,7 @@ public class PrettyPrintVisitor implements Visitor
     }
   }
 
-  private void isayln(String s)
-  {
+  private void isayln(String s) {
     say("    ");
     say(s);
     try {
@@ -44,8 +42,7 @@ public class PrettyPrintVisitor implements Visitor
     }
   }
 
-  private void say(String s)
-  {
+  private void say(String s) {
     try {
       this.writer.write(s);
     } catch (Exception e) {
@@ -57,43 +54,32 @@ public class PrettyPrintVisitor implements Visitor
   // /////////////////////////////////////////////////////
   // statements
   @Override
-  public void visit(ReturnObject s)
-  {
+  public void visit(ReturnObject s) {
     this.isayln("return-object");
-    return;
   }
 
   @Override
-  public void visit(Goto32 s)
-  {
+  public void visit(Goto32 s) {
     this.isayln("goto/32 " + s.l.toString());
-    return;
   }
 
   @Override
-  public void visit(Iflt s)
-  {
+  public void visit(Iflt s) {
     this.isayln("if-lt " + s.left + ", " + s.right + ", " + s.l.toString());
-    return;
   }
 
   @Override
-  public void visit(Ifne s)
-  {
+  public void visit(Ifne s) {
     this.isayln("if-ne " + s.l.toString());
-    return;
   }
 
   @Override
-  public void visit(Mulint s)
-  {
+  public void visit(Mulint s) {
     this.isayln("imul " + s.dst + ", " + s.src1 + ", " + s.src2);
-    return;
   }
 
   @Override
-  public void visit(Invokevirtual s)
-  {
+  public void visit(Invokevirtual s) {
     this.say("    invokevirtual L" + s.c + ";->" + s.f + "(");
     for (Type.T t : s.at) {
       t.accept(this);
@@ -101,108 +87,84 @@ public class PrettyPrintVisitor implements Visitor
     this.say(")");
     s.rt.accept(this);
     this.sayln("");
-    return;
   }
 
   @Override
-  public void visit(Return s)
-  {
+  public void visit(Return s) {
     this.isayln("return");
-    return;
   }
 
   @Override
-  public void visit(Subint s)
-  {
+  public void visit(Subint s) {
     this.isayln("sub-int " + s.dst + ", " + s.src1 + ", " + s.src2);
-    return;
   }
 
   @Override
-  public void visit(LabelJ s)
-  {
+  public void visit(LabelJ s) {
     this.sayln(":" + s.l.toString());
-    return;
   }
 
   @Override
-  public void visit(Const s)
-  {
+  public void visit(Const s) {
     this.isayln("const " + s.dst + ", " + s.i);
-    return;
   }
 
   @Override
-  public void visit(NewInstance s)
-  {
+  public void visit(NewInstance s) {
     this.isayln("new-instance " + s.dst + ", " + s.c);
     this.isayln("invoke-direct {" + s.dst + "}, " + s.c + "-><init>()V");
-    return;
   }
 
   @Override
-  public void visit(Print s)
-  {
+  public void visit(Print s) {
     this.isayln("sget-object {" + s.stream + "}, "
         + "Ljava/lang/System;->out:Ljava/io/PrintStream;");
     this.isayln("invoke-virtual {" + s.stream + ", " + s.src
         + "}, Ljava/io/PrintStream;->println(I)V");
-    return;
   }
 
   @Override
-  public void visit(Ifnez s)
-  {
+  public void visit(Ifnez s) {
     this.isayln("if-ne " + s.left + ", :" + s.l.toString());
-    return;
   }
 
   @Override
-  public void visit(Move16 s)
-  {
+  public void visit(Move16 s) {
     this.isayln("move/16 " + s.left + ", " + s.right);
-    return;
   }
 
   @Override
-  public void visit(Moveobject16 s)
-  {
+  public void visit(Moveobject16 s) {
     this.isayln("move-object/16 " + s.left + s.right);
-    return;
   }
 
   // //////////////////////////////////////////////////////
   // type
   @Override
-  public void visit(ClassType t)
-  {
+  public void visit(ClassType t) {
     this.say("L" + t.id + ";");
   }
 
   @Override
-  public void visit(Int t)
-  {
+  public void visit(Int t) {
     this.say("I");
   }
 
   @Override
-  public void visit(IntArray t)
-  {
+  public void visit(IntArray t) {
     this.say("[I");
   }
 
   // //////////////////////////////////////////////////
   // dec
   @Override
-  public void visit(DecSingle d)
-  {
+  public void visit(DecSingle d) {
   }
 
   // //////////////////////////////////////////////////
   // method
   @Override
-  public void visit(MethodSingle m)
-  {
+  public void visit(MethodSingle m) {
     this.say(".method public " + m.id + "(");
     for (Dec.T d : m.formals) {
       DecSingle dd = (DecSingle) d;
@@ -218,17 +180,15 @@ public class PrettyPrintVisitor implements Visitor
       s.accept(this);
 
     this.sayln(".end method");
-    return;
   }
 
   // class
   @Override
-  public void visit(ClassSingle c)
-  {
+  public void visit(ClassSingle c) {
     // Every class must go into its own class file.
     try {
       this.writer = new java.io.BufferedWriter(new java.io.OutputStreamWriter(
-          new java.io.FileOutputStream(c.id + ".smali")));
+          new java.io.FileOutputStream(generateFilename(c.id))));
     } catch (Exception e) {
       e.printStackTrace();
       System.exit(1);
@@ -272,17 +232,15 @@ public class PrettyPrintVisitor implements Visitor
       e.printStackTrace();
       System.exit(1);
     }
-    return;
   }
 
   // main class
   @Override
-  public void visit(MainClassSingle c)
-  {
+  public void visit(MainClassSingle c) {
     // Every class must go into its own class file.
     try {
       this.writer = new java.io.BufferedWriter(new java.io.OutputStreamWriter(
-          new java.io.FileOutputStream(c.id + ".j")));
+          new java.io.FileOutputStream(generateFilename(c.id))));
     } catch (Exception e) {
       e.printStackTrace();
       System.exit(1);
@@ -307,20 +265,29 @@ public class PrettyPrintVisitor implements Visitor
       e.printStackTrace();
       System.exit(1);
     }
-    return;
   }
 
   // program
   @Override
-  public void visit(ProgramSingle p)
-  {
-
+  public void visit(ProgramSingle p) {
     p.mainClass.accept(this);
 
     for (Class.T c : p.classes) {
       c.accept(this);
     }
-
   }
 
+  private String generateFilename(String classname) {
+    String ret = classname + ".smali";
+    filenames.add(ret);
+    return ret;
+  }
+
+  /**
+   * Get all generated filenames.
+   * Should be invoked after the whole pass.
+   */
+  public List<String> getOutputFileNames() {
+    return this.filenames;
+  }
 }

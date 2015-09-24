@@ -142,7 +142,12 @@ public class Tiger {
       outputFilenames = ppc.getOutputFileNames();
       break;
     case Dalvik:
-      // similar
+      codegen.dalvik.TranslateVisitor transD = new codegen.dalvik.TranslateVisitor();
+      theAst.accept(transD);
+      codegen.dalvik.Ast.Program.T dAst = transD.program;
+      codegen.dalvik.PrettyPrintVisitor ppd = new codegen.dalvik.PrettyPrintVisitor();
+      dAst.accept(ppd);
+      outputFilenames = ppd.getOutputFileNames();
       break;
     case X86:
       // similar
@@ -171,6 +176,7 @@ public class Tiger {
           process = rt.exec("gcc -w " + outputFilenames.get(0));
           break;
         case Dalvik:
+          process = rt.exec("java -jar smali.jar " + outputFilenames.stream().reduce("", (all, name) -> all + " " + name));
           break;
         case X86:
           break;

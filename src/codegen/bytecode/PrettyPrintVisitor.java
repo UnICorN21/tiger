@@ -164,7 +164,8 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(Ldc s) {
-    this.isayln("ldc " + s.i);
+    if (-128 <= s.i && s.i <= 127) this.isayln("bipush " + s.i);
+    else this.isayln("ldc " + s.i);
   }
 
   @Override

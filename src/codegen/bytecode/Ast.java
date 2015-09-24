@@ -373,8 +373,9 @@ public class Ast {
     }
 
     /**
-     * Stands for `ldc`/`ldc_w`/`ldc2_w` instruction, but using the constant itself
+     * Stands for `ldc`/`bipush` instruction, but using the constant itself
      * other than the index of the constant pool.
+     * It'll generate a `bipush` only if the value is in [-128, 127].
      */
     public static class Ldc extends T {
       public int i; // a constant number
