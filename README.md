@@ -4,6 +4,7 @@
 ### Status
 Complete part A.
 Complete part B.
+Complete part C.
 
 ### Notes
 #### Generate C code:
@@ -22,3 +23,9 @@ in resolving the symbols and another is missing `Id` class in some sub trees' co
 + Can refer to [JVM Specification](http://docs.oracle.com/javase/specs/jvms/se8/html/index.html)'s first 4 chapters to
 make a better understand of jasmin and the generation details.
 + Nevertheless to say, you should never trust the official code of this lab.
+
+#### Generate Dalvik bytecode:
++ Dalvik is a typical register-based computer. Therefore, some translation procedures are subtle different from the above.
++ Again, never trust the official code. Some codes are copied from `Generate Java bytecode` lab and haven't be modified
+at all.
++ My personal solution don't try to fix the situation when the arguments exceed 256 currently.(A registers allocator is required.)

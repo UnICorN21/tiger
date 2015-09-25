@@ -11,7 +11,9 @@ import codegen.dalvik.Ast.Stm.*;
 import util.Label;
 import util.Temp;
 
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 // Given a Java AST, translate it into Dalvik bytecode.
 
@@ -24,8 +26,11 @@ public class TranslateVisitor implements ast.Visitor {
   // type "etype" and the expression name "evar";
   private Type.T etype;
   private String evar;
-  private LinkedList<Dec.T> tmpVars;
+
+  private LinkedList<DecSingle> tmpVars;
   private LinkedList<Stm.T> stms;
+  private Map<String, DecSingle> classLookupTable;
+  private Map<String, DecSingle> methodLookupTable;
   private Method.T method;
   private Class.T clazz;
   private MainClass.T mainClass;
@@ -35,25 +40,16 @@ public class TranslateVisitor implements ast.Visitor {
     this.classId = null;
     this.type = null;
     this.dec = null;
-    this.tmpVars = new LinkedList<Dec.T>();
+    this.tmpVars = new LinkedList<>();
     this.etype = null;
     this.evar = null;
-    this.stms = new LinkedList<Stm.T>();
+    this.stms = new LinkedList<>();
+    this.classLookupTable = new HashMap<>();
+    this.methodLookupTable = new HashMap<>();
     this.method = null;
     this.clazz = null;
     this.mainClass = null;
     this.program = null;
-  }
-
-  static int count = 0;
-
-  String getTemp() {
-    // however, we should check that "count<=256"
-    return "v" + count++;
-  }
-
-  void resetCount() {
-    count = 0;
   }
 
   // utility functions
@@ -69,21 +65,42 @@ public class TranslateVisitor implements ast.Visitor {
   // expressions
   @Override
   public void visit(ast.Ast.Exp.Add e) {
+    e.left.accept(this);
+    String left = this.evar;
+    e.right.accept(this);
+    String right = this.evar;
+    String reg = Temp.next();
+    emit(new Addint(reg, left, right));
   }
 
   @Override
   public void visit(ast.Ast.Exp.And e) {
+    e.left.accept(this);
+    String left = this.evar;
+    e.right.accept(this);
+    String right = this.evar;
+    String reg = Temp.next();
+    emit(new Andint(reg, left, right));
   }
 
   @Override
   public void visit(ast.Ast.Exp.ArraySelect e) {
+    e.array.accept(this);
+    String aryReg = this.evar;
+    e.index.accept(this);
+    String idxReg = this.evar;
+    String reg = Temp.next();
+    emit(new Aget(aryReg, idxReg, reg));
   }
 
   @Override
   public void visit(ast.Ast.Exp.Call e) {
+    LinkedList<String> regs = new LinkedList<>();
     e.exp.accept(this);
+    regs.add(this.evar);
     for (ast.Ast.Exp.T x : e.args) {
       x.accept(this);
+      regs.add(this.evar);
     }
     e.rt.accept(this);
     Type.T rt = this.type;
@@ -92,24 +109,34 @@ public class TranslateVisitor implements ast.Visitor {
       t.accept(this);
       at.add(this.type);
     }
-    emit(new Invokevirtual(e.id, e.type, at, rt));
+    emit(new Invokevirtual(e.id, e.type, at, rt, regs));
   }
 
   @Override
   public void visit(ast.Ast.Exp.False e) {
+    this.evar = Temp.next();
+    this.etype = new Type.Int();
+    emit(new Const(this.evar, 0));
   }
 
   @Override
   public void visit(ast.Ast.Exp.Id e) {
-    e.type.accept(this);
-    ;
-    this.evar = e.id;
-    this.etype = this.type;
-    // but what about this is a field?
+    DecSingle ds = methodLookupTable.get(e.id);
+    if (null != ds) {
+      this.evar = ds.reg;
+      this.etype = ds.type;
+    } else {
+      ds = classLookupTable.get(e.id);
+      this.evar = String.format("L%s;->%s:%s", classId, ds.id, ds.type.desc());
+      this.etype = ds.type;
+    }
   }
 
   @Override
   public void visit(ast.Ast.Exp.Length e) {
+    e.array.accept(this);
+    String reg = Temp.next();
+    emit(new ArrayLength(reg, this.evar));
   }
 
   @Override
@@ -134,11 +161,32 @@ public class TranslateVisitor implements ast.Visitor {
 
   @Override
   public void visit(ast.Ast.Exp.Gt e) {
-    // TODO
+    Label tl = new Label(), fl = new Label(), el = new Label();
+    e.left.accept(this);
+    String lname = this.evar;
+    e.right.accept(this);
+    String rname = this.evar;
+    String newname = util.Temp.next();
+    this.evar = newname;
+    this.etype = new Type.Int();
+    emit(new Ifgt(lname, rname, tl));
+    emit(new LabelJ(fl));
+    emit(new Const(newname, 0));
+    emit(new Goto32(el));
+    emit(new LabelJ(tl));
+    emit(new Const(newname, 1));
+    emit(new Goto32(el));
+    emit(new LabelJ(el));
   }
 
   @Override
   public void visit(ast.Ast.Exp.NewIntArray e) {
+    e.exp.accept(this);
+    String reg = Temp.next();
+    emit(new NewArray(reg, this.evar, "[I"));
+    this.evar = reg;
+    this.type = new Type.IntArray();
+    emitDec(this.type, this.evar);
   }
 
   @Override
@@ -147,19 +195,23 @@ public class TranslateVisitor implements ast.Visitor {
     this.evar = newname;
     this.etype = new Type.ClassType(e.id);
     emit(new NewInstance(newname, e.id));
+    emitDec(this.etype, this.evar);
   }
 
   @Override
   public void visit(ast.Ast.Exp.Not e) {
+    e.exp.accept(this);
+    String reg = Temp.next();
+    emit(new Const(reg, 1));
+    emit(new Xorint(this.evar, this.evar, reg));
   }
 
   @Override
   public void visit(ast.Ast.Exp.Num e) {
-    String newname = Temp.next();
-    this.evar = newname;
+    this.evar = Temp.next();
     this.etype = new Type.Int();
-    emitDec(this.type, newname);
-    emit(new Const(newname, e.num));
+    emitDec(this.type, this.evar);
+    emit(new Const(this.evar, e.num));
   }
 
   @Override
@@ -168,15 +220,15 @@ public class TranslateVisitor implements ast.Visitor {
     String left = this.evar;
     e.right.accept(this);
     String right = this.evar;
-    String newname = Temp.next();
-    this.evar = newname;
+    this.evar = Temp.next();
     this.etype = new Type.Int();
-    emitDec(this.etype, this.evar);
-    emit(new Subint(newname, left, right));
+    emit(new Subint(this.evar, left, right));
   }
 
   @Override
   public void visit(ast.Ast.Exp.This e) {
+    this.evar = "p0";
+    this.etype = new Type.ClassType(classId);
   }
 
   @Override
@@ -185,14 +237,16 @@ public class TranslateVisitor implements ast.Visitor {
     String left = this.evar;
     e.right.accept(this);
     String right = this.evar;
-    String newname = Temp.next();
-    this.evar = newname;
+    this.evar = Temp.next();
     this.etype = new Type.Int();
-    emit(new Mulint(newname, left, right));
+    emit(new Mulint(this.evar, left, right));
   }
 
   @Override
   public void visit(ast.Ast.Exp.True e) {
+    this.evar = Temp.next();
+    this.etype = new Type.Int();
+    emit(new Const(this.evar, 1));
   }
 
   // ///////////////////////////////////////////////////
@@ -203,19 +257,41 @@ public class TranslateVisitor implements ast.Visitor {
     String right = this.evar;
     s.type.accept(this);
     Type.T ty = this.type;
-    if (ty instanceof Type.Int) {
-      emit(new Move16(s.id, right));
+    DecSingle ds = null;
+    if (s.isField) {
+      ds = classLookupTable.get(s.id);
+      emit(new Iput(right, "p0", ds.type.desc()));
     } else {
-      emit(new Moveobject16(s.id, right));
+      ds = methodLookupTable.get(s.id);
+      if (ty instanceof Type.Int) {
+        emit(new Move16(ds.reg, right));
+      } else {
+        emit(new Moveobject16(ds.reg, right));
+      }
     }
   }
 
   @Override
   public void visit(ast.Ast.Stm.AssignArray s) {
+    s.exp.accept(this);
+    String valReg = this.evar;
+    s.index.accept(this);
+    String idxReg = this.evar;
+    DecSingle ds;
+    if (s.isField) {
+      ds = classLookupTable.get(s.id);
+      String reg = Temp.next();
+      emit(new IGet(reg, "p0", String.format("L%s;->%s:[I", classId, s.id)));
+      emit(new Aput(valReg, reg, idxReg));
+    } else {
+      ds = methodLookupTable.get(s.id);
+      emit(new Aput(ds.reg, idxReg, valReg));
+    }
   }
 
   @Override
   public void visit(ast.Ast.Stm.Block s) {
+    s.stms.forEach(stm -> stm.accept(this));
   }
 
   @Override
@@ -243,16 +319,27 @@ public class TranslateVisitor implements ast.Visitor {
 
   @Override
   public void visit(ast.Ast.Stm.While s) {
+    Label cl = new Label(), el = new Label();
+
+    emit(new LabelJ(cl));
+    s.condition.accept(this);
+    String condReg = this.evar;
+    emit(new Ifeqz(condReg, el));
+    s.body.accept(this);
+    emit(new Goto32(cl));
+    emit(new LabelJ(el));
   }
 
   // ////////////////////////////////////////////////////////
   // type
   @Override
   public void visit(ast.Ast.Type.Boolean t) {
+    this.type = new Type.Int();
   }
 
   @Override
   public void visit(ast.Ast.Type.ClassType t) {
+    this.type = new Type.ClassType(t.id);
   }
 
   @Override
@@ -262,6 +349,7 @@ public class TranslateVisitor implements ast.Visitor {
 
   @Override
   public void visit(ast.Ast.Type.IntArray t) {
+    this.type = new Type.IntArray();
   }
 
   // dec
@@ -274,20 +362,29 @@ public class TranslateVisitor implements ast.Visitor {
   // method
   @Override
   public void visit(ast.Ast.Method.MethodSingle m) {
+    Temp.reset();
+    methodLookupTable.clear();
     // There are two passes here:
     // In the 1st pass, the method is translated
     // into a three-address-code like intermediate representation.
     m.retType.accept(this);
     Type.T newRetType = this.type;
     LinkedList<Dec.T> newFormals = new LinkedList<>();
+    int formalCnt = 0;
     for (ast.Ast.Dec.T d : m.formals) {
       d.accept(this);
-      newFormals.add(this.dec);
+      DecSingle ds = (DecSingle)this.dec;
+      ds.setReg("p" + ++formalCnt);
+      newFormals.add(ds);
+      methodLookupTable.put(ds.id, ds);
     }
     LinkedList<Dec.T> locals = new LinkedList<>();
     for (ast.Ast.Dec.T d : m.locals) {
       d.accept(this);
-      locals.add(this.dec);
+      DecSingle ds = (DecSingle)this.dec;
+      ds.setReg(Temp.next());
+      locals.add(ds);
+      methodLookupTable.put(ds.id, ds);
     }
     this.stms = new LinkedList<>();
     for (ast.Ast.Stm.T s : m.stms) {
@@ -302,15 +399,14 @@ public class TranslateVisitor implements ast.Visitor {
       emit(new ReturnObject(retName));
     else
       emit(new Return(retName));
-
     // in the second pass, you should rename all method
     // parameters according to the "p"-convention; and
     // rename all method locals according to the "v"-convention.
     // Your code here:
-
+    // TODO
     // cook the final method.
     this.method = new MethodSingle(newRetType, m.id, this.classId, newFormals,
-        locals, this.stms, 0, 0);
+        locals, this.stms, 0, 0, Temp.getCount());
   }
 
   // ///////////////////////////////////////////////////////////////
@@ -322,6 +418,8 @@ public class TranslateVisitor implements ast.Visitor {
     for (ast.Ast.Dec.T dec : c.decs) {
       dec.accept(this);
       newDecs.add(this.dec);
+      DecSingle ds = (DecSingle)this.dec;
+      classLookupTable.put(ds.id, ds);
     }
     LinkedList<Method.T> newMethods = new LinkedList<>();
     for (ast.Ast.Method.T m : c.methods) {
@@ -335,8 +433,9 @@ public class TranslateVisitor implements ast.Visitor {
   // main class
   @Override
   public void visit(ast.Ast.MainClass.MainClassSingle c) {
+    Temp.reset();
     c.stm.accept(this);
-    this.mainClass = new MainClassSingle(c.id, c.arg, this.stms);
+    this.mainClass = new MainClassSingle(c.id, c.arg, this.stms, Temp.getCount());
     this.stms = new LinkedList<>();
   }
 

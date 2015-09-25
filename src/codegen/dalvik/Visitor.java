@@ -18,15 +18,29 @@ public interface Visitor {
 
   void visit(Iflt s);
 
+  void visit(Ifgt s);
+
   void visit(Ifne s);
   
   void visit(Ifnez s);
 
+  void visit(Ifeqz s);
+
   void visit(Mulint s);
 
-  void visit(Return s);
-
   void visit(Subint s);
+
+  void visit(Addint s);
+
+  void visit(Divint s);
+
+  void visit(Andint s);
+
+  void visit(Xorint s);
+
+  void visit(Orint s);
+
+  void visit(Return s);
 
   void visit(Invokevirtual s);
 
@@ -41,6 +55,18 @@ public interface Visitor {
   void visit(Print s);
 
   void visit(NewInstance s);
+
+  void visit(NewArray s);
+
+  void visit(ArrayLength s);
+
+  void visit(Aput s);
+
+  void visit(Aget s);
+
+  void visit(Iput s);
+
+  void visit(IGet s);
 
   // type
   void visit(ClassType t);

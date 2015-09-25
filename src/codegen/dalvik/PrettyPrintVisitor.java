@@ -51,6 +51,20 @@ public class PrettyPrintVisitor implements Visitor {
     }
   }
 
+  int paramCount = 0;
+
+  private String paramRegister() {
+    return "p" + ++paramCount;
+  }
+
+  private void resetParamRegister() { paramCount = 0; }
+
+  private String classDesc(String id) { return String.format("L%s;", id); }
+
+  private void biopInt(String op, String dsc, String left, String right) {
+    this.isayln(String.format("%s-int %s, %s, %s", op, dsc, left, right));
+  }
+
   // /////////////////////////////////////////////////////
   // statements
   @Override
@@ -60,27 +74,38 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(Goto32 s) {
-    this.isayln("goto/32 " + s.l.toString());
+    this.isayln("goto/32 :" + s.l.toString());
   }
 
   @Override
   public void visit(Iflt s) {
-    this.isayln("if-lt " + s.left + ", " + s.right + ", " + s.l.toString());
+    this.isayln("if-lt " + s.left + ", " + s.right + ", :" + s.l.toString());
+  }
+
+  @Override
+  public void visit(Ifgt s) {
+    this.isayln("if-gt " + s.left + ", " + s.right + ", :" + s.l.toString());
   }
 
   @Override
   public void visit(Ifne s) {
-    this.isayln("if-ne " + s.l.toString());
+    this.isayln("if-ne :" + s.l.toString());
   }
 
   @Override
   public void visit(Mulint s) {
-    this.isayln("imul " + s.dst + ", " + s.src1 + ", " + s.src2);
+    biopInt("mul", s.dst, s.src1, s.src2);
   }
 
   @Override
   public void visit(Invokevirtual s) {
-    this.say("    invokevirtual L" + s.c + ";->" + s.f + "(");
+    this.say("    invoke-virtual {");
+    int cnt = 0;
+    for (String p: s.params) {
+      if (cnt++ <= 0) this.say(p);
+      else this.say(", " + p);
+    }
+    this.say("}, " + classDesc(s.c) + "->" + s.f + "(");
     for (Type.T t : s.at) {
       t.accept(this);
     }
@@ -91,12 +116,37 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(Return s) {
-    this.isayln("return");
+    this.isayln("return " + s.src);
   }
 
   @Override
   public void visit(Subint s) {
-    this.isayln("sub-int " + s.dst + ", " + s.src1 + ", " + s.src2);
+    biopInt("sub", s.dst, s.src1, s.src2);
+  }
+
+  @Override
+  public void visit(Addint s) {
+    biopInt("add", s.dst, s.src1, s.src2);
+  }
+
+  @Override
+  public void visit(Divint s) {
+    biopInt("div", s.dst, s.src1, s.src2);
+  }
+
+  @Override
+  public void visit(Andint s) {
+    biopInt("and", s.dst, s.src1, s.src2);
+  }
+
+  @Override
+  public void visit(Orint s) {
+    biopInt("or", s.dst, s.src1, s.src2);
+  }
+
+  @Override
+  public void visit(Xorint s) {
+    biopInt("xor", s.dst, s.src1, s.src2);
   }
 
   @Override
@@ -111,13 +161,43 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(NewInstance s) {
-    this.isayln("new-instance " + s.dst + ", " + s.c);
-    this.isayln("invoke-direct {" + s.dst + "}, " + s.c + "-><init>()V");
+    this.isayln("new-instance " + s.dst + ", " + classDesc(s.c));
+    this.isayln("invoke-direct {" + s.dst + "}, " + classDesc(s.c) + "-><init>()V");
+  }
+
+  @Override
+  public void visit(NewArray s) {
+    this.isayln("new-array " + s.dst + ", " + s.size + ", " + s.type);
+  }
+
+  @Override
+  public void visit(ArrayLength s) {
+    this.isayln("array-length " + s.dst + ", " + s.src);
+  }
+
+  @Override
+  public void visit(Aget s) {
+    this.isayln("aget " + s.dst + ", " + s.aryReg + ", " + s.idxReg);
+  }
+
+  @Override
+  public void visit(Aput s) {
+    this.isayln("aput " + s.src + ", " + s.aryReg + ", " + s.idxReg);
+  }
+
+  @Override
+  public void visit(IGet s) {
+    this.isayln("iget " + s.dst + ", " + s.objReg + ", " + s.type);
+  }
+
+  @Override
+  public void visit(Iput s) {
+    this.isayln("iput " + s.src + ", " + s.objReg + ", " + s.type);
   }
 
   @Override
   public void visit(Print s) {
-    this.isayln("sget-object {" + s.stream + "}, "
+    this.isayln("sget-object " + s.stream + ", "
         + "Ljava/lang/System;->out:Ljava/io/PrintStream;");
     this.isayln("invoke-virtual {" + s.stream + ", " + s.src
         + "}, Ljava/io/PrintStream;->println(I)V");
@@ -125,7 +205,12 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(Ifnez s) {
-    this.isayln("if-ne " + s.left + ", :" + s.l.toString());
+    this.isayln("if-nez " + s.cond + ", :" + s.l.toString());
+  }
+
+  @Override
+  public void visit(Ifeqz s) {
+    this.isayln("if-eqz " + s.cond + ", :" + s.l.toString());
   }
 
   @Override
@@ -173,11 +258,12 @@ public class PrettyPrintVisitor implements Visitor {
     this.say(")");
     m.retType.accept(this);
     this.sayln("");
-    this.sayln(".limit stack 4096");
-    this.sayln(".limit locals " + (m.index + 1));
-
-    for (Stm.T s : m.stms)
-      s.accept(this);
+    this.isayln(".registers " + m.regCnt);
+    m.formals.stream().map(f -> (DecSingle)f).forEach(f -> this.isayln(String.format(".param %s, \"%s\"", f.reg, f.id)));
+    this.isayln(".prologue\n");
+    m.locals.stream().map(f -> (DecSingle)f).forEach(f -> this.isayln(String.format(".local %s, \"%s\":%s", f.reg, f.id, f.type.desc())));
+    this.isayln("");
+    m.stms.forEach(s -> s.accept(this));
 
     this.sayln(".end method");
   }
@@ -195,14 +281,14 @@ public class PrettyPrintVisitor implements Visitor {
     }
 
     // header
-    this.sayln("; This is automatically generated by the Tiger compiler.");
-    this.sayln("; Do NOT modify!\n");
+    this.sayln("# This is automatically generated by the Tiger compiler.");
+    this.sayln("# Do NOT modify!\n");
 
-    this.sayln(".class public " + c.id);
+    this.sayln(".class public " + classDesc(c.id));
     if (c.extendss == null)
-      this.sayln(".super java/lang/Object\n");
+      this.sayln(".super Ljava/lang/Object;\n");
     else
-      this.sayln(".super " + c.extendss);
+      this.sayln(".super " + classDesc(c.extendss));
 
     // fields
     for (Dec.T d : c.decs) {
@@ -213,13 +299,15 @@ public class PrettyPrintVisitor implements Visitor {
     }
 
     // methods
-    this.sayln(".method public <init>()V");
-    this.isayln("aload 0");
+    this.sayln(".method public constructor <init>()V");
+    this.isayln(".registers 1");
+    this.isayln(".prologue\n");
+    this.isayln(".line 1");
     if (c.extendss == null)
-      this.isayln("invokespecial java/lang/Object/<init>()V");
+      this.isayln("invoke-direct {p0}, Ljava/lang/Object;-><init>()V");
     else
-      this.isayln("invokespecial " + c.extendss + "/<init>()V");
-    this.isayln("return");
+      this.isayln("invoke-direct {p0}, " + c.extendss + "/<init>()V");
+    this.isayln("return-void");
     this.sayln(".end method\n\n");
 
     for (Method.T m : c.methods) {
@@ -246,17 +334,18 @@ public class PrettyPrintVisitor implements Visitor {
       System.exit(1);
     }
 
-    this.sayln("; This is automatically generated by the Tiger compiler.");
-    this.sayln("; Do NOT modify!\n");
+    this.sayln("# This is automatically generated by the Tiger compiler.");
+    this.sayln("# Do NOT modify!\n");
 
-    this.sayln(".class public " + c.id);
-    this.sayln(".super java/lang/Object\n");
+    this.sayln(".class public " + classDesc(c.id));
+    this.sayln(".super Ljava/lang/Object;\n");
     this.sayln(".method public static main([Ljava/lang/String;)V");
-    this.isayln(".limit stack 4096");
-    this.isayln(".limit locals 2");
+    this.isayln(".registers " + c.regCnt);
+    this.isayln(String.format(".param p0, \"%s\"", c.arg));
+    this.isayln(".prologue");
     for (Stm.T s : c.stms)
       s.accept(this);
-    this.isayln("return");
+    this.isayln("return-void");
     this.sayln(".end method");
 
     try {

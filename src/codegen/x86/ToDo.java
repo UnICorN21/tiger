@@ -1,7 +1,7 @@
 package codegen.x86;
 
 public class ToDo {
-  // This package is left empty intentionally.
+  // This package is cond empty intentionally.
   // To implement the x86 code generator, you
   // should add the necessary abstract syntax tree
   // for x86. 
