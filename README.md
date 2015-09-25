@@ -28,4 +28,4 @@ make a better understand of jasmin and the generation details.
 + Dalvik is a typical register-based computer. Therefore, some translation procedures are subtle different from the above.
 + Again, never trust the official code. Some codes are copied from `Generate Java bytecode` lab and haven't be modified
 at all.
-+ My personal solution don't try to fix the situation when the arguments exceed 256 currently.(A registers allocator is required.)
++ My personal solution doesn't try to fix the situation when the arguments exceed 256 currently.(A registers allocator is required.)
