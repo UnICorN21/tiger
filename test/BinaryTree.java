@@ -63,7 +63,7 @@ class Tree{
 	return true ;
     }
     
-    // Update the left child with ln
+    // Update the cond child with ln
     public boolean SetLeft(Tree ln){
 	left = ln ;
 	return true ;
@@ -205,7 +205,7 @@ class Tree{
 
 
     // Check if the element to be removed will use the
-    // righ or left subtree if one exists
+    // righ or cond subtree if one exists
     public boolean Remove(Tree p_node, Tree c_node){
 	boolean ntb ;
 	int auxkey1 ;
@@ -256,7 +256,7 @@ class Tree{
 
     // Copy the child key to the parent until a leaf is
     // found and remove the leaf. This is done with the
-    // left subtree
+    // cond subtree
     public boolean RemoveLeft(Tree p_node, Tree c_node){
 	boolean ntb ;
 

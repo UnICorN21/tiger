@@ -4,7 +4,6 @@
 
 // The Gimple Garbage Collector.
 
-
 //===============================================================//
 // The Java Heap data structure.
 
@@ -16,8 +15,7 @@
       | \<~~~~~~~ size ~~~~~>/ |
     from                       to
  */
-struct JavaHeap
-{
+struct JavaHeap {
   int size;         // in bytes, note that this if for semi-heap size
   char *from;       // the "from" space pointer
   char *fromFree;   // the next "free" space in the from space
@@ -33,8 +31,7 @@ struct JavaHeap heap;
 // Lab 4, exercise 10:
 // Given the heap size (in bytes), allocate a Java heap
 // in the C heap, initialize the relevant fields.
-void Tiger_heap_init (int heapSize)
-{
+void Tiger_heap_init (int heapSize) {
   // You should write 7 statement here:
   // #1: allocate a chunk of memory of size "heapSize" using "malloc"
 
@@ -57,7 +54,6 @@ void Tiger_heap_init (int heapSize)
 // The "prev" pointer, pointing to the top frame on the GC stack. 
 // (see part A of Lab 4)
 void *prev = 0;
-
 
 
 //===============================================================//
@@ -98,8 +94,7 @@ p---->| v_0          | \
 //           an error message ("OutOfMemory") and exit.
 //           (However, a production compiler will try to expand
 //           the Java heap.)
-void *Tiger_new (void *vtable, int size)
-{
+void *Tiger_new (void *vtable, int size) {
   // Your code here:
   
 }
@@ -149,9 +144,57 @@ void *Tiger_new_array (int length)
 
 // Lab 4, exercise 12:
 // A copying collector based-on Cheney's algorithm.
-static void Tiger_gc ()
-{
+static void Tiger_gc () {
   // Your code here:
   
 }
 
+//// "new" a new object, do necessary initializations, and
+//// return the pointer (reference).
+///*    -----------------------------------------
+//      | vptr | v0 | v1 | ...      | v_{size-1}|
+//      -----------------------------------------
+//      ^      \                                /
+//      |       \<------------- size --------->/
+//      |
+//      p (returned address)
+//*/
+//void *Tiger_new (void *vtable, int size) {
+//  // You should write 4 statements for this function.
+//  // #1: "malloc" a chunk of memory (be careful of the size):
+//  if (0 >= size) {
+//    printf("Warning: try to allocate a mem space less than 0.\n");
+//    size = 1;
+//  }
+//  int sz = sizeof(void*) + size;
+//  void *p = malloc(sz);
+//  // #2: clear this chunk of memory (zero off it):
+//  memset(p, 0, sz);
+//  // #3: set up the "vptr" pointer to the value of "vtable":
+//  memcpy(p, &vtable, sizeof(void*));
+//  // #4: return the pointer
+//  return p;
+//}
+//
+//// "new" an array of size "length", do necessary
+//// initializations. And each array comes with an
+//// extra "header" storing the array length.
+//// This function should return the starting address
+//// of the array elements, but not the starting address of
+//// the array chunk.
+///*    ---------------------------------------------
+//      | length | e0 | e1 | ...      | e_{length-1}|
+//      ---------------------------------------------
+//               ^
+//               |
+//               p (returned address)
+//*/
+//void *Tiger_new_array (int length) {
+//  // You can use the C "malloc" facilities, as above.
+//  // Your code here:
+//  int *p = (int*)malloc(sizeof(int) * (length + 1));
+//  if (NULL == p) return NULL;
+//  *p = length;
+//  ++p;
+//  return p;
+//}

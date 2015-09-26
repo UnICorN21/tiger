@@ -3,24 +3,19 @@ package codegen.C;
 import codegen.C.Ast.Dec;
 import codegen.C.Ast.Type;
 
-public class ClassTable
-{
+public class ClassTable {
   private java.util.Hashtable<String, ClassBinding> table;
 
-  public ClassTable()
-  {
-    this.table = new java.util.Hashtable<String, ClassBinding>();
+  public ClassTable() {
+    this.table = new java.util.Hashtable<>();
   }
 
-  public void init(String current, String extendss)
-  {
+  public void init(String current, String extendss) { // NOT a typical Class Init method. Just init the related ClassBindings.
     this.table.put(current, new ClassBinding(extendss));
-    return;
   }
 
   public void initDecs(String current,
-      java.util.LinkedList<Dec.T> decs)
-  {
+      java.util.LinkedList<Dec.T> decs) {
     ClassBinding cb = this.table.get(current);
     for (Dec.T dec : decs) {
       Dec.DecSingle decc = (Dec.DecSingle) dec;
@@ -30,19 +25,14 @@ public class ClassTable
   }
 
   public void initMethod(String current, Type.T ret,
-      java.util.LinkedList<Dec.T> args, String mid)
-  {
+      java.util.LinkedList<Dec.T> args, String mid) {
     ClassBinding cb = this.table.get(current);
     cb.putm(current, ret, args, mid);
-    return;
   }
 
-  public void inherit(String c)
-  {
-    ClassBinding cb = this.table.get(c);
-    if (cb.visited)
-      return;
-
+  public void inherit(String current) {
+    ClassBinding cb = this.table.get(current);
+    if (cb.visited) return;
     if (cb.extendss == null) {
       cb.visited = true;
       return;
@@ -53,12 +43,12 @@ public class ClassTable
     ClassBinding pb = this.table.get(cb.extendss);
     // this tends to be very slow...
     // need a much fancier data structure.
-    java.util.LinkedList<Tuple> newFields = new java.util.LinkedList<Tuple>();
+    java.util.LinkedList<Tuple> newFields = new java.util.LinkedList<>();
     newFields.addAll(pb.fields);
     newFields.addAll(cb.fields);
     cb.update(newFields);
     // methods;
-    java.util.ArrayList<Ftuple> newMethods = new java.util.ArrayList<Ftuple>();
+    java.util.ArrayList<Ftuple> newMethods = new java.util.ArrayList<>();
     newMethods.addAll(pb.methods);
     for (codegen.C.Ftuple t : cb.methods) {
       int index = newMethods.indexOf(t);
@@ -71,18 +61,15 @@ public class ClassTable
     cb.update(newMethods);
     // set the mark
     cb.visited = true;
-    return;
   }
 
   // return null for non-existing keys
-  public ClassBinding get(String c)
-  {
+  public ClassBinding get(String c) {
     return this.table.get(c);
   }
 
   @Override
-  public String toString()
-  {
+  public String toString() {
     return this.table.toString();
   }
 }

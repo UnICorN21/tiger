@@ -1,137 +1,144 @@
 package elaborator;
 
-import java.util.LinkedList;
-
 import ast.Ast.Class;
 import ast.Ast.Class.ClassSingle;
-import ast.Ast.Dec;
-import ast.Ast.Exp;
-import ast.Ast.Exp.Add;
-import ast.Ast.Exp.And;
-import ast.Ast.Exp.ArraySelect;
-import ast.Ast.Exp.Call;
-import ast.Ast.Exp.False;
-import ast.Ast.Exp.Id;
-import ast.Ast.Exp.Length;
-import ast.Ast.Exp.Lt;
-import ast.Ast.Exp.NewIntArray;
-import ast.Ast.Exp.NewObject;
-import ast.Ast.Exp.Not;
-import ast.Ast.Exp.Num;
-import ast.Ast.Exp.Sub;
-import ast.Ast.Exp.This;
-import ast.Ast.Exp.Times;
-import ast.Ast.Exp.True;
-import ast.Ast.MainClass;
-import ast.Ast.Method;
+import ast.Ast.*;
+import ast.Ast.Dec.DecSingle;
+import ast.Ast.Exp.*;
 import ast.Ast.Method.MethodSingle;
 import ast.Ast.Program.ProgramSingle;
-import ast.Ast.Stm;
-import ast.Ast.Stm.Assign;
-import ast.Ast.Stm.AssignArray;
-import ast.Ast.Stm.Block;
-import ast.Ast.Stm.If;
-import ast.Ast.Stm.Print;
-import ast.Ast.Stm.While;
-import ast.Ast.Type;
+import ast.Ast.Stm.*;
 import ast.Ast.Type.ClassType;
 import control.Control.ConAst;
+import util.Pos;
 
-public class ElaboratorVisitor implements ast.Visitor
-{
+import java.util.LinkedList;
+
+public class ElaboratorVisitor implements ast.Visitor {
+  private static final Type.Int TYPE_INT = new Type.Int();
+  private static final Type.IntArray TYPE_INTARRAY = new Type.IntArray();
+  private static final Type.Boolean TYPE_BOOLEAN = new Type.Boolean();
+
   public ClassTable classTable; // symbol table for class
   public MethodTable methodTable; // symbol table for each method
   public String currentClass; // the class name being elaborated
   public Type.T type; // type of the expression being elaborated
 
-  public ElaboratorVisitor()
-  {
+  private int errorCnt = 0;
+  private int warnCnt = 0;
+
+  public ElaboratorVisitor() {
     this.classTable = new ClassTable();
     this.methodTable = new MethodTable();
     this.currentClass = null;
     this.type = null;
   }
 
-  private void error()
-  {
-    System.out.println("type mismatch");
-    System.exit(1);
+  private void error(String msg, Pos pos) {
+    ++errorCnt;
+    System.out.println(String.format("%s at %s.", msg, pos));
+  }
+
+  private void error(Type.T found, Type.T excepted, Pos pos) {
+    error(String.format("Except %s, found %s", excepted, found), pos);
+  }
+
+  private void warn(String msg) {
+    ++warnCnt;
+    System.out.println(String.format("Warning: %s", msg));
+  }
+
+  private void warnUnused(String id, Pos pos) {
+    warn(String.format("variable %s at %s never used", id, pos));
+  }
+
+  private void report() {
+    System.out.println("Parse finished.");
+    System.out.println(String.format("Found %d error(s), %d warn(s).\n", errorCnt, warnCnt));
+    if (0 < errorCnt) System.exit(1);
   }
 
   // /////////////////////////////////////////////////////
   // expressions
   @Override
-  public void visit(Add e)
-  {
+  public void visit(Add e) {
+    e.left.accept(this);
+    Type.T tl = this.type;
+    e.right.accept(this);
+    if (!this.type.toString().equals(tl.toString())) error(tl, this.type, e.right.pos);
+    this.type = TYPE_INT;
   }
 
   @Override
-  public void visit(And e)
-  {
+  public void visit(And e) {
+    e.left.accept(this);
+    if (!this.type.toString().equals("@boolean")) error(this.type, TYPE_BOOLEAN, e.left.pos);
+    e.right.accept(this);
+    if (!this.type.toString().equals("@boolean")) error(this.type, TYPE_BOOLEAN, e.right.pos);
+    this.type = TYPE_BOOLEAN;
   }
 
   @Override
-  public void visit(ArraySelect e)
-  {
+  public void visit(ArraySelect e) {
+    e.index.accept(this);
+    if (!this.type.toString().equals("@int")) error(this.type, TYPE_INT, e.index.pos);
+    e.array.accept(this);
+    if (!this.type.toString().equals("@int[]")) error(this.type, TYPE_INTARRAY, e.array.pos);
+    this.type = TYPE_INT;
   }
 
   @Override
-  public void visit(Call e)
-  {
+  public void visit(Call e) {
     Type.T leftty;
     Type.ClassType ty = null;
 
     e.exp.accept(this);
     leftty = this.type;
     if (leftty instanceof ClassType) {
+      // check whether can find the correspond class
       ty = (ClassType) leftty;
+      if (null == this.classTable.get(ty.toString())) {
+        error("Can't resolve class named " + ty.toString(), e.exp.pos);
+        return;
+      }
       e.type = ty.id;
-    } else
-      error();
+    } else error("Can't call methods on a no class object", e.exp.pos);
     MethodType mty = this.classTable.getm(ty.id, e.id);
-
-    java.util.LinkedList<Type.T> declaredArgTypes
-    = new java.util.LinkedList<Type.T>();
-    for (Dec.T dec: mty.argsType){
-      declaredArgTypes.add(((Dec.DecSingle)dec).type);
-    }
-    java.util.LinkedList<Type.T> argsty = new LinkedList<Type.T>();
+    java.util.LinkedList<Type.T> declaredArgTypes = new java.util.LinkedList<>();
+    mty.argsType.forEach(dec -> declaredArgTypes.add(((DecSingle)dec).type));
+    java.util.LinkedList<Type.T> argsty = new LinkedList<>();
     for (Exp.T a : e.args) {
       a.accept(this);
       argsty.addLast(this.type);
     }
-    if (declaredArgTypes.size() != argsty.size())
-      error();
-    // For now, the following code only checks that
-    // the types for actual and formal arguments should
-    // be the same. However, in MiniJava, the actual type
-    // of the parameter can also be a subtype (sub-class) of the 
-    // formal type. That is, one can pass an object of type "A"
-    // to a method expecting a type "B", whenever type "A" is
-    // a sub-class of type "B".
-    // Modify the following code accordingly:
+    if (mty.argsType.size() > argsty.size()) error("Not enough arguments", e.pos);
+    else if (mty.argsType.size() < argsty.size()) error("More arguments than excepted", e.pos);
     for (int i = 0; i < argsty.size(); i++) {
-      Dec.DecSingle dec = (Dec.DecSingle) mty.argsType.get(i);
-      if (dec.type.toString().equals(argsty.get(i).toString()))
-        ;
-      else
-        error();
+      Type.T methodArgType = null;
+      if (i < mty.argsType.size()) methodArgType = ((DecSingle) mty.argsType.get(i)).type;
+      Type.T paramArgType = argsty.get(i);
+      if (null != paramArgType && paramArgType instanceof ClassType) {
+        // loop to check with type hierarchy
+        while (null != methodArgType && !methodArgType.toString().equals(paramArgType.toString())) {
+          String parent = this.classTable.get(paramArgType.toString()).extendss;
+          if (null != parent) paramArgType = new Type.ClassType(parent);
+          else error(paramArgType, methodArgType, e.pos);
+        }
+      } else if (null != paramArgType && !paramArgType.toString().equals(paramArgType.toString())) error(paramArgType, methodArgType, e.pos);
     }
     this.type = mty.retType;
     // the following two types should be the declared types.
     e.at = declaredArgTypes;
     e.rt = this.type;
-    return;
   }
 
   @Override
-  public void visit(False e)
-  {
+  public void visit(False e) {
+    this.type = new Type.Boolean();
   }
 
   @Override
-  public void visit(Id e)
-  {
+  public void visit(Id e) {
     // first look up the id in method table
     Type.T type = this.methodTable.get(e.id);
     // if search failed, then s.id must be a class field.
@@ -141,222 +148,221 @@ public class ElaboratorVisitor implements ast.Visitor
       // useful in later phase.
       e.isField = true;
     }
-    if (type == null)
-      error();
+    if (type == null) error("Can't resolve variable " + e.id, e.pos);
     this.type = type;
     // record this type on this node for future use.
     e.type = type;
-    return;
   }
 
   @Override
-  public void visit(Length e)
-  {
+  public void visit(Length e) {
+    e.array.accept(this);
+    if (!this.type.toString().equals("@int[]")) error(this.type, TYPE_INTARRAY, e.array.pos);
+    this.type = TYPE_INT;
   }
 
   @Override
-  public void visit(Lt e)
-  {
+  public void visit(Lt e) {
     e.left.accept(this);
     Type.T ty = this.type;
     e.right.accept(this);
-    if (!this.type.toString().equals(ty.toString()))
-      error();
-    this.type = new Type.Boolean();
-    return;
+    if (!this.type.toString().equals(ty.toString())) error(this.type, ty, e.right.pos);
+    this.type = TYPE_BOOLEAN;
   }
 
   @Override
-  public void visit(NewIntArray e)
-  {
+  public void visit(Gt e) {
+    e.left.accept(this);
+    Type.T ty = this.type;
+    e.right.accept(this);
+    if (!this.type.toString().equals(ty.toString())) error(this.type, ty, e.right.pos);
+    this.type = TYPE_BOOLEAN;
   }
 
   @Override
-  public void visit(NewObject e)
-  {
+  public void visit(NewIntArray e) {
+    e.exp.accept(this);
+    if (!this.type.toString().equals("@int")) error(this.type, TYPE_INT, e.exp.pos);
+    this.type = TYPE_INTARRAY;
+  }
+
+  @Override
+  public void visit(NewObject e) {
     this.type = new Type.ClassType(e.id);
-    return;
   }
 
   @Override
-  public void visit(Not e)
-  {
+  public void visit(Not e) {
+    e.exp.accept(this);
+    if (!this.type.toString().equals("@boolean")) error(this.type, TYPE_BOOLEAN, e.exp.pos);
+    this.type = TYPE_BOOLEAN;
   }
 
   @Override
-  public void visit(Num e)
-  {
-    this.type = new Type.Int();
-    return;
+  public void visit(Num e) {
+    this.type = TYPE_INT;
   }
 
   @Override
-  public void visit(Sub e)
-  {
+  public void visit(Sub e) {
     e.left.accept(this);
     Type.T leftty = this.type;
     e.right.accept(this);
-    if (!this.type.toString().equals(leftty.toString()))
-      error();
-    this.type = new Type.Int();
-    return;
+    if (!this.type.toString().equals(leftty.toString())) error(this.type, leftty, e.right.pos);
+    this.type = TYPE_INT;
   }
 
   @Override
-  public void visit(This e)
-  {
+  public void visit(This e) {
     this.type = new Type.ClassType(this.currentClass);
-    return;
   }
 
   @Override
-  public void visit(Times e)
-  {
+  public void visit(Times e) {
     e.left.accept(this);
     Type.T leftty = this.type;
     e.right.accept(this);
-    if (!this.type.toString().equals(leftty.toString()))
-      error();
-    this.type = new Type.Int();
-    return;
+    if (!this.type.toString().equals(leftty.toString())) error(this.type, leftty, e.right.pos);
+    this.type = TYPE_INT;
   }
 
   @Override
-  public void visit(True e)
-  {
+  public void visit(True e) {
+    this.type = TYPE_BOOLEAN;
   }
 
   // statements
   @Override
-  public void visit(Assign s)
-  {
+  public void visit(Assign s) {
     // first look up the id in method table
     Type.T type = this.methodTable.get(s.id);
-    // if search failed, then s.id must
-    if (type == null)
+    // if search failed, then s.id must be a class field
+    if (type == null) {
+      s.isField = true;
       type = this.classTable.get(this.currentClass, s.id);
-    if (type == null)
-      error();
+    }
+    if (type == null) error("Can't resolve variable " + s.id, s.exp.pos);
     s.exp.accept(this);
-    s.type = type;
-    this.type.toString().equals(type.toString());
-    return;
+    s.type = this.type;
+    if (null != type && !s.type.toString().equals(type.toString())) error(this.type, type, s.exp.pos);
   }
 
   @Override
-  public void visit(AssignArray s)
-  {
+  public void visit(AssignArray s) {
+    Type.T leftArrayType = this.methodTable.get(s.id);
+    if (null == leftArrayType) {
+      s.isField = true;
+      leftArrayType = this.classTable.get(this.currentClass, s.id);
+    }
+    if (null == leftArrayType) error("Can't resolve variable " + s.id, s.index.pos);
+    s.index.accept(this);
+    if (!this.type.toString().equals("@int")) error(this.type, TYPE_INT, s.index.pos);
+    s.exp.accept(this);
+    if (!this.type.toString().equals("@int")) error(this.type, TYPE_INT, s.exp.pos);
   }
 
   @Override
-  public void visit(Block s)
-  {
+  public void visit(Block s) {
+    for (Stm.T stm: s.stms) stm.accept(this);
   }
 
   @Override
-  public void visit(If s)
-  {
+  public void visit(If s) {
     s.condition.accept(this);
-    if (!this.type.toString().equals("@boolean"))
-      error();
+    if (!this.type.toString().equals("@boolean")) error(this.type, TYPE_BOOLEAN, s.condition.pos);
     s.thenn.accept(this);
     s.elsee.accept(this);
-    return;
   }
 
   @Override
-  public void visit(Print s)
-  {
+  public void visit(Print s) {
     s.exp.accept(this);
-    if (!this.type.toString().equals("@int"))
-      error();
-    return;
+    if (!this.type.toString().equals("@int")) error(this.type, TYPE_INT, s.exp.pos);
   }
 
   @Override
-  public void visit(While s)
-  {
+  public void visit(While s) {
+    s.condition.accept(this);
+    if (!this.type.toString().equals("@boolean")) error(this.type, TYPE_BOOLEAN, s.condition.pos);
+    s.body.accept(this);
   }
 
   // type
   @Override
-  public void visit(Type.Boolean t)
-  {
+  public void visit(Type.Boolean t) {
+    this.type = t;
   }
 
   @Override
-  public void visit(Type.ClassType t)
-  {
+  public void visit(Type.ClassType t) {
+    this.type = t;
   }
 
   @Override
-  public void visit(Type.Int t)
-  {
-    System.out.println("aaaa");
+  public void visit(Type.Int t) {
+    this.type = t;
   }
 
   @Override
-  public void visit(Type.IntArray t)
-  {
+  public void visit(Type.IntArray t) {
+    this.type = t;
   }
 
   // dec
   @Override
-  public void visit(Dec.DecSingle d)
-  {
+  public void visit(Dec.DecSingle d) {
+    this.classTable.put(currentClass, d.id, d.type);
   }
 
   // method
   @Override
-  public void visit(Method.MethodSingle m)
-  {
+  public void visit(Method.MethodSingle m) {
     // construct the method table
     this.methodTable.put(m.formals, m.locals);
 
-    if (ConAst.elabMethodTable)
+    if (ConAst.elabMethodTable) {
+      System.out.println("MethodTable of " + m.id);
       this.methodTable.dump();
+      System.out.println();
+    }
 
     for (Stm.T s : m.stms)
       s.accept(this);
     m.retExp.accept(this);
-    return;
+
+    this.methodTable.getUnusedVars().forEach(info -> warnUnused(info.id, info.pos));
+    this.methodTable.clear();
   }
 
   // class
   @Override
-  public void visit(Class.ClassSingle c)
-  {
+  public void visit(Class.ClassSingle c) {
     this.currentClass = c.id;
 
     for (Method.T m : c.methods) {
       m.accept(this);
     }
-    return;
   }
 
   // main class
   @Override
-  public void visit(MainClass.MainClassSingle c)
-  {
+  public void visit(MainClass.MainClassSingle c) {
     this.currentClass = c.id;
     // "main" has an argument "arg" of type "String[]", but
     // one has no chance to use it. So it's safe to skip it...
 
     c.stm.accept(this);
-    return;
   }
 
   // ////////////////////////////////////////////////////////
   // step 1: build class table
   // class table for Main class
-  private void buildMainClass(MainClass.MainClassSingle main)
-  {
+  private void buildMainClass(MainClass.MainClassSingle main) {
     this.classTable.put(main.id, new ClassBinding(null));
   }
 
   // class table for normal classes
-  private void buildClass(ClassSingle c)
-  {
+  private void buildClass(ClassSingle c) {
     this.classTable.put(c.id, new ClassBinding(c.extendss));
     for (Dec.T dec : c.decs) {
       Dec.DecSingle d = (Dec.DecSingle) dec;
@@ -373,8 +379,7 @@ public class ElaboratorVisitor implements ast.Visitor
 
   // program
   @Override
-  public void visit(ProgramSingle p)
-  {
+  public void visit(ProgramSingle p) {
     // ////////////////////////////////////////////////
     // step 1: build a symbol table for class (the class table)
     // a class table is a mapping from class names to class bindings
@@ -396,6 +401,9 @@ public class ElaboratorVisitor implements ast.Visitor
     for (Class.T c : p.classes) {
       c.accept(this);
     }
+
+    // step 3: report the result
+    report();
 
   }
 }
