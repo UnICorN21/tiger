@@ -7,7 +7,7 @@ public class Slp {
     // base class, standing for `token`
     public static abstract class T { /* null */ }
 
-    // id
+    // classType
     public static class Id extends T {
       String id;
 
@@ -16,7 +16,7 @@ public class Slp {
       }
     }
 
-    // id
+    // classType
     public static class Num extends T {
       int num;
 

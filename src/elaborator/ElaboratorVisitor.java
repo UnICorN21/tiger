@@ -139,12 +139,12 @@ public class ElaboratorVisitor implements ast.Visitor {
 
   @Override
   public void visit(Id e) {
-    // first look up the id in method table
+    // first look up the classType in method table
     Type.T type = this.methodTable.get(e.id);
-    // if search failed, then s.id must be a class field.
+    // if search failed, then s.classType must be a class field.
     if (type == null) {
       type = this.classTable.get(this.currentClass, e.id);
-      // mark this id as a field id, this fact will be
+      // mark this classType as a field classType, this fact will be
       // useful in later phase.
       e.isField = true;
     }
@@ -234,9 +234,9 @@ public class ElaboratorVisitor implements ast.Visitor {
   // statements
   @Override
   public void visit(Assign s) {
-    // first look up the id in method table
+    // first look up the classType in method table
     Type.T type = this.methodTable.get(s.id);
-    // if search failed, then s.id must be a class field
+    // if search failed, then s.classType must be a class field
     if (type == null) {
       s.isField = true;
       type = this.classTable.get(this.currentClass, s.id);

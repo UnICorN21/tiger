@@ -79,9 +79,9 @@ public class Parser {
   // -> true
   // -> false
   // -> this
-  // -> id
+  // -> classType
   // -> new int [exp]
-  // -> new id ()
+  // -> new classType ()
   private Ast.Exp.T parseAtomExp() {
     Ast.Exp.T ret = null;
     Pos pos = getCurrentPos();
@@ -147,7 +147,7 @@ public class Parser {
   }
 
   // NotExp -> AtomExp
-  // -> AtomExp .id (expList)
+  // -> AtomExp .classType (expList)
   // -> AtomExp [exp]
   // -> AtomExp .length
   private Ast.Exp.T parseNotExp() {
@@ -261,8 +261,8 @@ public class Parser {
   // -> if ( Exp ) Statement else Statement
   // -> while ( Exp ) Statement
   // -> System.out.println ( Exp ) ;
-  // -> id = Exp ;
-  // -> id [ Exp ]= Exp ;
+  // -> classType = Exp ;
+  // -> classType [ Exp ]= Exp ;
   private Ast.Stm.T parseStatement() {
     Ast.Stm.T stm = null;
     switch (current.kind) {
@@ -343,7 +343,7 @@ public class Parser {
   // Type -> int []
   // -> boolean
   // -> int
-  // -> id
+  // -> classType
   private Ast.Type.T parseType() {
     Ast.Type.T ret = null;
     switch (current.kind) {
@@ -372,7 +372,7 @@ public class Parser {
     return ret;
   }
 
-  // VarDecl -> Type id ;
+  // VarDecl -> Type classType ;
   private Ast.Dec.T parseVarDecl() {
     // to parse the "Type" nonterminal in this method, instead of writing
     // a fresh one.
@@ -395,9 +395,9 @@ public class Parser {
     return ret;
   }
 
-  // FormalList -> Type id FormalRest*
+  // FormalList -> Type classType FormalRest*
   // ->
-  // FormalRest -> , Type id
+  // FormalRest -> , Type classType
   private LinkedList<Ast.Dec.T> parseFormalList() {
     LinkedList<Ast.Dec.T> ret = new util.Flist<Ast.Dec.T>().list();
     if (current.kind == Kind.TOKEN_INT || current.kind == Kind.TOKEN_BOOLEAN
@@ -417,7 +417,7 @@ public class Parser {
     return ret;
   }
 
-  // Method -> public Type id ( FormalList )
+  // Method -> public Type classType ( FormalList )
   // { VarDecl* Statement* return Exp ;}
   private Ast.Method.T parseMethod() {
     eatToken(Kind.TOKEN_PUBLIC);
@@ -447,8 +447,8 @@ public class Parser {
     return ret;
   }
 
-  // ClassDecl -> class id { VarDecl* MethodDecl* }
-  // -> class id extends id { VarDecl* MethodDecl* }
+  // ClassDecl -> class classType { VarDecl* MethodDecl* }
+  // -> class classType extends classType { VarDecl* MethodDecl* }
   private Ast.Class.T parseClassDecl() {
     eatToken(Kind.TOKEN_CLASS);
     String id = eatToken(Kind.TOKEN_ID);
@@ -475,8 +475,8 @@ public class Parser {
     return ret;
   }
 
-  // MainClass -> class id {
-  //   public static void main ( String [] id ) {
+  // MainClass -> class classType {
+  //   public static void main ( String [] classType ) {
   //     Statement
   //   }
   // }

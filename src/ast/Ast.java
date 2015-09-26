@@ -225,8 +225,8 @@ public class Ast {
 
     // Id
     public static class Id extends T {
-      public String id; // name of the id
-      public Type.T type; // type of the id
+      public String id; // name of the classType
+      public Type.T type; // type of the classType
       public boolean isField; // whether or not this is a class field
 
       public Id(String id, Pos pos) {
@@ -424,8 +424,8 @@ public class Ast {
     public static class Assign extends T {
       public String id;
       public Exp.T exp;
-      public Type.T type; // type of the id
-      public boolean isField; // is id a class field.
+      public Type.T type; // type of the classType
+      public boolean isField; // is classType a class field.
 
       public Assign(String id, Exp.T exp) {
         this.id = id;

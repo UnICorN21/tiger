@@ -218,7 +218,8 @@ public class Ast {
       // is used to name the allocation.
       public String name;
 
-      public NewIntArray(T exp) {
+      public NewIntArray(String name, T exp) {
+        this.name = name;
         this.exp = exp;
       }
 
@@ -229,13 +230,14 @@ public class Ast {
     }
 
     public static class NewObject extends T {
-      public String id;
+      public String classType;
       // Lab4, exercise 1: this field
       // is used to name the allocation.
       public String name;
 
-      public NewObject(String id) {
-        this.id = id;
+      public NewObject(String name, String classType) {
+        this.classType = classType;
+        this.name = name;
       }
 
       @Override
@@ -437,15 +439,16 @@ public class Ast {
   // /////////////////////////////////////////////
   // vtable
   public static class Vtable {
-    public static abstract class T implements codegen.C.Acceptable {
-    }
+    public static abstract class T implements codegen.C.Acceptable { /* null */ }
 
     public static class VtableSingle extends T {
       public String id; // name of the class
+      public String gcMap; // class gc map
       public java.util.ArrayList<codegen.C.Ftuple> ms; // all methods
 
-      public VtableSingle(String id, ArrayList<codegen.C.Ftuple> ms) {
+      public VtableSingle(String id, String gcMap, ArrayList<codegen.C.Ftuple> ms) {
         this.id = id;
+        this.gcMap = gcMap.isEmpty() ? "NULL" : gcMap;
         this.ms = ms;
       }
 
@@ -460,8 +463,7 @@ public class Ast {
   // /////////////////////////////////////////////
   // method
   public static class Method {
-    public static abstract class T implements codegen.C.Acceptable {
-    }
+    public static abstract class T implements codegen.C.Acceptable { /* null */ }
 
     public static class MethodSingle extends T {
       public Type.T retType;

@@ -19,6 +19,7 @@ import control.Control;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class PrettyPrintVisitor implements Visitor {
   private int indentLevel;
@@ -87,7 +88,7 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(Call e) {
-    this.say("(" + e.assign + "=");
+    this.say("(" + e.assign + " = ");
     e.exp.accept(this);
     this.say(", ");
     this.say(e.assign + "->vptr->" + e.id + "(" + e.assign);
@@ -138,8 +139,8 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(NewObject e) {
-    this.say("((struct " + e.id + "*)(Tiger_new (&" + e.id
-        + "_vtable_, sizeof(struct " + e.id + "))))");
+    this.say("(" + e.name + " = ((struct " + e.classType + "*)(Tiger_new (&" + e.classType
+        + "_vtable_, sizeof(struct " + e.classType + ")))), " + e.name + ")");
   }
 
   @Override
@@ -260,9 +261,35 @@ public class PrettyPrintVisitor implements Visitor {
     this.sayln(" " + d.id);
   }
 
+  private String genMemGCMap(List<Dec.T> list) {
+    return list.stream().map(f -> {
+      Ast.Type.T t = ((DecSingle)f).type;
+      if (t instanceof ClassType || t instanceof IntArray) return "1";
+      else return "0";
+    }).reduce("", String::concat);
+  }
+
+  private void isayln(String content) {
+    this.printSpaces();
+    this.sayln(content);
+  }
+
   // method
   @Override
   public void visit(MethodSingle m) {
+    // generate a gc frame struct
+    String gcFrameName = String.format("struct %s_%s_gc_frame", m.classId, m.id);
+    this.sayln(gcFrameName + " {");
+    this.isayln("void *prev;");
+    this.isayln("char *arguments_gc_map;");
+    this.isayln("void *arguments_base_address;");
+    this.isayln("int local_references_cnt;");
+    m.locals.stream().map(l -> (DecSingle)l)
+            .filter(d -> d.type instanceof ClassType || d.type instanceof IntArray)
+            .forEach(d -> this.isayln(String.format("struct %s *%s;", d.type, d.id)));
+    this.sayln("};\n");
+
+    // generate the method body
     m.retType.accept(this);
     this.say(" " + m.classId + "_" + m.id + "(");
     int size = m.formals.size();
@@ -277,6 +304,16 @@ public class PrettyPrintVisitor implements Visitor {
     this.sayln(")");
     this.sayln("{");
 
+    // generate a gc stack frame and push it into the stack
+    this.isayln(gcFrameName + " frame;");
+    this.isayln("frame.prev = head;");
+    this.isayln("head = &frame;");
+    this.isayln(String.format("frame.arguments_gc_map = \"%s\";", genMemGCMap(m.formals)));
+    this.isayln("frame.arguments_base_address = &this;");
+    int localRefCnt = (int)Stream.of(genMemGCMap(m.locals)).filter(s -> s.equals("1")).count();
+    this.isayln(String.format("frame.local_references_cnt = %s;", localRefCnt));
+    this.isayln("");
+
     for (Dec.T d : m.locals) {
       DecSingle dec = (DecSingle) d;
       this.say("  ");
@@ -284,11 +321,21 @@ public class PrettyPrintVisitor implements Visitor {
       this.say(" " + dec.id + ";\n");
     }
     this.sayln("");
+    m.locals.stream().map(l -> (DecSingle) l)
+            .filter(d -> d.type instanceof ClassType || d.type instanceof IntArray)
+            .forEach(d -> this.isayln(String.format("frame.%s = &%s;", d.id, d.id)));
+    if (0 != localRefCnt) this.sayln("");
+
     m.stms.stream().forEach(s -> s.accept(this));
+    this.sayln("");
+
+    // pop the gc frame
+    this.isayln("head = frame.prev;");
+
     this.say("  return ");
     m.retExp.accept(this);
     this.sayln(";");
-    this.sayln("}");
+    this.sayln("}\n");
   }
 
   @Override
@@ -303,14 +350,14 @@ public class PrettyPrintVisitor implements Visitor {
       this.sayln(d.id + ";");
     }
     m.stm.accept(this);
-    this.sayln("}\n");
+    this.sayln("}");
   }
 
   // vtables
   @Override
   public void visit(VtableSingle v) {
-    this.sayln("struct " + v.id + "_vtable");
-    this.sayln("{");
+    this.sayln("struct " + v.id + "_vtable {");
+    this.isayln("char *gc_map;");
     for (codegen.C.Ftuple t : v.ms) {
       this.say("  ");
       t.ret.accept(this);
@@ -322,6 +369,7 @@ public class PrettyPrintVisitor implements Visitor {
   private void outputVtable(VtableSingle v) {
     this.sayln("struct " + v.id + "_vtable " + v.id + "_vtable_ = ");
     this.sayln("{");
+    this.isayln(v.gcMap + ",");
     for (codegen.C.Ftuple t : v.ms) {
       this.say("  ");
       this.sayln(t.classs + "_" + t.id + ",");
@@ -332,8 +380,7 @@ public class PrettyPrintVisitor implements Visitor {
   // class
   @Override
   public void visit(ClassSingle c) {
-    this.sayln("struct " + c.id);
-    this.sayln("{");
+    this.sayln("struct " + c.id + " {");
     this.sayln("  struct " + c.id + "_vtable *vptr;");
     for (codegen.C.Tuple t : c.decs) {
       this.say("  ");
@@ -341,7 +388,7 @@ public class PrettyPrintVisitor implements Visitor {
       this.say(" ");
       this.sayln(t.id + ";");
     }
-    this.sayln("};");
+    this.sayln("};\n");
   }
 
   // program
@@ -374,11 +421,13 @@ public class PrettyPrintVisitor implements Visitor {
     }
     this.sayln("");
 
+    this.sayln("// a global pointer to GC stack");
+    this.sayln("void *head;\n");
+
     this.sayln("// methods");
     for (Method.T m : p.methods) {
       m.accept(this);
     }
-    this.sayln("");
 
     this.sayln("// vtables");
     for (Vtable.T v : p.vtables) {
@@ -389,8 +438,6 @@ public class PrettyPrintVisitor implements Visitor {
     this.sayln("// main method");
     p.mainMethod.accept(this);
     this.sayln("");
-
-    this.say("\n\n");
 
     try {
       this.writer.close();

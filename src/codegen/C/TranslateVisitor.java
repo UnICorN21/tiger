@@ -12,8 +12,10 @@ import codegen.C.Ast.Stm.If;
 import codegen.C.Ast.Stm.Print;
 import codegen.C.Ast.Type.ClassType;
 import codegen.C.Ast.Vtable.VtableSingle;
+import util.Temp;
 
 import java.util.LinkedList;
+import java.util.List;
 
 // Given a Java ast, translate it into a C ast and outputs it.
 
@@ -45,12 +47,6 @@ public class TranslateVisitor implements ast.Visitor {
     this.methods = new LinkedList<>();
     this.mainMethod = null;
     this.program = null;
-  }
-
-  // //////////////////////////////////////////////////////
-  //
-  public String genId() {
-    return util.Temp.next();
   }
 
   // /////////////////////////////////////////////////////
@@ -85,7 +81,7 @@ public class TranslateVisitor implements ast.Visitor {
   @Override
   public void visit(ast.Ast.Exp.Call e) {
     e.exp.accept(this);
-    String newid = this.genId();
+    String newid = Temp.nextToken("c");
     this.tmpVars.add(new Dec.DecSingle(new Type.ClassType(e.type), newid));
     Exp.T exp = this.exp;
     LinkedList<Exp.T> args = new LinkedList<>();
@@ -133,13 +129,19 @@ public class TranslateVisitor implements ast.Visitor {
 
   @Override
   public void visit(ast.Ast.Exp.NewIntArray e) {
+    String token = Temp.nextToken("a");
+    Dec.DecSingle ds = new Dec.DecSingle(new Type.IntArray(), token);
+    this.tmpVars.add(ds);
     e.exp.accept(this);
-    this.exp = new Exp.NewIntArray(this.exp);
+    this.exp = new Exp.NewIntArray(token, this.exp);
   }
 
   @Override
   public void visit(ast.Ast.Exp.NewObject e) {
-    this.exp = new NewObject(e.id);
+    String token = Temp.nextToken("c");
+    Dec.DecSingle ds = new Dec.DecSingle(new ClassType(e.id), token);
+    this.tmpVars.add(ds);
+    this.exp = new NewObject(token, e.id);
   }
 
   @Override
@@ -294,12 +296,19 @@ public class TranslateVisitor implements ast.Visitor {
         newFormals, locals, newStm, retExp);
   }
 
+  private String genClassGCMap(List<Tuple> fields) {
+    return fields.stream().map(f -> {
+      if (f.type instanceof ClassType || f.type instanceof Type.IntArray) return "1";
+      else return "0";
+    }).reduce("", String::concat);
+  }
+
   // class
   @Override
   public void visit(ast.Ast.Class.ClassSingle c) {
     ClassBinding cb = this.table.get(c.id);
     this.classes.add(new ClassSingle(c.id, cb.fields));
-    this.vtables.add(new VtableSingle(c.id, cb.methods));
+    this.vtables.add(new VtableSingle(c.id, genClassGCMap(cb.fields), cb.methods));
     this.classId = c.id;
     c.methods.stream().forEach(m -> {
       m.accept(this);
@@ -313,7 +322,7 @@ public class TranslateVisitor implements ast.Visitor {
     ClassBinding cb = this.table.get(c.id);
     Class.T newc = new ClassSingle(c.id, cb.fields);
     this.classes.add(newc);
-    this.vtables.add(new VtableSingle(c.id, cb.methods));
+    this.vtables.add(new VtableSingle(c.id, genClassGCMap(cb.fields), cb.methods));
 
     this.tmpVars = new LinkedList<>();
 

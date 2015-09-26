@@ -242,8 +242,8 @@ public class Ast {
      * The first argument in the arguments-list must be p0.
      */
     public static class Invokevirtual extends T {
-      public String f; // function id
-      public String c; // class id
+      public String f; // function classType
+      public String c; // class classType
       public LinkedList<Type.T> at; // formals' types
       public Type.T rt; // return type
       public LinkedList<String> params;
