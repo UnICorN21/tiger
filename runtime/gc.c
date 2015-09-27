@@ -3,6 +3,7 @@
 #include <string.h>
 
 // The Gimple Garbage Collector.
+static void Tiger_gc();
 
 //===============================================================//
 // The Java Heap data structure.
@@ -34,20 +35,24 @@ struct JavaHeap heap;
 void Tiger_heap_init (int heapSize) {
   // You should write 7 statement here:
   // #1: allocate a chunk of memory of size "heapSize" using "malloc"
-
+  if (0 >= heapSize) {
+    printf("Warning: try to create a heap space less than 0.\n");
+    heapSize = 1;
+  }
+  char *heapChuck = (char*)malloc(heapSize);
   // #2: initialize the "size" field, note that "size" field
   // is for semi-heap, but "heapSize" is for the whole heap.
-
+  heap.size = heapSize >> 1;
   // #3: initialize the "from" field (with what value?)
-
+  heap.from = heapChuck;
   // #4: initialize the "fromFree" field (with what value?)
-
+  heap.fromFree = heapChuck;
   // #5: initialize the "to" field (with what value?)
-
+  heap.to = (char*)(heapChuck + heap.size);
   // #6: initizlize the "toStart" field with NULL;
-
+  heap.toStart = heap.to;
   // #7: initialize the "toNext" field with NULL;
-
+  heap.toNext = heap.to;
   return;
 }
 
@@ -55,24 +60,25 @@ void Tiger_heap_init (int heapSize) {
 // (see part A of Lab 4)
 void *prev = 0;
 
-
 //===============================================================//
 // Object Model And allocation
 
+union ObjInfo {
+  void *vptr;
+  unsigned length;
+};
+
+const int HEAD_SZ = sizeof(union ObjInfo) + sizeof(void*);
 
 // Lab 4: exercise 11:
 // "new" a new object, do necessary initializations, and
 // return the pointer (reference).
 /*    ----------------
-      | vptr      ---|----> (points to the virtual method table)
+      |  forwarding  |
       |--------------|
-      | isObjOrArray | (0: for normal objects)
-      |--------------|
-      | length       | (this field should be empty for normal objects)
-      |--------------|
-      | forwarding   | 
+ p--->|   objInfo    |
       |--------------|\
-p---->| v_0          | \      
+      | v_0          | \
       |--------------|  s
       | ...          |  i
       |--------------|  z
@@ -96,31 +102,36 @@ p---->| v_0          | \
 //           the Java heap.)
 void *Tiger_new (void *vtable, int size) {
   // Your code here:
-   if (0 >= size) {
-      printf("Warning: try to allocate a mem space less than 0.\n");
-      size = 1;
+  if (0 >= size) {
+    printf("Warning: try to allocate a mem space less than 0.\n");
+    size = 1;
+  }
+  int haveGC = 0;
+  while (1) {
+    int sz = size + HEAD_SZ;
+    long remain = heap.size - (heap.fromFree - heap.from);
+    if (remain >= sz) {
+      int * *pObj = (int**)malloc(sz);
+      *pObj++ = NULL;
+      ((union ObjInfo*)pObj)->vptr = vtable;
+      return pObj;
+    } else if (!haveGC) {
+      Tiger_gc();
+      haveGC = 1;
+    } else {
+      printf("OutOfMemoryError: cannot have enough heap space.");
+      exit(1);
     }
-    int sz = sizeof(void*) + size;
-    void *p = malloc(sz);
-    // #2: clear this chunk of memory (zero off it):
-    memset(p, 0, sz);
-    // #3: set up the "vptr" pointer to the value of "vtable":
-    memcpy(p, &vtable, sizeof(void*));
-    // #4: return the pointer
-    return p;
+  }
 }
 
 // "new" an array of size "length", do necessary
 // initializations. And each array comes with an
 // extra "header" storing the array length and other information.
 /*    ----------------
-      | vptr         | (this field should be empty for an array)
+      |  forwarding  |
       |--------------|
-      | isObjOrArray | (1: for array)
-      |--------------|
-      | length       |
-      |--------------|
-      | forwarding   | 
+      |   objInfo    |
       |--------------|\
 p---->| e_0          | \      
       |--------------|  s
@@ -145,12 +156,27 @@ p---->| e_0          | \
 //           (However, a production compiler will try to expand
 //           the Java heap.)
 void *Tiger_new_array (int length) {
-  // Your code here:
-  int *p = (int*)malloc(sizeof(int) * (length + 1));
-  if (NULL == p) return NULL;
-  *p = length;
-  ++p;
-  return p;
+  if (0 >= length) {
+    printf("Warning: try to create an array with illegal length.\n");
+    length = 1;
+  }
+  int haveGC = 0;
+  while (1) {
+    int sz = sizeof(int) * length + HEAD_SZ;
+    long remain = heap.size - (heap.fromFree - heap.from);
+    if (remain >= sz) {
+      int * *pObj = (int**)malloc(sz);
+      *pObj++ = NULL;
+      ((union ObjInfo*)pObj)->length = length;
+      return ++pObj;
+    } else if (!haveGC) {
+      Tiger_gc();
+      haveGC = 1;
+    } else {
+      printf("OutOfMemoryError: cannot have enough heap space.");
+      exit(1);
+    }
+  }
 }
 
 //===============================================================//

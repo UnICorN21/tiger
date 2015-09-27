@@ -109,9 +109,9 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(Length e) {
-    this.say("(*((");
+    this.say("((union ObjInfo*)(");
     e.array.accept(this);
-    this.say(")-1))");
+    this.say(" - sizeof(union ObjInfo*))->length");
   }
 
   @Override
@@ -192,13 +192,11 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(Block s) {
-    this.printSpaces();
-    this.sayln("{");
+    this.isayln("{");
     this.indent();
     s.stms.stream().forEach(stm -> stm.accept(this));
     this.unIndent();
-    this.printSpaces();
-    this.sayln("}");
+    this.isayln("}");
   }
 
   @Override
@@ -439,7 +437,6 @@ public class PrettyPrintVisitor implements Visitor {
     for (Vtable.T v : p.vtables) {
       outputVtable((VtableSingle) v);
     }
-    this.sayln("");
 
     this.sayln("// a global pointer to GC stack");
     this.sayln("void *head;\n");
