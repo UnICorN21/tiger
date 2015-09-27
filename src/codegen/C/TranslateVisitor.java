@@ -81,15 +81,22 @@ public class TranslateVisitor implements ast.Visitor {
   @Override
   public void visit(ast.Ast.Exp.Call e) {
     e.exp.accept(this);
-    String newid = Temp.nextToken("c");
-    this.tmpVars.add(new Dec.DecSingle(new Type.ClassType(e.type), newid));
     Exp.T exp = this.exp;
+    String token;
+    if (exp instanceof NewObject) token = ((NewObject)exp).name;
+    else if (exp instanceof This) token = "this";
+    else if (exp instanceof Id) token = ((Id)exp).id;
+    else {
+      // should never happen
+      token = Temp.nextToken("c");
+      this.tmpVars.add(new Dec.DecSingle(new Type.ClassType(e.type), token));
+    }
     LinkedList<Exp.T> args = new LinkedList<>();
     for (ast.Ast.Exp.T x : e.args) {
       x.accept(this);
       args.add(this.exp);
     }
-    this.exp = new Call(newid, exp, e.id, args);
+    this.exp = new Call(token, exp, e.id, args);
   }
 
   @Override

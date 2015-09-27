@@ -88,20 +88,18 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(Call e) {
-    this.say("(" + e.assign + " = ");
     e.exp.accept(this);
-    this.say(", ");
-    this.say(e.assign + "->vptr->" + e.id + "(" + e.assign);
+    this.say("->vptr->" + e.id + "(" + e.assign);
     int size = e.args.size();
     if (size == 0) {
-      this.say("))");
+      this.say(")");
       return;
     }
     for (Exp.T x : e.args) {
       this.say(", ");
       x.accept(this);
     }
-    this.say("))");
+    this.say(")");
   }
 
   @Override
@@ -140,7 +138,7 @@ public class PrettyPrintVisitor implements Visitor {
   @Override
   public void visit(NewObject e) {
     this.say("(" + e.name + " = ((struct " + e.classType + "*)(Tiger_new (&" + e.classType
-        + "_vtable_, sizeof(struct " + e.classType + ")))), " + e.name + ")");
+            + "_vtable_, sizeof(struct " + e.classType + ")))), " + e.name + ")");
   }
 
   @Override
@@ -212,19 +210,17 @@ public class PrettyPrintVisitor implements Visitor {
     this.indent();
     s.thenn.accept(this);
     this.unIndent();
-    this.sayln("");
     this.printSpaces();
     this.sayln("else");
     this.indent();
     s.elsee.accept(this);
-    this.sayln("");
     this.unIndent();
   }
 
   @Override
   public void visit(Print s) {
     this.printSpaces();
-    this.say("System_out_println (");
+    this.say("System_out_println(");
     s.exp.accept(this);
     this.sayln(");");
   }
@@ -251,7 +247,7 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(IntArray t) {
-    this.say("int*");
+    this.say("int *");
   }
 
   // dec
@@ -286,7 +282,10 @@ public class PrettyPrintVisitor implements Visitor {
     this.isayln("int local_references_cnt;");
     m.locals.stream().map(l -> (DecSingle)l)
             .filter(d -> d.type instanceof ClassType || d.type instanceof IntArray)
-            .forEach(d -> this.isayln(String.format("struct %s *%s;", d.type, d.id)));
+            .forEach(d -> {
+              if (d.type instanceof ClassType) this.isayln(String.format("struct %s *%s;", d.type, d.id));
+              else this.isayln("int *" + d.id + ";");
+            });
     this.sayln("};\n");
 
     // generate the method body
@@ -323,7 +322,7 @@ public class PrettyPrintVisitor implements Visitor {
     this.sayln("");
     m.locals.stream().map(l -> (DecSingle) l)
             .filter(d -> d.type instanceof ClassType || d.type instanceof IntArray)
-            .forEach(d -> this.isayln(String.format("frame.%s = &%s;", d.id, d.id)));
+            .forEach(d -> this.isayln(String.format("frame.%s = %s;", d.id, d.id)));
     if (0 != localRefCnt) this.sayln("");
 
     m.stms.stream().forEach(s -> s.accept(this));
@@ -350,6 +349,7 @@ public class PrettyPrintVisitor implements Visitor {
       this.sayln(d.id + ";");
     }
     m.stm.accept(this);
+    this.isayln("return 0;");
     this.sayln("}");
   }
 
@@ -369,7 +369,7 @@ public class PrettyPrintVisitor implements Visitor {
   private void outputVtable(VtableSingle v) {
     this.sayln("struct " + v.id + "_vtable " + v.id + "_vtable_ = ");
     this.sayln("{");
-    this.isayln(v.gcMap + ",");
+    this.isayln((v.gcMap.isEmpty() ? "NULL" : String.format("\"%s\"", v.gcMap)) + ",");
     for (codegen.C.Ftuple t : v.ms) {
       this.say("  ");
       this.sayln(t.classs + "_" + t.id + ",");
@@ -419,6 +419,26 @@ public class PrettyPrintVisitor implements Visitor {
     for (Vtable.T v : p.vtables) {
       v.accept(this);
     }
+
+    this.sayln("// forward declarations");
+    p.methods.stream().map(m -> (MethodSingle)m).forEach(m -> {
+      m.retType.accept(this);
+      this.say(" " + m.classId + "_" + m.id + "(");
+      int size = m.formals.size();
+      for (Dec.T d : m.formals) {
+        DecSingle dec = (DecSingle) d;
+        size--;
+        dec.type.accept(this);
+        if (size > 0)
+          this.say(", ");
+      }
+      this.sayln(");");
+    });
+
+    this.sayln("// vtables");
+    for (Vtable.T v : p.vtables) {
+      outputVtable((VtableSingle) v);
+    }
     this.sayln("");
 
     this.sayln("// a global pointer to GC stack");
@@ -429,11 +449,7 @@ public class PrettyPrintVisitor implements Visitor {
       m.accept(this);
     }
 
-    this.sayln("// vtables");
-    for (Vtable.T v : p.vtables) {
-      outputVtable((VtableSingle) v);
-    }
-    this.sayln("");
+
 
     this.sayln("// main method");
     p.mainMethod.accept(this);

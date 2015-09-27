@@ -496,8 +496,7 @@ public class Ast {
   // /////////////////////////////////////////////
   // main method
   public static class MainMethod {
-    public static abstract class T implements codegen.C.Acceptable {
-    }
+    public static abstract class T implements codegen.C.Acceptable { /* null */ }
 
     public static class MainMethodSingle extends T {
       public LinkedList<Dec.T> locals;
@@ -518,8 +517,7 @@ public class Ast {
   // ////////////////////////////////////////////
   // program
   public static class Program {
-    public static abstract class T implements codegen.C.Acceptable {
-    }
+    public static abstract class T implements codegen.C.Acceptable { /* null */ }
 
     public static class ProgramSingle extends T {
       public LinkedList<Class.T> classes;
