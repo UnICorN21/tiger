@@ -449,11 +449,8 @@ public class PrettyPrintVisitor implements Visitor {
       m.accept(this);
     }
 
-
-
     this.sayln("// main method");
     p.mainMethod.accept(this);
-    this.sayln("");
 
     try {
       this.writer.close();
