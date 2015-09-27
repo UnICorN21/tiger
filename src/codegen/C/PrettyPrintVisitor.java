@@ -291,6 +291,11 @@ public class PrettyPrintVisitor implements Visitor {
     this.sayln("}");
   }
 
+  private void isayln(String content) {
+    this.printSpaces();
+    this.sayln(content);
+  }
+
   @Override
   public void visit(MainMethodSingle m) {
     this.sayln("int Tiger_main ()");
@@ -303,6 +308,7 @@ public class PrettyPrintVisitor implements Visitor {
       this.sayln(d.id + ";");
     }
     m.stm.accept(this);
+    this.isayln("return 0;");
     this.sayln("}\n");
   }
 
@@ -374,15 +380,30 @@ public class PrettyPrintVisitor implements Visitor {
     }
     this.sayln("");
 
-    this.sayln("// methods");
-    for (Method.T m : p.methods) {
-      m.accept(this);
-    }
-    this.sayln("");
+    this.sayln("// forward declarations");
+    p.methods.stream().map(m -> (MethodSingle)m).forEach(m -> {
+      m.retType.accept(this);
+      this.say(" " + m.classId + "_" + m.id + "(");
+      int size = m.formals.size();
+      for (Dec.T d : m.formals) {
+        DecSingle dec = (DecSingle) d;
+        size--;
+        dec.type.accept(this);
+        if (size > 0)
+          this.say(", ");
+      }
+      this.sayln(");");
+    });
 
     this.sayln("// vtables");
     for (Vtable.T v : p.vtables) {
       outputVtable((VtableSingle) v);
+    }
+    this.sayln("");
+
+    this.sayln("// methods");
+    for (Method.T m : p.methods) {
+      m.accept(this);
     }
     this.sayln("");
 
