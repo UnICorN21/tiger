@@ -63,20 +63,22 @@ void *prev = 0;
 //===============================================================//
 // Object Model And allocation
 
-union ObjInfo {
-  void *vptr;
-  unsigned length;
-};
+typedef struct {
+    void *vptr; // NULL for an array-instance
+    union {
+        int size;
+        unsigned length;
+    } info;
+    void *forwarding;
+} ObjHeader;
 
-const int HEAD_SZ = sizeof(union ObjInfo) + sizeof(void*);
+const int HEAD_SZ = sizeof(ObjHeader);
 
 // Lab 4: exercise 11:
 // "new" a new object, do necessary initializations, and
 // return the pointer (reference).
 /*    ----------------
-      |  forwarding  |
-      |--------------|
- p--->|   objInfo    |
+ p--->|  objHeader   |
       |--------------|\
       | v_0          | \
       |--------------|  s
@@ -101,7 +103,6 @@ const int HEAD_SZ = sizeof(union ObjInfo) + sizeof(void*);
 //           (However, a production compiler will try to expand
 //           the Java heap.)
 void *Tiger_new (void *vtable, int size) {
-  // Your code here:
   if (0 >= size) {
     printf("Warning: try to allocate a mem space less than 0.\n");
     size = 1;
@@ -111,15 +112,17 @@ void *Tiger_new (void *vtable, int size) {
     int sz = size + HEAD_SZ;
     long remain = heap.size - (heap.fromFree - heap.from);
     if (remain >= sz) {
-      int * *pObj = (int**)malloc(sz);
-      *pObj++ = NULL;
-      ((union ObjInfo*)pObj)->vptr = vtable;
+      ObjHeader *pObj = (ObjHeader*)heap.fromFree;
+      pObj->vptr = vtable;
+      pObj->info.size = size;
+      pObj->forwarding = NULL;
+      heap.fromFree += sz;
       return pObj;
     } else if (!haveGC) {
       Tiger_gc();
       haveGC = 1;
     } else {
-      printf("OutOfMemoryError: cannot have enough heap space.");
+      printf("OutOfMemoryError: cannot have enough heap space.\n");
       exit(1);
     }
   }
@@ -129,11 +132,9 @@ void *Tiger_new (void *vtable, int size) {
 // initializations. And each array comes with an
 // extra "header" storing the array length and other information.
 /*    ----------------
-      |  forwarding  |
-      |--------------|
-      |   objInfo    |
+ p--->|  objHeader   |
       |--------------|\
-p---->| e_0          | \      
+      | e_0          | \
       |--------------|  s
       | ...          |  i
       |--------------|  z
@@ -165,15 +166,17 @@ void *Tiger_new_array (int length) {
     int sz = sizeof(int) * length + HEAD_SZ;
     long remain = heap.size - (heap.fromFree - heap.from);
     if (remain >= sz) {
-      int * *pObj = (int**)malloc(sz);
-      *pObj++ = NULL;
-      ((union ObjInfo*)pObj)->length = length;
-      return ++pObj;
+      ObjHeader *pObj = (ObjHeader*)heap.fromFree;
+      pObj->vptr = NULL;
+      pObj->info.length = length;
+      pObj->forwarding = NULL;
+      heap.fromFree += sz;
+      return pObj;
     } else if (!haveGC) {
       Tiger_gc();
       haveGC = 1;
     } else {
-      printf("OutOfMemoryError: cannot have enough heap space.");
+      printf("OutOfMemoryError: cannot have enough heap space.\n");
       exit(1);
     }
   }
@@ -184,7 +187,74 @@ void *Tiger_new_array (int length) {
 
 // Lab 4, exercise 12:
 // A copying collector based-on Cheney's algorithm.
-static void Tiger_gc () {
-  // Your code here:
 
+inline static void swap(void *a, void *b) {
+  void *mid = a;
+  a = b;
+  b = mid;
+}
+
+static void* Tiger_gc_forward(void *p) {
+  if (p >= (void*)heap.from && p < heap.from + heap.size) {
+    void * *forwarding = (void**)((int*)p + 2);
+    if (*forwarding >= (void*)heap.to && *forwarding <= heap.to + heap.size) return p;
+    int size = HEAD_SZ;
+
+    ObjHeader *header = (ObjHeader*)p;
+    if (NULL != header->vptr) { // p is an instance-object
+      size += header->info.size;
+    } else { // p is an array-object
+      size += sizeof(int) * header->info.length;
+    }
+
+    forwarding = memcpy(heap.toNext, p, size);
+    heap.toNext += size;
+    return forwarding;
+  } else return p;
+}
+
+static void Tiger_gc () {
+  int *cur_frame = (int*)prev;
+  while (NULL != cur_frame) {
+    // fetch the info of a gc frame
+    char *arguments_gc_map = *(char**)(cur_frame + 2);
+    int *arguments_base_addr = *(int**)(cur_frame + 4);
+    int local_ref_cnt = *(cur_frame + 6);
+
+    // forward the formals
+    int i;
+    for (i = 0; i < strlen(arguments_gc_map); ++i) if ('1' == arguments_gc_map[i]) {
+      void * *cur_formal = (void**)(arguments_base_addr + i);
+      *cur_formal = Tiger_gc_forward(*cur_formal);
+    }
+
+    // forward the locals
+    for (i = 0; i < local_ref_cnt; ++i) {
+      void * *cur_local = (void**)(cur_frame + 8 + i);
+      *cur_local = Tiger_gc_forward(*cur_local);
+    }
+
+    // forward the outer environment
+    cur_frame = *(void**)cur_frame;
+  }
+
+  char *scan = heap.toStart;
+  while (scan < heap.toNext) {
+    int *p = (int*)scan;
+    ObjHeader *header = (ObjHeader*)p;
+    if (NULL != header->vptr) {
+      char *gc_map = *(char**)(header->vptr);
+      int i;
+      for (i = 0; i < strlen(gc_map); ++i) if ('1' == gc_map[i]) {
+        void * *field = (void**)(p + 3 + i);
+        *field = Tiger_gc_forward(*field);
+      }
+    }
+    scan += header->info.size;
+  }
+
+  swap(heap.from, heap.to);
+  heap.fromFree = heap.toNext;
+  heap.toStart = heap.to;
+  heap.toNext = heap.to;
 }

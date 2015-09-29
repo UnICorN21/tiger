@@ -81,7 +81,7 @@ public class PrettyPrintVisitor implements Visitor {
   @Override
   public void visit(ArraySelect e) {
     e.array.accept(this);
-    this.say("[");
+    this.say("[3 + ");
     e.index.accept(this);
     this.say("]");
   }
@@ -109,9 +109,9 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(Length e) {
-    this.say("((union ObjInfo*)(");
+    this.say("*(");
     e.array.accept(this);
-    this.say(" - sizeof(union ObjInfo*))->length");
+    this.say(" + 1)");
   }
 
   @Override
@@ -183,7 +183,7 @@ public class PrettyPrintVisitor implements Visitor {
   @Override
   public void visit(AssignArray s) {
     this.printSpaces();
-    this.say(s.id + "[");
+    this.say(s.id + "[3 + ");
     s.index.accept(this);
     this.say("] = ");
     s.exp.accept(this);
@@ -303,11 +303,11 @@ public class PrettyPrintVisitor implements Visitor {
 
     // generate a gc stack frame and push it into the stack
     this.isayln(gcFrameName + " frame;");
-    this.isayln("frame.prev = head;");
-    this.isayln("head = &frame;");
+    this.isayln("frame.prev = prev;");
+    this.isayln("prev = &frame;");
     this.isayln(String.format("frame.arguments_gc_map = \"%s\";", genMemGCMap(m.formals)));
     this.isayln("frame.arguments_base_address = &this;");
-    int localRefCnt = (int)Stream.of(genMemGCMap(m.locals)).filter(s -> s.equals("1")).count();
+    long localRefCnt = genMemGCMap(m.locals).chars().filter(s -> s == '1').count();
     this.isayln(String.format("frame.local_references_cnt = %s;", localRefCnt));
     this.isayln("");
 
@@ -327,7 +327,7 @@ public class PrettyPrintVisitor implements Visitor {
     this.sayln("");
 
     // pop the gc frame
-    this.isayln("head = frame.prev;");
+    this.isayln("prev = frame.prev;");
 
     this.say("  return ");
     m.retExp.accept(this);
@@ -337,8 +337,31 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(MainMethodSingle m) {
+    this.isayln("struct Tiger_main_gc_frame {");
+    this.isayln("void *prev;");
+    this.isayln("char *arguments_gc_map;");
+    this.isayln("void *arguments_base_address;");
+    this.isayln("int local_references_cnt;");
+    m.locals.stream().map(l -> (DecSingle)l)
+            .filter(d -> d.type instanceof ClassType || d.type instanceof IntArray)
+            .forEach(d -> {
+              if (d.type instanceof ClassType) this.isayln(String.format("struct %s *%s;", d.type, d.id));
+              else this.isayln("int *" + d.id + ";");
+            });
+    this.sayln("};\n");
+
     this.sayln("int Tiger_main ()");
     this.sayln("{");
+
+    this.isayln("struct Tiger_main_gc_frame frame;");
+    this.isayln("frame.prev = prev;");
+    this.isayln("prev = &frame;");
+    this.isayln("frame.arguments_gc_map = \"\";");
+    this.isayln("frame.arguments_base_address = NULL;");
+    int localRefCnt = (int)Stream.of(genMemGCMap(m.locals)).filter(s -> s.equals("1")).count();
+    this.isayln(String.format("frame.local_references_cnt = %s;", localRefCnt));
+    this.isayln("");
+
     for (Dec.T dec : m.locals) {
       this.say("  ");
       DecSingle d = (DecSingle) dec;
@@ -346,6 +369,13 @@ public class PrettyPrintVisitor implements Visitor {
       this.say(" ");
       this.sayln(d.id + ";");
     }
+    this.sayln("");
+
+    m.locals.stream().map(l -> (DecSingle) l)
+            .filter(d -> d.type instanceof ClassType || d.type instanceof IntArray)
+            .forEach(d -> this.isayln(String.format("frame.%s = %s;", d.id, d.id)));
+    if (0 != localRefCnt) this.sayln("");
+
     m.stm.accept(this);
     this.isayln("return 0;");
     this.sayln("}");
@@ -367,7 +397,7 @@ public class PrettyPrintVisitor implements Visitor {
   private void outputVtable(VtableSingle v) {
     this.sayln("struct " + v.id + "_vtable " + v.id + "_vtable_ = ");
     this.sayln("{");
-    this.isayln((v.gcMap.isEmpty() ? "NULL" : String.format("\"%s\"", v.gcMap)) + ",");
+    this.isayln(String.format("\"%s\"", v.gcMap) + ",");
     for (codegen.C.Ftuple t : v.ms) {
       this.say("  ");
       this.sayln(t.classs + "_" + t.id + ",");
@@ -439,7 +469,6 @@ public class PrettyPrintVisitor implements Visitor {
     }
 
     this.sayln("// a global pointer to GC stack");
-    this.sayln("void *head;\n");
 
     this.sayln("// methods");
     for (Method.T m : p.methods) {

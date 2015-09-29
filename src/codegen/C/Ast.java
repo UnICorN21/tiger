@@ -448,7 +448,7 @@ public class Ast {
 
       public VtableSingle(String id, String gcMap, ArrayList<codegen.C.Ftuple> ms) {
         this.id = id;
-        this.gcMap = gcMap.isEmpty() ? "NULL" : gcMap;
+        this.gcMap = gcMap;
         this.ms = ms;
       }
 
