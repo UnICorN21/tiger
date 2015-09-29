@@ -409,7 +409,9 @@ public class PrettyPrintVisitor implements Visitor {
   @Override
   public void visit(ClassSingle c) {
     this.sayln("struct " + c.id + " {");
-    this.sayln("  struct " + c.id + "_vtable *vptr;");
+    this.isayln("struct " + c.id + "_vtable *vptr;");
+    this.isayln("int size;");
+    this.isayln("void *forwarding;");
     for (codegen.C.Tuple t : c.decs) {
       this.say("  ");
       t.type.accept(this);
@@ -462,6 +464,7 @@ public class PrettyPrintVisitor implements Visitor {
       }
       this.sayln(");");
     });
+    if (!p.methods.isEmpty()) this.sayln("");
 
     this.sayln("// vtables");
     for (Vtable.T v : p.vtables) {

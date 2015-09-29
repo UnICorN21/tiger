@@ -137,8 +137,6 @@ public class TranslateVisitor implements ast.Visitor {
   @Override
   public void visit(ast.Ast.Exp.NewIntArray e) {
     String token = Temp.nextToken("a");
-    Dec.DecSingle ds = new Dec.DecSingle(new Type.IntArray(), token);
-    this.tmpVars.add(ds);
     e.exp.accept(this);
     this.exp = new Exp.NewIntArray(token, this.exp);
   }
