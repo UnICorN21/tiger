@@ -20,7 +20,6 @@ public class CompilerPass
     while (n-- != 0) {
       System.out.print(" ");
     }
-    return;
   }
 
   public CompilerPass(String name, Object obj, Object x)
@@ -69,7 +68,6 @@ public class CompilerPass
       }
       System.out.println("");
     }
-    return;
   }
   
   public void doitName(String name)
@@ -109,6 +107,5 @@ public class CompilerPass
       }
       System.out.println("");
     }
-    return;
   }
 }
