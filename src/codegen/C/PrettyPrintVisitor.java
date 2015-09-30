@@ -281,8 +281,8 @@ public class PrettyPrintVisitor implements Visitor {
     m.locals.stream().map(l -> (DecSingle)l)
             .filter(d -> d.type instanceof ClassType || d.type instanceof IntArray)
             .forEach(d -> {
-              if (d.type instanceof ClassType) this.isayln(String.format("struct %s *%s;", d.type, d.id));
-              else this.isayln("int *" + d.id + ";");
+              if (d.type instanceof ClassType) this.isayln(String.format("struct %s * *%s;", d.type, d.id));
+              else this.isayln("int * *" + d.id + ";");
             });
     this.sayln("};\n");
 
@@ -320,7 +320,7 @@ public class PrettyPrintVisitor implements Visitor {
     this.sayln("");
     m.locals.stream().map(l -> (DecSingle) l)
             .filter(d -> d.type instanceof ClassType || d.type instanceof IntArray)
-            .forEach(d -> this.isayln(String.format("frame.%s = %s;", d.id, d.id)));
+            .forEach(d -> this.isayln(String.format("frame.%s = &%s;", d.id, d.id)));
     if (0 != localRefCnt) this.sayln("");
 
     m.stms.stream().forEach(s -> s.accept(this));
@@ -345,8 +345,8 @@ public class PrettyPrintVisitor implements Visitor {
     m.locals.stream().map(l -> (DecSingle)l)
             .filter(d -> d.type instanceof ClassType || d.type instanceof IntArray)
             .forEach(d -> {
-              if (d.type instanceof ClassType) this.isayln(String.format("struct %s *%s;", d.type, d.id));
-              else this.isayln("int *" + d.id + ";");
+              if (d.type instanceof ClassType) this.isayln(String.format("struct %s * *%s;", d.type, d.id));
+              else this.isayln("int * *" + d.id + ";");
             });
     this.sayln("};\n");
 
@@ -373,7 +373,7 @@ public class PrettyPrintVisitor implements Visitor {
 
     m.locals.stream().map(l -> (DecSingle) l)
             .filter(d -> d.type instanceof ClassType || d.type instanceof IntArray)
-            .forEach(d -> this.isayln(String.format("frame.%s = %s;", d.id, d.id)));
+            .forEach(d -> this.isayln(String.format("frame.%s = &%s;", d.id, d.id)));
     if (0 != localRefCnt) this.sayln("");
 
     m.stm.accept(this);

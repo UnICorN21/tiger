@@ -194,17 +194,17 @@ void *Tiger_new_array (int length) {
 // Lab 4, exercise 12:
 // A copying collector based-on Cheney's algorithm.
 
-inline static void swap(void *a, void *b) {
-    void *mid = a;
-    a = b;
-    b = mid;
+inline static void swap(void * *a, void * *b) {
+    void *mid = *a;
+    *a = *b;
+    *b = mid;
 }
 
 static void* Tiger_gc_forward(void *p) {
-    if (p >= (void*)heap.from && p < heap.from + heap.size) {
+    if ((char*)p >= heap.from && (char*)p < heap.from + heap.size) {
         int *header = (int*)p;
         void * *forwarding = (void**)(header + 4);
-        if (*forwarding >= (void*)heap.to && *forwarding <= heap.to + heap.size) return p;
+        if ((char*)*forwarding >= heap.to && (char*)*forwarding <= heap.to + heap.size) return p;
         int size = HEAD_SZ;
 
         if (NULL != *(void**)header) { // p is an instance-object
@@ -239,8 +239,8 @@ static void Tiger_gc () {
 
         // forward the locals
         for (i = 0; i < local_ref_cnt; ++i) {
-            void * *cur_local = (void**)(cur_frame + 8 + i);
-            *cur_local = Tiger_gc_forward(*cur_local);
+            void * **cur_local = (void* **)(cur_frame + 8 + i);
+            **cur_local = Tiger_gc_forward(**cur_local);
         }
 
         // forward the outer environment
@@ -258,17 +258,17 @@ static void Tiger_gc () {
                 void * *field = (void**)(p + 6 + i * 2);
                 *field = Tiger_gc_forward(*field);
             }
-        }
-        scan += *(p + 2) + HEAD_SZ;
+            scan += *(p + 2) + HEAD_SZ;
+        } else scan += *(p + 2) * sizeof(int) + HEAD_SZ;
     }
 
-    swap(heap.from, heap.to);
+    swap(&heap.from, &heap.to);
     heap.fromFree = heap.toNext;
     heap.toStart = heap.to;
     heap.toNext = heap.to;
 
     etime = clock();
     long spt = 1000 * (etime - stime) / CLOCKS_PER_SEC;
-    long collect_space = remain_before_gc - (heap.fromFree - heap.from);
+    long collect_space = remain_before_gc - (heap.size - (heap.fromFree - heap.from));
     printf("%d round of GC: %ldms, collected %ld bytes\n.", gc_cnt, spt, collect_space);
 }
