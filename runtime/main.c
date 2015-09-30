@@ -4,8 +4,7 @@
 
 extern void Tiger_heap_init (int);
 
-int main (int argc, char **argv)
-{
+int main (int argc, char **argv) {
   // Lab 4, exercise 13:
   // You should add some command arguments to the generated executable
   // to control the behaviour of your Gimple garbage collector.
@@ -24,3 +23,4 @@ int main (int argc, char **argv)
   // enter Java code...
   Tiger_main ();
 }
+

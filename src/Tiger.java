@@ -1,27 +1,25 @@
 import static control.Control.ConAst.dumpAst;
 import static control.Control.ConAst.testFac;
 
+import ast.Ast.Program;
+import control.CommandLine;
+import control.Control;
+import lexer.Lexer;
+import lexer.Token;
+import parser.Parser;
+
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
-import ast.Ast.Program;
-import lexer.Lexer;
-import lexer.Token;
-import parser.Parser;
-import control.CommandLine;
-import control.Control;
-
-public class Tiger
-{
+public class Tiger {
   static Tiger tiger;
   static CommandLine cmd;
   static InputStream fstream;
   public ast.Ast.Program.T theAst;
 
   // lex and parse
-  private void lexAndParse(String fname)
-  {
+  private void lexAndParse(String fname) {
     Parser parser;
 
     try {
@@ -35,12 +33,9 @@ public class Tiger
       e.printStackTrace();
       System.exit(1);
     }
-    return;
   }
 
-  public void compile(String fname)
-  {
-
+  public void compile(String fname) {
     // /////////////////////////////////////////////////////
     // to test the pretty printer on the "test/Fac.java" program
     if (testFac) {
@@ -240,21 +235,17 @@ public class Tiger
     default:
       break;
     }
-    return;
   }
 
-  public void assemble(String str)
-  {
+  public void assemble(String str) {
     // Your code here:
   }
 
-  public void link(String str)
-  {
+  public void link(String str) {
     // Your code here:
   }
 
-  public void compileAndLink(String fname)
-  {
+  public void compileAndLink(String fname) {
     // compile
     control.CompilerPass compilePass = new control.CompilerPass("Compile",
         tiger, fname);
@@ -269,22 +260,18 @@ public class Tiger
     control.CompilerPass linkPass = new control.CompilerPass("Linking", tiger,
         fname);
     linkPass.doitName("link");
-
-    return;
   }
 
-  public static void main(String[] args)
-  {
+  public static void main(String[] args) {
     // ///////////////////////////////////////////////////////
     // handle command line arguments
     tiger = new Tiger();
     cmd = new CommandLine();
-    String fname = "";
+    String fname;
     fname = cmd.scan(args);
 
     control.CompilerPass tigerAll = new control.CompilerPass("Tiger", tiger,
         fname);
     tigerAll.doitName("compileAndLink");
-    return;
   }
 }
