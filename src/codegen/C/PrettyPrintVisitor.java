@@ -353,7 +353,7 @@ public class PrettyPrintVisitor implements Visitor {
     this.sayln("int Tiger_main ()");
     this.sayln("{");
 
-    this.isayln("struct Tiger_main_gc_frame frame;");
+    this.sayln("struct Tiger_main_gc_frame frame;");
     this.isayln("frame.prev = prev;");
     this.isayln("prev = &frame;");
     this.isayln("frame.arguments_gc_map = \"\";");
@@ -470,8 +470,6 @@ public class PrettyPrintVisitor implements Visitor {
     for (Vtable.T v : p.vtables) {
       outputVtable((VtableSingle) v);
     }
-
-    this.sayln("// a global pointer to GC stack");
 
     this.sayln("// methods");
     for (Method.T m : p.methods) {

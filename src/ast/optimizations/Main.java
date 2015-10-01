@@ -1,16 +1,13 @@
 package ast.optimizations;
 
-public class Main
-{
+public class Main {
   public ast.Ast.Program.T program;
   
-  public void accept(ast.Ast.Program.T ast)
-  {
+  public void accept(ast.Ast.Program.T ast) {
     DeadClass dceVisitor = new DeadClass();
     control.CompilerPass deadClassPass = new control.CompilerPass(
         "Dead class elimination", ast, dceVisitor);
-    if (control.Control.skipPass("ast.DeadClass")){
-    }else{
+    if (!control.Control.skipPass("ast.DeadClass")){
       deadClassPass.doit();
       ast = dceVisitor.program;
     }
@@ -18,8 +15,7 @@ public class Main
     DeadCode dcodeVisitor = new DeadCode();
     control.CompilerPass deadCodePass = new control.CompilerPass(
         "Dead code elimination", ast, dcodeVisitor);
-    if (control.Control.skipPass("ast.DeadCode")){
-    }else{
+    if (!control.Control.skipPass("ast.DeadCode")){
       deadCodePass.doit();
       ast = dcodeVisitor.program;
     }
@@ -28,8 +24,7 @@ public class Main
     AlgSimp algVisitor = new AlgSimp();
     control.CompilerPass algPass = new control.CompilerPass(
         "Algebraic simplification", ast, algVisitor);
-    if (control.Control.skipPass("ast.AlgSimp")){
-    }else{
+    if (!control.Control.skipPass("ast.AlgSimp")){
       algPass.doit();
       ast = algVisitor.program;
     }
@@ -37,14 +32,11 @@ public class Main
     ConstFold cfVisitor = new ConstFold();
     control.CompilerPass constFoldPass = new control.CompilerPass(
         "Const folding", ast, cfVisitor);
-    if (control.Control.skipPass("ast.ConstFold")){
-    }else{
+    if (!control.Control.skipPass("ast.ConstFold")){
       constFoldPass.doit();
       ast = cfVisitor.program;
-    }    
+    }
 
     program = ast;
-    
-    return;
   }
 }

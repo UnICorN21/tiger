@@ -1,17 +1,17 @@
 package control;
 
-public class Control
-{
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class Control {
   // the lexer
-  public static class ConLexer
-  {
+  public static class ConLexer {
     public static boolean test = false;
     public static boolean dump = false;
   }
   
   // the straight-line program interpreter
-  public static class ConSlp
-  {
+  public static class ConSlp {
     public enum T{NONE, ARGS, INTERP, COMPILE, TEST, DIV};
     
     public static T action = T.NONE;
@@ -20,8 +20,7 @@ public class Control
   }
   
   // Ast and elaborator
-  public static class ConAst
-  {
+  public static class ConAst {
     public static boolean dumpAst = false;
     public static boolean testFac = false;
     public static boolean dumpC = false;
@@ -33,13 +32,12 @@ public class Control
     public static boolean elabMethodTable = false;
   }
   
-  public static class ConCodeGen
-  {
+  public static class ConCodeGen {
     public static String fileName = null;
 
     public static String outputName = null;
 
-    public static enum Kind_t {
+    public enum Kind_t {
       Bytecode, C, Dalvik, X86
     }
 
@@ -53,22 +51,19 @@ public class Control
  public static Visualize_Kind_t visualize = Visualize_Kind_t.None;
   
   // verbose level
-  public enum Verbose_t{
+  public enum Verbose_t {
     Silent, Pass, Detailed
   }
   public static Verbose_t verbose = Verbose_t.Silent;
   
   // trace
   public static java.util.LinkedList<String> trace =
-      new java.util.LinkedList<String>();
-  public static void addTrace (String name)
-  {
+      new java.util.LinkedList<>();
+  public static void addTrace (String name) {
     trace.add(name);
-    return;
   }
   
-  public static boolean isTracing (String name)
-  {
+  public static boolean isTracing (String name) {
     for (String s: trace){
       if (s.equals(name))
         return true;
@@ -76,21 +71,24 @@ public class Control
     return false;
   }
   
-  //
   public static java.util.LinkedList<String> skippedPasses =
-      new java.util.LinkedList<String>();
+      new java.util.LinkedList<>();
   
-  public static void addPass (String name)
-  {
+  public static void addPass (String name) {
     skippedPasses.add(name);
-    return;
   }
-  
-  public static boolean skipPass (String name)
-  {
+
+  /**
+   * Add `*` support for group skip.
+   */
+  public static boolean skipPass (String name) {
     for (String s: skippedPasses){
-      if (s.equals(name))
-        return true;
+      Matcher m  = Pattern.compile("(.*)\\.?\\*$").matcher(s);
+      if (m.find()) {
+          String prefix = m.group(1);
+          if (name.startsWith(prefix)) return true;
+      }
+      else if (s.equals(name)) return true;
     }
     return false;
   }

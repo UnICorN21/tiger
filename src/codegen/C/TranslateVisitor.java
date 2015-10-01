@@ -96,7 +96,8 @@ public class TranslateVisitor implements ast.Visitor {
       x.accept(this);
       args.add(this.exp);
     }
-    this.exp = new Call(token, exp, e.id, args);
+    e.rt.accept(this);
+    this.exp = new Call(token, exp, e.id, args, this.type);
   }
 
   @Override

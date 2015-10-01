@@ -62,11 +62,11 @@ public class DeadClass implements ast.Visitor {
   }
 
   @Override
-  public void visit(False e) {
-  }
+  public void visit(False e) { /* null */ }
 
   @Override
   public void visit(Id e) {
+    e.type.accept(this);
   }
 
   @Override
@@ -82,7 +82,8 @@ public class DeadClass implements ast.Visitor {
 
   @Override
   public void visit(Exp.Gt e) {
-
+    e.left.accept(this);
+    e.right.accept(this);
   }
 
   @Override
@@ -92,10 +93,10 @@ public class DeadClass implements ast.Visitor {
 
   @Override
   public void visit(NewObject e) {
-    if (this.set.contains(e.id))
-      return;
-    this.worklist.add(e.id);
-    this.set.add(e.id);
+    if (!this.set.contains(e.id)) {
+      this.worklist.add(e.id);
+      this.set.add(e.id);
+    }
   }
 
   @Override
@@ -104,8 +105,7 @@ public class DeadClass implements ast.Visitor {
   }
 
   @Override
-  public void visit(Num e) {
-  }
+  public void visit(Num e) { /* null */ }
 
   @Override
   public void visit(Sub e) {
@@ -114,8 +114,7 @@ public class DeadClass implements ast.Visitor {
   }
 
   @Override
-  public void visit(This e) {
-  }
+  public void visit(This e) { /* null */ }
 
   @Override
   public void visit(Times e) {
@@ -124,8 +123,7 @@ public class DeadClass implements ast.Visitor {
   }
 
   @Override
-  public void visit(True e) {
-  }
+  public void visit(True e) { /* null */ }
 
   // statements
   @Override
@@ -165,24 +163,26 @@ public class DeadClass implements ast.Visitor {
 
   // type
   @Override
-  public void visit(Boolean t) {
-  }
+  public void visit(Boolean t) { /* null */ }
 
   @Override
   public void visit(ClassType t) {
+    if (!this.set.contains(t.id)) {
+      this.set.add(t.id);
+      this.worklist.add(t.id);
+    }
   }
 
   @Override
-  public void visit(Int t) {
-  }
+  public void visit(Int t) { /* null */ }
 
   @Override
-  public void visit(IntArray t) {
-  }
+  public void visit(IntArray t) { /* null */ }
 
   // dec
   @Override
   public void visit(DecSingle d) {
+    d.type.accept(this);
   }
 
   // method
@@ -195,6 +195,12 @@ public class DeadClass implements ast.Visitor {
   // class
   @Override
   public void visit(ClassSingle c) {
+    if (null != c.extendss && !this.set.contains(c.extendss)) {
+      this.set.contains(c.extendss);
+      this.worklist.contains(c.extendss);
+    }
+    c.decs.forEach(d -> d.accept(this));
+    c.methods.forEach(m -> m.accept(this));
   }
 
   // main class
@@ -232,9 +238,7 @@ public class DeadClass implements ast.Visitor {
         newClasses.add(c);
     }
 
-    
-    this.program =
-    new ProgramSingle(p.mainClass, newClasses);
+    this.program = new ProgramSingle(p.mainClass, newClasses);
     
     if (control.Control.trace.equals("ast.DeadClass")){
       System.out.println("before optimization:");

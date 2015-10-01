@@ -1,34 +1,22 @@
 package cfg;
 
-import cfg.Cfg.Block;
+import cfg.Cfg.*;
 import cfg.Cfg.Block.BlockSingle;
 import cfg.Cfg.Class;
 import cfg.Cfg.Class.ClassSingle;
-import cfg.Cfg.Dec;
 import cfg.Cfg.Dec.DecSingle;
 import cfg.Cfg.MainMethod.MainMethodSingle;
-import cfg.Cfg.Method;
 import cfg.Cfg.Method.MethodSingle;
-import cfg.Cfg.Operand;
 import cfg.Cfg.Operand.Int;
 import cfg.Cfg.Operand.Var;
 import cfg.Cfg.Program.ProgramSingle;
-import cfg.Cfg.Stm;
-import cfg.Cfg.Stm.Add;
-import cfg.Cfg.Stm.InvokeVirtual;
-import cfg.Cfg.Stm.Lt;
-import cfg.Cfg.Stm.Move;
-import cfg.Cfg.Stm.NewObject;
-import cfg.Cfg.Stm.Print;
-import cfg.Cfg.Stm.Sub;
-import cfg.Cfg.Stm.Times;
+import cfg.Cfg.Stm.*;
 import cfg.Cfg.Transfer.Goto;
 import cfg.Cfg.Transfer.If;
 import cfg.Cfg.Transfer.Return;
 import cfg.Cfg.Type.ClassType;
 import cfg.Cfg.Type.IntArrayType;
 import cfg.Cfg.Type.IntType;
-import cfg.Cfg.Vtable;
 import cfg.Cfg.Vtable.VtableSingle;
 import control.Control;
 
@@ -52,8 +40,7 @@ public class PrettyPrintVisitor implements Visitor
     }
   }
 
-  private void say(String s)
-  {
+  private void say(String s) {
     try {
       this.writer.write(s);
     } catch (Exception e) {
@@ -65,33 +52,28 @@ public class PrettyPrintVisitor implements Visitor
   // /////////////////////////////////////////////////////
   // operand
   @Override
-  public void visit(Int operand)
-  {
-    this.say(new Integer(operand.i).toString());
+  public void visit(Int operand) {
+    this.say(Integer.toString(operand.i));
   }
 
   @Override
-  public void visit(Var operand)
-  {
+  public void visit(Var operand) {
     this.say(operand.id);
   }
 
   // statements
   @Override
-  public void visit(Add s)
-  {
+  public void visit(Add s) {
     this.printSpaces();
     this.say(s.dst + " = ");
     s.left.accept(this);
     this.say(" + ");
     s.right.accept(this);
     this.say(";");
-    return;
   }
 
   @Override
-  public void visit(InvokeVirtual s)
-  {
+  public void visit(InvokeVirtual s) {
     this.printSpaces();
     this.say(s.dst + " = " + s.obj);
     this.say("->vptr->" + s.f + "("+s.obj);
@@ -100,78 +82,64 @@ public class PrettyPrintVisitor implements Visitor
       x.accept(this);
     }
     this.say(");");
-    return;
   }
 
   @Override
-  public void visit(Lt s)
-  {
+  public void visit(Lt s) {
     this.printSpaces();
     this.say(s.dst + " = ");
     s.left.accept(this);
     this.say(" < ");
     s.right.accept(this);
     this.say(";");
-    return;
   }
 
   @Override
-  public void visit(Move s)
-  {
+  public void visit(Move s) {
     this.printSpaces();
     this.say(s.dst + " = ");
     s.src.accept(this);
     this.say(";");
-    return;
   }
 
   @Override
-  public void visit(NewObject s)
-  {
+  public void visit(NewObject s) {
     this.printSpaces();
     this.say(s.dst +" = ((struct " + s.c + "*)(Tiger_new (&" + s.c
         + "_vtable_, sizeof(struct " + s.c + "))));");
-    return;
   }
 
   @Override
-  public void visit(Print s)
-  {
+  public void visit(Print s) {
     this.printSpaces();
     this.say("System_out_println (");
     s.arg.accept(this);
     this.sayln(");");
-    return;
   }
 
   @Override
-  public void visit(Sub s)
-  {
+  public void visit(Sub s) {
     this.printSpaces();
     this.say(s.dst + " = ");
     s.left.accept(this);
     this.say(" - ");
     s.right.accept(this);
     this.say(";");
-    return;
   }
 
   @Override
-  public void visit(Times s)
-  {
+  public void visit(Times s) {
     this.printSpaces();
     this.say(s.dst + " = ");
     s.left.accept(this);
     this.say(" * ");
     s.right.accept(this);
     this.say(";");
-    return;
   }
 
   // transfer
   @Override
-  public void visit(If s)
-  {
+  public void visit(If s) {
     this.printSpaces();
     this.say("if (");
     s.operand.accept(this);
@@ -182,15 +150,12 @@ public class PrettyPrintVisitor implements Visitor
     this.say("else\n");
     this.printSpaces();
     this.say("  goto " + s.falsee.toString()+";\n");
-    return;
   }
 
   @Override
-  public void visit(Goto s)
-  {
+  public void visit(Goto s) {
     this.printSpaces();
     this.say("goto " + s.label.toString()+";\n");
-    return;
   }
 
   @Override
@@ -200,7 +165,6 @@ public class PrettyPrintVisitor implements Visitor
     this.say("return ");
     s.operand.accept(this);
     this.say(";");
-    return;
   }
 
   // type
@@ -232,15 +196,13 @@ public class PrettyPrintVisitor implements Visitor
   
   // dec
   @Override
-  public void visit(BlockSingle b)
-  {
+  public void visit(BlockSingle b) {
     this.say(b.label.toString()+":\n");
-    for (Stm.T s: b.stms){
+    for (Stm.T s: b.stms) {
       s.accept(this);
       this.say("\n");
     }
     b.transfer.accept(this);
-    return;
   }
 
   // method
@@ -273,12 +235,10 @@ public class PrettyPrintVisitor implements Visitor
       b.accept(this);
     }
     this.sayln("\n}");
-    return;
   }
 
   @Override
-  public void visit(MainMethodSingle m)
-  {
+  public void visit(MainMethodSingle m) {
     this.sayln("int Tiger_main ()");
     this.sayln("{");
     for (Dec.T dec : m.locals) {
@@ -294,7 +254,6 @@ public class PrettyPrintVisitor implements Visitor
       b.accept(this);
     }
     this.sayln("\n}\n");
-    return;
   }
 
   // vtables

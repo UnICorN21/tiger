@@ -1,7 +1,3 @@
-import static control.Control.ConAst.dumpAst;
-import static control.Control.ConAst.testFac;
-
-import ast.Ast.Program;
 import control.CommandLine;
 import control.Control;
 import lexer.Lexer;
@@ -12,6 +8,9 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
+import static control.Control.ConAst.dumpAst;
+import static control.Control.ConAst.testFac;
+
 public class Tiger {
   static Tiger tiger;
   static CommandLine cmd;
@@ -19,7 +18,7 @@ public class Tiger {
   public ast.Ast.Program.T theAst;
 
   // lex and parse
-  private void lexAndParse(String fname) {
+  public void lexAndParse(String fname) {
     Parser parser;
 
     try {
@@ -166,7 +165,6 @@ public class Tiger {
 
     // /////////////////////////////////////////////////////////
     // normal compilation phases.
-    Program.T theAst = null;
 
     control.CompilerPass lexAndParsePass = new control.CompilerPass(
         "Lex and parse", tiger, fname);
@@ -190,7 +188,7 @@ public class Tiger {
     ast.optimizations.Main optAstPasses = new ast.optimizations.Main();
     control.CompilerPass optAstPass = new control.CompilerPass(
         "Optimizing the AST", optAstPasses, theAst);
-    optAstPass.doitName("doit");
+    optAstPass.doitName("accept");
     theAst = optAstPasses.program;
 
     // code generation

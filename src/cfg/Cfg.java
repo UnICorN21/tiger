@@ -126,18 +126,15 @@ public class Cfg
       }
     }
 
-    public static class Var extends T
-    {
+    public static class Var extends T {
       public String id;
 
-      public Var(String id)
-      {
+      public Var(String id) {
         this.id = id;
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }
@@ -435,8 +432,7 @@ public class Cfg
       }
 
       @Override
-      public void accept(Visitor v)
-      {
+      public void accept(Visitor v) {
         v.visit(this);
       }
     }

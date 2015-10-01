@@ -1,7 +1,6 @@
 package control;
 
-public class CompilerPass
-{
+public class CompilerPass {
   private String name;
   private long startTime;
   private long endTime;
@@ -10,8 +9,7 @@ public class CompilerPass
   private static int indent = 0;
   private final int nest = 3;
 
-  private void printSpaces()
-  {
+  private void printSpaces() {
     int n = indent;
     if (n < 0) {
       System.out.println("compiler bug");
@@ -22,8 +20,7 @@ public class CompilerPass
     }
   }
 
-  public CompilerPass(String name, Object obj, Object x)
-  {
+  public CompilerPass(String name, Object obj, Object x) {
     this.name = name;
     this.startTime = 0;
     this.endTime = 0;
@@ -31,8 +28,7 @@ public class CompilerPass
     this.x = x;
   }
 
-  public void doit()
-  {
+  public void doit() {
     if (Control.verbose != Control.Verbose_t.Silent) {
       printSpaces();
       indent += nest;
@@ -57,7 +53,7 @@ public class CompilerPass
       System.exit(1);
     }
 
-    if (Control.verbose != Control.Verbose_t.Silent){
+    if (Control.verbose != Control.Verbose_t.Silent) {
       indent -= nest;
       printSpaces();
       System.out.print(this.name + " finished");
@@ -70,8 +66,7 @@ public class CompilerPass
     }
   }
   
-  public void doitName(String name)
-  {
+  public void doitName(String name) {
     if (Control.verbose != Control.Verbose_t.Silent) {
       printSpaces();
       indent += nest;

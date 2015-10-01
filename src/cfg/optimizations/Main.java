@@ -2,18 +2,15 @@ package cfg.optimizations;
 
 import cfg.Cfg.Program;
 
-public class Main
-{
+public class Main {
   public Program.T program;
 
-  public void accept(Program.T cfg)
-  {
+  public void accept(Program.T cfg) {
     // liveness analysis
     LivenessVisitor liveness = new LivenessVisitor();
     control.CompilerPass livenessPass = new control.CompilerPass(
         "Liveness analysis", cfg, liveness);
-    if (control.Control.skipPass("cfg.Linvess")) {
-    } else {
+    if (!control.Control.skipPass("cfg.Linvess")) {
       livenessPass.doit();
       // Export necessary data structures from the
       // liveness analysis.
@@ -24,8 +21,7 @@ public class Main
     DeadCode deadCode = new DeadCode();
     control.CompilerPass deadCodePass = new control.CompilerPass(
         "Dead-code elimination", cfg, deadCode);
-    if (control.Control.skipPass("cfg.deadCode")) {
-    } else {
+    if (!control.Control.skipPass("cfg.deadCode")) {
       deadCodePass.doit();
       cfg = deadCode.program;
     }
@@ -34,8 +30,7 @@ public class Main
     ReachingDefinition reachingDef = new ReachingDefinition();
     control.CompilerPass reachingDefPass = new control.CompilerPass(
         "Reaching definition", cfg, reachingDef);
-    if (control.Control.skipPass("cfg.reaching")) {
-    } else {
+    if (!control.Control.skipPass("cfg.reaching")) {
       reachingDefPass.doit();
       // Export necessary data structures
       // Your code here:
@@ -45,8 +40,7 @@ public class Main
     ConstProp constProp = new ConstProp();
     control.CompilerPass constPropPass = new control.CompilerPass(
         "Constant propagation", cfg, constProp);
-    if (control.Control.skipPass("cfg.constProp")) {
-    } else {
+    if (!control.Control.skipPass("cfg.constProp")) {
       constPropPass.doit();
       cfg = constProp.program;
     }
@@ -55,8 +49,7 @@ public class Main
     CopyProp copyProp = new CopyProp();
     control.CompilerPass copyPropPass = new control.CompilerPass(
         "Copy propagation", cfg, copyProp);
-    if (control.Control.skipPass("cfg.copyProp")) {
-    } else {
+    if (!control.Control.skipPass("cfg.copyProp")) {
       copyPropPass.doit();
       cfg = copyProp.program;
     }
@@ -65,8 +58,7 @@ public class Main
     AvailExp availExp = new AvailExp();
     control.CompilerPass availExpPass = new control.CompilerPass(
         "Available expression", cfg, availExp);
-    if (control.Control.skipPass("cfg.availExp")) {
-    } else {
+    if (!control.Control.skipPass("cfg.availExp")) {
       availExpPass.doit();
       // Export necessary data structures
       // Your code here:
@@ -76,14 +68,11 @@ public class Main
     Cse cse = new Cse();
     control.CompilerPass csePass = new control.CompilerPass(
         "Common subexpression elimination", cfg, cse);
-    if (control.Control.skipPass("cfg.cse")) {
-    } else {
+    if (!control.Control.skipPass("cfg.cse")) {
       csePass.doit();
       cfg = cse.program;
     }
 
     program = cfg;
-
-    return;
   }
 }
