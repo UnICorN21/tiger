@@ -337,7 +337,7 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(MainMethodSingle m) {
-    this.isayln("struct Tiger_main_gc_frame {");
+    this.sayln("struct Tiger_main_gc_frame {");
     this.isayln("void *prev;");
     this.isayln("char *arguments_gc_map;");
     this.isayln("void *arguments_base_address;");
@@ -353,7 +353,7 @@ public class PrettyPrintVisitor implements Visitor {
     this.sayln("int Tiger_main ()");
     this.sayln("{");
 
-    this.sayln("struct Tiger_main_gc_frame frame;");
+    this.isayln("struct Tiger_main_gc_frame frame;");
     this.isayln("frame.prev = prev;");
     this.isayln("prev = &frame;");
     this.isayln("frame.arguments_gc_map = \"\";");
