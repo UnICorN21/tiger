@@ -23,13 +23,11 @@ import java.util.LinkedList;
 public class DeadClass implements ast.Visitor {
   private HashSet<String> set;
   private LinkedList<String> worklist;
-  private ast.Ast.Class.T newClass;
   public Program.T program;
 
   public DeadClass() {
     this.set = new java.util.HashSet<>();
     this.worklist = new java.util.LinkedList<>();
-    this.newClass = null;
     this.program = null;
   }
 

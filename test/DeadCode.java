@@ -6,6 +6,8 @@ class DeadCode {
 
 class Doit {
     public int doit() {
+        int unused;
+
         if (true)
           System.out.println(1);
         else 

@@ -200,11 +200,17 @@ public class Ast {
       public Type.T rt;
 
       public Call(T exp, String id, java.util.LinkedList<T> args, Pos pos) {
+        this(pos, args, null, exp, id, null, null);
+      }
+
+      public Call(Pos pos, LinkedList<T> args, LinkedList<Type.T> at, T exp, String id, Type.T rt, String type) {
         super(pos);
+        this.args = args;
+        this.at = at;
         this.exp = exp;
         this.id = id;
-        this.args = args;
-        this.type = null;
+        this.rt = rt;
+        this.type = type;
       }
 
       @Override
@@ -428,10 +434,14 @@ public class Ast {
       public boolean isField; // is classType a class field.
 
       public Assign(String id, Exp.T exp) {
-        this.id = id;
+        this(exp, id, false, null);
+      }
+
+      public Assign(Exp.T exp, String id, boolean isField, Type.T type) {
         this.exp = exp;
-        this.type = null;
-        this.isField = false;
+        this.id = id;
+        this.isField = isField;
+        this.type = type;
       }
 
       @Override
@@ -448,10 +458,14 @@ public class Ast {
       public boolean isField;
 
       public AssignArray(String id, Exp.T index, Exp.T exp) {
+        this(exp, id, index, false);
+      }
+
+      public AssignArray(Exp.T exp, String id, Exp.T index, boolean isField) {
+        this.exp = exp;
         this.id = id;
         this.index = index;
-        this.exp = exp;
-        this.isField = false;
+        this.isField = isField;
       }
 
       @Override
