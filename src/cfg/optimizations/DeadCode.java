@@ -1,5 +1,6 @@
 package cfg.optimizations;
 
+import cfg.Cfg;
 import cfg.Cfg.Block.BlockSingle;
 import cfg.Cfg.Class.ClassSingle;
 import cfg.Cfg.Dec.DecSingle;
@@ -9,14 +10,7 @@ import cfg.Cfg.Operand.Int;
 import cfg.Cfg.Operand.Var;
 import cfg.Cfg.Program;
 import cfg.Cfg.Program.ProgramSingle;
-import cfg.Cfg.Stm.Add;
-import cfg.Cfg.Stm.InvokeVirtual;
-import cfg.Cfg.Stm.Lt;
-import cfg.Cfg.Stm.Move;
-import cfg.Cfg.Stm.NewObject;
-import cfg.Cfg.Stm.Print;
-import cfg.Cfg.Stm.Sub;
-import cfg.Cfg.Stm.Times;
+import cfg.Cfg.Stm.*;
 import cfg.Cfg.Transfer.Goto;
 import cfg.Cfg.Transfer.If;
 import cfg.Cfg.Transfer.Return;
@@ -25,8 +19,7 @@ import cfg.Cfg.Type.IntArrayType;
 import cfg.Cfg.Type.IntType;
 import cfg.Cfg.Vtable.VtableSingle;
 
-public class DeadCode implements cfg.Visitor
-{
+public class DeadCode implements cfg.Visitor {
   public Program.T program;
   
   public DeadCode()
@@ -53,13 +46,37 @@ public class DeadCode implements cfg.Visitor
   }
 
   @Override
+  public void visit(Cfg.Stm.NewIntArray m) {
+
+  }
+
+  @Override
+  public void visit(Cfg.Stm.And s) {
+
+  }
+
+  @Override
+  public void visit(Cfg.Stm.ArraySelect s) {
+
+  }
+
+  @Override
+  public void visit(Cfg.Stm.Length s) {
+
+  }
+
+  @Override
   public void visit(InvokeVirtual s)
   {
   }
 
   @Override
-  public void visit(Lt s)
-  {
+  public void visit(Lt s) {
+  }
+
+  @Override
+  public void visit(Cfg.Stm.Gt s) {
+
   }
 
   @Override

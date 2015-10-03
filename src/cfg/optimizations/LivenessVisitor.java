@@ -1,29 +1,15 @@
 package cfg.optimizations;
 
-import java.util.HashMap;
-import java.util.HashSet;
-
-import cfg.Cfg.Block;
+import cfg.Cfg.*;
 import cfg.Cfg.Block.BlockSingle;
 import cfg.Cfg.Class.ClassSingle;
 import cfg.Cfg.Dec.DecSingle;
 import cfg.Cfg.MainMethod.MainMethodSingle;
-import cfg.Cfg.Method;
 import cfg.Cfg.Method.MethodSingle;
-import cfg.Cfg.Operand;
 import cfg.Cfg.Operand.Int;
 import cfg.Cfg.Operand.Var;
 import cfg.Cfg.Program.ProgramSingle;
-import cfg.Cfg.Stm;
-import cfg.Cfg.Stm.Add;
-import cfg.Cfg.Stm.InvokeVirtual;
-import cfg.Cfg.Stm.Lt;
-import cfg.Cfg.Stm.Move;
-import cfg.Cfg.Stm.NewObject;
-import cfg.Cfg.Stm.Print;
-import cfg.Cfg.Stm.Sub;
-import cfg.Cfg.Stm.Times;
-import cfg.Cfg.Transfer;
+import cfg.Cfg.Stm.*;
 import cfg.Cfg.Transfer.Goto;
 import cfg.Cfg.Transfer.If;
 import cfg.Cfg.Transfer.Return;
@@ -32,8 +18,10 @@ import cfg.Cfg.Type.IntArrayType;
 import cfg.Cfg.Type.IntType;
 import cfg.Cfg.Vtable.VtableSingle;
 
-public class LivenessVisitor implements cfg.Visitor
-{
+import java.util.HashMap;
+import java.util.HashSet;
+
+public class LivenessVisitor implements cfg.Visitor {
   // gen, kill for one statement
   private HashSet<String> oneStmGen;
   private HashSet<String> oneStmKill;
@@ -158,37 +146,55 @@ public class LivenessVisitor implements cfg.Visitor
     // Invariant: accept() of operand modifies "gen"
     s.left.accept(this);
     s.right.accept(this);
-    return;
   }
 
   @Override
-  public void visit(InvokeVirtual s)
-  {
+  public void visit(Stm.NewIntArray m) {
+
+  }
+
+  @Override
+  public void visit(Stm.And s) {
+
+  }
+
+  @Override
+  public void visit(Stm.ArraySelect s) {
+
+  }
+
+  @Override
+  public void visit(Stm.Length s) {
+
+  }
+
+  @Override
+  public void visit(InvokeVirtual s) {
     this.oneStmKill.add(s.dst);
     this.oneStmGen.add(s.obj);
     for (Operand.T arg : s.args) {
       arg.accept(this);
     }
-    return;
   }
 
   @Override
-  public void visit(Lt s)
-  {
+  public void visit(Lt s) {
     this.oneStmKill.add(s.dst);
     // Invariant: accept() of operand modifies "gen"
     s.left.accept(this);
     s.right.accept(this);
-    return;
   }
 
   @Override
-  public void visit(Move s)
-  {
+  public void visit(Stm.Gt s) {
+
+  }
+
+  @Override
+  public void visit(Move s) {
     this.oneStmKill.add(s.dst);
     // Invariant: accept() of operand modifies "gen"
     s.src.accept(this);
-    return;
   }
 
   @Override

@@ -123,7 +123,7 @@ public class AlgSimp implements ast.Visitor {
 
   @Override
   public void visit(Not e) {
-    e.accept(this);
+    e.exp.accept(this);
     this.exp = new Not(this.exp, e.pos);
   }
 

@@ -1,8 +1,5 @@
 package cfg.optimizations;
 
-import java.util.HashMap;
-import java.util.HashSet;
-
 import cfg.Cfg.Block;
 import cfg.Cfg.Block.BlockSingle;
 import cfg.Cfg.Class.ClassSingle;
@@ -13,14 +10,7 @@ import cfg.Cfg.Operand.Int;
 import cfg.Cfg.Operand.Var;
 import cfg.Cfg.Program.ProgramSingle;
 import cfg.Cfg.Stm;
-import cfg.Cfg.Stm.Add;
-import cfg.Cfg.Stm.InvokeVirtual;
-import cfg.Cfg.Stm.Lt;
-import cfg.Cfg.Stm.Move;
-import cfg.Cfg.Stm.NewObject;
-import cfg.Cfg.Stm.Print;
-import cfg.Cfg.Stm.Sub;
-import cfg.Cfg.Stm.Times;
+import cfg.Cfg.Stm.*;
 import cfg.Cfg.Transfer;
 import cfg.Cfg.Transfer.Goto;
 import cfg.Cfg.Transfer.If;
@@ -30,8 +20,10 @@ import cfg.Cfg.Type.IntArrayType;
 import cfg.Cfg.Type.IntType;
 import cfg.Cfg.Vtable.VtableSingle;
 
-public class ReachingDefinition implements cfg.Visitor
-{
+import java.util.HashMap;
+import java.util.HashSet;
+
+public class ReachingDefinition implements cfg.Visitor {
   // gen, kill for one statement
   private HashSet<Stm.T> oneStmGen;
   private HashSet<Stm.T> oneStmKill;
@@ -113,13 +105,37 @@ public class ReachingDefinition implements cfg.Visitor
   }
 
   @Override
+  public void visit(Stm.NewIntArray m) {
+
+  }
+
+  @Override
+  public void visit(Stm.And s) {
+
+  }
+
+  @Override
+  public void visit(Stm.ArraySelect s) {
+
+  }
+
+  @Override
+  public void visit(Stm.Length s) {
+
+  }
+
+  @Override
   public void visit(InvokeVirtual s)
   {
   }
 
   @Override
-  public void visit(Lt s)
-  {
+  public void visit(Lt s) {
+  }
+
+  @Override
+  public void visit(Stm.Gt s) {
+
   }
 
   @Override
