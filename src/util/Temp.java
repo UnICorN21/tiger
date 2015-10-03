@@ -17,7 +17,7 @@ public class Temp {
   // Factory pattern
   public static String next() {
     switch(kind) {
-      case Bytecode:
+      case C: Bytecode:
         return "x_" + (Temp.count++);
       case Dalvik:
         return "v" + (Temp.count++);
