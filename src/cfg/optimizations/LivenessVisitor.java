@@ -17,9 +17,11 @@ import cfg.Cfg.Type.ClassType;
 import cfg.Cfg.Type.IntArrayType;
 import cfg.Cfg.Type.IntType;
 import cfg.Cfg.Vtable.VtableSingle;
+import util.Bug;
+import util.Label;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class LivenessVisitor implements cfg.Visitor {
   // gen, kill for one statement
@@ -56,38 +58,36 @@ public class LivenessVisitor implements cfg.Visitor {
 
   // As you will walk the tree for many times, so
   // it will be useful to recored which is which:
-  enum Liveness_Kind_t
-  {
+  enum Liveness_Kind_t {
     None, StmGenKill, BlockGenKill, BlockInOut, StmInOut,
   }
 
   private Liveness_Kind_t kind = Liveness_Kind_t.None;
 
-  public LivenessVisitor()
-  {
+  public LivenessVisitor() {
     this.oneStmGen = new HashSet<>();
-    this.oneStmKill = new java.util.HashSet<>();
+    this.oneStmKill = new HashSet<>();
 
-    this.oneTransferGen = new java.util.HashSet<>();
-    this.oneTransferKill = new java.util.HashSet<>();
+    this.oneTransferGen = new HashSet<>();
+    this.oneTransferKill = new HashSet<>();
 
-    this.stmGen = new java.util.HashMap<>();
-    this.stmKill = new java.util.HashMap<>();
+    this.stmGen = new HashMap<>();
+    this.stmKill = new HashMap<>();
 
-    this.transferGen = new java.util.HashMap<>();
-    this.transferKill = new java.util.HashMap<>();
+    this.transferGen = new HashMap<>();
+    this.transferKill = new HashMap<>();
 
-    this.blockGen = new java.util.HashMap<>();
-    this.blockKill = new java.util.HashMap<>();
+    this.blockGen = new HashMap<>();
+    this.blockKill = new HashMap<>();
 
-    this.blockLiveIn = new java.util.HashMap<>();
-    this.blockLiveOut = new java.util.HashMap<>();
+    this.blockLiveIn = new HashMap<>();
+    this.blockLiveOut = new HashMap<>();
 
-    this.stmLiveIn = new java.util.HashMap<>();
-    this.stmLiveOut = new java.util.HashMap<>();
+    this.stmLiveIn = new HashMap<>();
+    this.stmLiveOut = new HashMap<>();
 
-    this.transferLiveIn = new java.util.HashMap<>();
-    this.transferLiveOut = new java.util.HashMap<>();
+    this.transferLiveIn = new HashMap<>();
+    this.transferLiveOut = new HashMap<>();
 
     this.kind = Liveness_Kind_t.None;
   }
@@ -95,29 +95,25 @@ public class LivenessVisitor implements cfg.Visitor {
   // /////////////////////////////////////////////////////
   // utilities
 
-  private java.util.HashSet<String> getOneStmGenAndClear()
-  {
+  private java.util.HashSet<String> getOneStmGenAndClear() {
     java.util.HashSet<String> temp = this.oneStmGen;
     this.oneStmGen = new java.util.HashSet<>();
     return temp;
   }
 
-  private java.util.HashSet<String> getOneStmKillAndClear()
-  {
+  private java.util.HashSet<String> getOneStmKillAndClear() {
     java.util.HashSet<String> temp = this.oneStmKill;
     this.oneStmKill = new java.util.HashSet<>();
     return temp;
   }
 
-  private java.util.HashSet<String> getOneTransferGenAndClear()
-  {
+  private java.util.HashSet<String> getOneTransferGenAndClear() {
     java.util.HashSet<String> temp = this.oneTransferGen;
     this.oneTransferGen = new java.util.HashSet<>();
     return temp;
   }
 
-  private java.util.HashSet<String> getOneTransferKillAndClear()
-  {
+  private java.util.HashSet<String> getOneTransferKillAndClear() {
     java.util.HashSet<String> temp = this.oneTransferKill;
     this.oneTransferKill = new java.util.HashSet<>();
     return temp;
@@ -126,22 +122,16 @@ public class LivenessVisitor implements cfg.Visitor {
   // /////////////////////////////////////////////////////
   // operand
   @Override
-  public void visit(Int operand)
-  {
-    return;
-  }
+  public void visit(Int operand) { /* null */ }
 
   @Override
-  public void visit(Var operand)
-  {
+  public void visit(Var operand) {
     this.oneStmGen.add(operand.id);
-    return;
   }
 
   // statements
   @Override
-  public void visit(Add s)
-  {
+  public void visit(Add s) {
     this.oneStmKill.add(s.dst);
     // Invariant: accept() of operand modifies "gen"
     s.left.accept(this);
@@ -150,22 +140,28 @@ public class LivenessVisitor implements cfg.Visitor {
 
   @Override
   public void visit(Stm.NewIntArray m) {
-
+    this.oneStmKill.add(m.dst);
+    m.length.accept(this);
   }
 
   @Override
   public void visit(Stm.And s) {
-
+    this.oneStmKill.add(s.dst);
+    s.left.accept(this);
+    s.right.accept(this);
   }
 
   @Override
   public void visit(Stm.ArraySelect s) {
-
+    this.oneStmKill.add(s.dst);
+    s.array.accept(this);
+    s.index.accept(this);
   }
 
   @Override
   public void visit(Stm.Length s) {
-
+    this.oneStmKill.add(s.dst);
+    s.array.accept(this);
   }
 
   @Override
@@ -187,7 +183,9 @@ public class LivenessVisitor implements cfg.Visitor {
 
   @Override
   public void visit(Stm.Gt s) {
-
+    this.oneStmKill.add(s.dst);
+    s.left.accept(this);
+    s.right.accept(this);
   }
 
   @Override
@@ -198,96 +196,77 @@ public class LivenessVisitor implements cfg.Visitor {
   }
 
   @Override
-  public void visit(NewObject s)
-  {
+  public void visit(NewObject s) {
     this.oneStmKill.add(s.dst);
-    return;
   }
 
   @Override
-  public void visit(Print s)
-  {
+  public void visit(Print s) {
     s.arg.accept(this);
-    return;
   }
 
   @Override
-  public void visit(Sub s)
-  {
+  public void visit(Sub s) {
     this.oneStmKill.add(s.dst);
     // Invariant: accept() of operand modifies "gen"
     s.left.accept(this);
     s.right.accept(this);
-    return;
   }
 
   @Override
-  public void visit(Times s)
-  {
+  public void visit(Times s) {
     this.oneStmKill.add(s.dst);
     // Invariant: accept() of operand modifies "gen"
     s.left.accept(this);
     s.right.accept(this);
-    return;
   }
 
   // transfer
   @Override
-  public void visit(If s)
-  {
+  public void visit(If s) {
     // Invariant: accept() of operand modifies "gen"
-    s.operand.accept(this);
-    return;
+    if (s.operand instanceof Operand.Var)
+      this.oneTransferGen.add(((Var)s.operand).id);
   }
 
   @Override
-  public void visit(Goto s)
-  {
-    return;
-  }
+  public void visit(Goto s) { /* null */ }
 
   @Override
-  public void visit(Return s)
-  {
+  public void visit(Return s) {
     // Invariant: accept() of operand modifies "gen"
-    s.operand.accept(this);
-    return;
+    if (s.operand instanceof Operand.Var)
+      this.oneTransferGen.add(((Var)s.operand).id);
   }
 
   // type
   @Override
-  public void visit(ClassType t)
-  {
-  }
+  public void visit(ClassType t) { /* null */ }
 
   @Override
-  public void visit(IntType t)
-  {
-  }
+  public void visit(IntType t) { /* null */ }
 
   @Override
-  public void visit(IntArrayType t)
-  {
-  }
+  public void visit(IntArrayType t) { /* null */ }
 
   // dec
   @Override
-  public void visit(DecSingle d)
-  {
-  }
+  public void visit(DecSingle d) { /* null */ }
 
   // utility functions:
-  private void calculateStmTransferGenKill(BlockSingle b)
-  {
+  private void calculateStmTransferGenKill(BlockSingle b) {
+    if (0 == b.stms.size()) {
+      this.oneStmGen = new HashSet<>();
+      this.oneStmKill = new HashSet<>();
+    }
     for (Stm.T s : b.stms) {
-      this.oneStmGen = new java.util.HashSet<>();
-      this.oneStmKill = new java.util.HashSet<>();      
+      this.oneStmGen = new HashSet<>();
+      this.oneStmKill = new HashSet<>();
       s.accept(this);
       this.stmGen.put(s, this.oneStmGen);
       this.stmKill.put(s, this.oneStmKill);
       if (control.Control.isTracing("liveness.step1")) {
-        System.out.print("\ngen, kill for statement:");
-        s.toString();
+        System.out.print("\ngen, kill for statement: " + s);
         System.out.print("\ngen is:");
         for (String str : this.oneStmGen) {
           System.out.print(str + ", ");
@@ -298,14 +277,13 @@ public class LivenessVisitor implements cfg.Visitor {
         }
       }
     }
-    this.oneTransferGen = new java.util.HashSet<>();
-    this.oneTransferKill = new java.util.HashSet<>();
+    this.oneTransferGen = new HashSet<>();
+    this.oneTransferKill = new HashSet<>();
     b.transfer.accept(this);
     this.transferGen.put(b.transfer, this.oneTransferGen);
     this.transferKill.put(b.transfer, this.oneTransferGen);
     if (control.Control.isTracing("liveness.step1")) {
-      System.out.print("\ngen, kill for transfer:");
-      b.toString();
+      System.out.print("\ngen, kill for transfer: " + b);
       System.out.print("\ngen is:");
       for (String str : this.oneTransferGen) {
         System.out.print(str + ", ");
@@ -315,56 +293,139 @@ public class LivenessVisitor implements cfg.Visitor {
         System.out.print(str + ", ");
       }
     }
-    return;
+  }
+
+  private void calculateBlockGenKill(BlockSingle b) {
+    HashSet<String> blockKill = new HashSet<>(), blockGen = new HashSet<>();
+    if (null != b.transfer) {
+      blockGen.addAll(this.transferGen.get(b.transfer));
+      blockKill.addAll(this.transferKill.get(b.transfer));
+    }
+    for (int i = b.stms.size()-1; i >= 0; --i) {
+      this.stmKill.get(b.stms.get(i)).stream().forEach(e -> {
+        if (blockGen.contains(e)) blockGen.remove(e);
+        blockKill.add(e);
+      });
+      this.stmGen.get(b.stms.get(i)).stream().forEach(blockGen::add);
+    }
+    this.blockGen.put(b, blockGen);
+    this.blockKill.put(b, blockKill);
+    if (control.Control.isTracing("liveness.step2")) {
+      System.out.print("gen, kill for block " + b.label + ":");
+      System.out.print("\n\tgen is: ");
+      blockGen.stream().forEach(e -> System.out.print(e + ", "));
+      System.out.print("\n\tkill is: ");
+      blockKill.stream().forEach(e -> System.out.print(e + ", "));
+      System.out.println();
+    }
+  }
+
+  private void calculateBlockInOut(BlockSingle b) {
+    HashSet<String> blockIn = new HashSet<>(), blockOut = new HashSet<>();
+    b.out.stream().forEach(succ -> {
+      HashSet<String> liveIn = this.blockLiveIn.get(succ);
+      if (null != liveIn) blockOut.addAll(liveIn);
+    });
+    blockIn.addAll(this.blockGen.get(b));
+    blockIn.addAll(blockOut.stream().filter(e -> !this.blockKill.get(b).contains(e)).collect(Collectors.toSet()));
+    this.blockLiveIn.put(b, blockIn);
+    this.blockLiveOut.put(b, blockOut);
+    if (control.Control.isTracing("liveness.step3")) {
+      System.out.print("in, out for block " + b.label + ":");
+      System.out.print("\n\tin is: ");
+      blockIn.stream().forEach(e -> System.out.print(e + ", "));
+      System.out.print("\n\tout is: ");
+      blockOut.stream().forEach(e -> System.out.print(e + ", "));
+      System.out.println();
+    }
+  }
+
+  private void calculateStmInOut(BlockSingle b) {
+    // TODO
+  }
+
+  private List<Block.T> topoSort(List<Block.T> blocks) {
+    List<BlockSingle> bss = blocks.stream().map(b -> (BlockSingle)b).collect(Collectors.toList());
+    for (int i = 0; i < bss.size(); ++i) {
+      Transfer.T transfer = bss.get(i).transfer;
+      List<Label> ls = new LinkedList<>();
+      if (transfer instanceof Goto) ls.add(((Goto)transfer).label);
+      else if (transfer instanceof If) {
+        Transfer.If iff = (If)transfer;
+        ls.add(iff.truee);
+        ls.add(iff.falsee);
+      }
+      for (Label label: ls) {
+        for (BlockSingle bs: bss) if (label.equals(bs.label)) {
+          bs.in.add(bss.get(i));
+          bss.get(i).out.add(bs);
+        }
+      }
+    }
+
+    List<Block.T> ret = new LinkedList<>();
+    while (!bss.isEmpty()) {
+      BlockSingle select = null;
+      for (BlockSingle b: bss) if (0 == b.in.size()) select = b;
+      for (BlockSingle b: bss) if (b.in.contains(select)) b.in.remove(select);
+      bss.remove(select);
+      ret.add(select);
+    }
+
+    return ret;
   }
 
   // block
   @Override
-  public void visit(BlockSingle b)
-  {
+  public void visit(BlockSingle b) {
     switch (this.kind) {
-    case StmGenKill:
-      calculateStmTransferGenKill(b);
-      break;
-    default:
-      // Your code here:
-      return;
+      case StmGenKill:
+        calculateStmTransferGenKill(b);
+        break;
+      case BlockGenKill:
+        calculateBlockGenKill(b);
+        break;
+      case BlockInOut:
+        calculateBlockInOut(b);
+        break;
+      case StmInOut:
+        calculateStmInOut(b);
+        break;
+      default:
+        // this should never reach
+        new Bug();
+        break;
     }
   }
 
   // method
   @Override
-  public void visit(MethodSingle m)
-  {
+  public void visit(MethodSingle m) {
     // Four steps:
     // Step 1: calculate the "gen" and "kill" sets for each
     // statement and transfer
     this.kind = Liveness_Kind_t.StmGenKill;
-    for (Block.T block : m.blocks) {
-      block.accept(this);
-    }
+    m.blocks.stream().forEach(b -> b.accept(this));
 
     // Step 2: calculate the "gen" and "kill" sets for each block.
-    // For this, you should visit statements and transfers in a
-    // block in a reverse order.
-    // Your code here:
+    this.kind = Liveness_Kind_t.BlockGenKill;
+    m.blocks.stream().forEach(b -> b.accept(this));
 
     // Step 3: calculate the "liveIn" and "liveOut" sets for each block
-    // Note that to speed up the calculation, you should first
-    // calculate a reverse topo-sort order of the CFG blocks, and
-    // crawl through the blocks in that order.
-    // And also you should loop until a fix-point is reached.
-    // Your code here:
+    this.kind = Liveness_Kind_t.BlockInOut;
+    List<Block.T> tbs = topoSort(m.blocks);
+    Collections.reverse(tbs);
+    tbs.stream().forEach(b -> b.accept(this));
 
     // Step 4: calculate the "liveIn" and "liveOut" sets for each
     // statement and transfer
     // Your code here:
-
+    this.kind = Liveness_Kind_t.StmInOut;
+    m.blocks.stream().forEach(b -> b.accept(this));
   }
 
   @Override
-  public void visit(MainMethodSingle m)
-  {
+  public void visit(MainMethodSingle m) {
     // Four steps:
     // Step 1: calculate the "gen" and "kill" sets for each
     // statement and transfer
@@ -374,9 +435,6 @@ public class LivenessVisitor implements cfg.Visitor {
     }
 
     // Step 2: calculate the "gen" and "kill" sets for each block.
-    // For this, you should visit statements and transfers in a
-    // block in a reverse order.
-    // Your code here:
 
     // Step 3: calculate the "liveIn" and "liveOut" sets for each block
     // Note that to speed up the calculation, you should first
@@ -392,25 +450,18 @@ public class LivenessVisitor implements cfg.Visitor {
 
   // vtables
   @Override
-  public void visit(VtableSingle v)
-  {
-  }
+  public void visit(VtableSingle v) { /* null */ }
 
   // class
   @Override
-  public void visit(ClassSingle c)
-  {
-  }
+  public void visit(ClassSingle c) { /* null */ }
 
   // program
   @Override
-  public void visit(ProgramSingle p)
-  {
+  public void visit(ProgramSingle p) {
     p.mainMethod.accept(this);
     for (Method.T mth : p.methods) {
       mth.accept(this);
     }
-    return;
   }
-
 }

@@ -142,7 +142,7 @@ public class Cfg {
 
       @Override
       public String toString() {
-        return String.format("%s = %s + %s;", dst, left, right);
+        return String.format("%s = %s + %s", dst, left, right);
       }
 
       @Override
@@ -450,6 +450,11 @@ public class Cfg {
       }
 
       @Override
+      public String toString() {
+        return "Goto " + label;
+      }
+
+      @Override
       public void accept(Visitor v) {
         v.visit(this);
       }
@@ -464,6 +469,11 @@ public class Cfg {
         this.operand = operand;
         this.truee = truee;
         this.falsee = falsee;
+      }
+
+      @Override
+      public String toString() {
+        return String.format("If %s goto %s else goto %s", operand, truee, falsee);
       }
 
       @Override
@@ -502,11 +512,18 @@ public class Cfg {
       public LinkedList<Stm.T> stms;
       public Transfer.T transfer;
 
+      // used for topo-sort
+      public LinkedList<BlockSingle> in;
+      public LinkedList<BlockSingle> out;
+
       public BlockSingle(util.Label label, LinkedList<Stm.T> stms,
           Transfer.T transfer) {
         this.label = label;
         this.stms = stms;
         this.transfer = transfer;
+
+        this.in = new LinkedList<>();
+        this.out = new LinkedList<>();
       }
 
       @Override
@@ -523,9 +540,8 @@ public class Cfg {
         StringBuffer strb = new StringBuffer();
         strb.append(this.label.toString() + ":\\n");
         // Lab5. Your code here:
-        stms.stream().forEach(s -> {
-          strb.append(s + "\\n");
-        });
+        stms.stream().forEach(s -> strb.append(s + "\\n"));
+        strb.append(transfer);
         return strb.toString();
       }
 

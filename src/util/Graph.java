@@ -30,9 +30,12 @@ public class Graph<X> {
     Node from;
     Node to;
 
-    public Edge(Node from, Node to) {
+    String info;
+
+    public Edge(Node from, Node to, String info) {
       this.from = from;
       this.to = to;
+      this.info = info;
     }
 
     @Override
@@ -81,18 +84,18 @@ public class Graph<X> {
     return null;
   }
 
-  private void addEdge(Node from, Node to) {
-    from.edges.addLast(new Edge(from, to));
+  private void addEdge(Node from, Node to, String info) {
+    from.edges.addLast(new Edge(from, to, info));
   }
 
-  public void addEdge(X from, X to) {
+  public void addEdge(X from, X to, String info) {
     Node f = this.lookupNode(from);
     Node t = this.lookupNode(to);
 
     if (f == null || t == null)
       new util.Bug();
 
-    this.addEdge(f, t);
+    this.addEdge(f, t, info);
   }
 
   public void dfsDoit(Node n, java.util.HashSet<Node> visited) {
@@ -128,7 +131,7 @@ public class Graph<X> {
 
     for (Node node : this.graph) {
       for (Edge edge : node.edges)
-        dot.insert(edge.from.toString(), edge.to.toString());
+        dot.insert(edge.from.toString(), edge.to.toString(), edge.info);
     }
 
     try {

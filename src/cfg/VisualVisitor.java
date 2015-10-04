@@ -209,13 +209,13 @@ public class VisualVisitor implements Visitor {
       if (transfer instanceof Transfer.Goto) {
         Transfer.Goto gotoo = (Transfer.Goto) transfer;
         Block.T to = map.get(gotoo.label);
-        graph.addEdge(block, to);
+        graph.addEdge(block, to, null);
       } else if (transfer instanceof Transfer.If) {
         Transfer.If iff = (If) transfer;
         Block.T truee = map.get(iff.truee);
-        graph.addEdge(block, truee);
+        graph.addEdge(block, truee, null);
         Block.T falsee = map.get(iff.falsee);
-        graph.addEdge(block, falsee);
+        graph.addEdge(block, falsee, null);
       }
     }
     graph.visualize();
@@ -241,13 +241,13 @@ public class VisualVisitor implements Visitor {
       if (transfer instanceof Goto) {
         Transfer.Goto gotoo = (Transfer.Goto) transfer;
         Block.T to = map.get(gotoo.label);
-        graph.addEdge(block, to);
+        graph.addEdge(block, to, null);
       } else if (transfer instanceof Transfer.If) {
         Transfer.If iff = (Transfer.If) transfer;
         Block.T truee = map.get(iff.truee);
-        graph.addEdge(block, truee);
+        graph.addEdge(block, truee, null);
         Block.T falsee = map.get(iff.falsee);
-        graph.addEdge(block, falsee);
+        graph.addEdge(block, falsee, null);
       }
     }
     graph.visualize();

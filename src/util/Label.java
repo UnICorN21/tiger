@@ -9,6 +9,12 @@ public class Label {
   }
 
   @Override
+  public boolean equals(Object obj) {
+    if (null == obj || !(obj instanceof Label)) return false;
+    return i == ((Label)obj).i;
+  }
+
+  @Override
   public String toString() {
     return "L_" + (Integer.toString(this.i));
   }

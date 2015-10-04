@@ -2,5 +2,6 @@
 
 ----
 ### Status
+Complete part A, B.
 
 ### Notes

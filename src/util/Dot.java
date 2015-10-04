@@ -1,26 +1,17 @@
 package util;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.LinkedList;
 
-public class Dot
-{
-  class DotElement<X, Y, Z>
-  {
+public class Dot {
+  class DotElement<X, Y, Z> {
     Triple<X, Y, Z> e;
 
-    public DotElement(X x, Y y, Z z)
-    {
-      this.e = new Triple<X, Y, Z>(x, y, z);
+    public DotElement(X x, Y y, Z z) {
+      this.e = new Triple<>(x, y, z);
     }
 
-    public String toString()
-    {
+    public String toString() {
       String s = "";
       if (this.e.z != null)
         s = this.e.z.toString();
@@ -32,39 +23,30 @@ public class Dot
 
   LinkedList<DotElement<String, String, String>> list;
 
-  public Dot()
-  {
-    this.list = new LinkedList<DotElement<String, String, String>>();
+  public Dot() {
+    this.list = new LinkedList<>();
   }
 
-  public void insert(String from, String to)
-  {
-    this.list.addFirst(new DotElement<String, String, String>(from, to, null));
+  public void insert(String from, String to) {
+    this.list.addFirst(new DotElement<>(from, to, null));
   }
 
-  public void insert(String from, String to, String info)
-  {
-
-    String s = "[label=\"" + info + "\"]";
-    // System.out.println(s);
-    this.list.addFirst(new DotElement<String, String, String>(from, to, s));
+  public void insert(String from, String to, String info) {
+    String s = null != info ? "[label=\"" + info + "\"]" : null;
+    this.list.addFirst(new DotElement<>(from, to, s));
   }
 
-  public String toString()
-  {
+  public String toString() {
     StringBuffer sb = new StringBuffer();
 
     for (DotElement<String, String, String> e : this.list) {
       sb.append(e.toString());
     }
 
-    String result = sb.toString();
-
-    return result;
+    return sb.toString();
   }
 
-  public void toDot(String fname)
-  {
+  public void toDot(String fname) {
     String fn = fname + ".dot";
     try {
       File f = new File(fn);
@@ -86,11 +68,9 @@ public class Dot
     } catch (Throwable o) {
       new util.Bug();
     }
-    return;
   }
 
-  void visualize(String name)
-  {
+  void visualize(String name) {
     toDot(name);
     String format = "";
     String postfix = "";
@@ -119,8 +99,7 @@ public class Dot
     try {
       // Read this article:
       // http://walsh.iteye.com/blog/449051
-      final class StreamDrainer implements Runnable
-      {
+      final class StreamDrainer implements Runnable {
         private InputStream ins;
 
         public StreamDrainer(InputStream ins)
@@ -128,8 +107,7 @@ public class Dot
           this.ins = ins;
         }
 
-        public void run()
-        {
+        public void run() {
           try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(
                 ins));
@@ -157,6 +135,5 @@ public class Dot
     } catch (Throwable o) {
       o.printStackTrace();
     }
-    return;
   }
 }
