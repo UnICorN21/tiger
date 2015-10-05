@@ -19,65 +19,65 @@ import cfg.Cfg.Vtable.VtableSingle;
 
 public interface Visitor {
   // operand
-  void visit(Int o);
+  default void visit(Int o) { /* null */ }
 
-  void visit(Var o);
+  default void visit(Var o) { /* null */ }
 
   // type
-  void visit(ClassType t);
+  default void visit(ClassType t) { /* null */ }
 
-  void visit(IntType t);
+  default void visit(IntType t) { /* null */ }
 
-  void visit(IntArrayType t);
+  default void visit(IntArrayType t) { /* null */ }
 
   // dec
-  void visit(DecSingle d);
+  default void visit(DecSingle d) { /* null */ }
 
   // transfer
-  void visit(If t);
+  default void visit(If t) { /* null */ }
 
-  void visit(Goto t);
+  default void visit(Goto t) { /* null */ }
 
-  void visit(Return t);
+  default void visit(Return t) { /* null */ }
 
   // statement:
-  void visit(Add m);
+  default void visit(Add m) { /* null */ }
 
-  void visit(Cfg.Stm.And s);
+  default void visit(Cfg.Stm.And s) { /* null */ }
 
-  void visit(Cfg.Stm.ArraySelect s);
+  default void visit(Cfg.Stm.ArraySelect s) { /* null */ }
 
-  void visit(Cfg.Stm.Length s);
+  default void visit(Cfg.Stm.Length s) { /* null */ }
 
-  void visit(InvokeVirtual m);
+  default void visit(InvokeVirtual m) { /* null */ }
 
-  void visit(Lt s);
+  default void visit(Lt s) { /* null */ }
 
-  void visit(Gt s);
+  default void visit(Gt s) { /* null */ }
 
-  void visit(Move m);
+  default void visit(Move m) { /* null */ }
   
-  void visit(NewObject m);
+  default void visit(NewObject m) { /* null */ }
 
-  void visit(Cfg.Stm.NewIntArray m);
+  default void visit(Cfg.Stm.NewIntArray m) { /* null */ }
   
-  void visit(Print m);
+  default void visit(Print m) { /* null */ }
 
-  void visit(Sub m);
+  default void visit(Sub m) { /* null */ }
 
-  void visit(Times m);
+  default void visit(Times m) { /* null */ }
 
   // block
-  void visit(BlockSingle b);
+  default void visit(BlockSingle b) { /* null */ }
+
+  // vtable
+  default void visit(VtableSingle v) { /* null */ }
+
+  // class
+  default void visit(ClassSingle c) { /* null */ }
 
   // method
   void visit(MethodSingle m);
-
-  // vtable
-  void visit(VtableSingle v);
-
-  // class
-  void visit(ClassSingle c);
 
   // main method
   void visit(MainMethodSingle c);

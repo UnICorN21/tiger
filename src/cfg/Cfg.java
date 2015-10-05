@@ -124,10 +124,11 @@ public class Cfg {
   // //////////////////////////////////////////////////
   // statement
   public static class Stm {
-    public static abstract class T implements cfg.Acceptable { /* null */ }
+    public static abstract class T implements cfg.Acceptable {
+      public String dst;
+    }
 
     public static class Add extends T {
-      public String dst;
       // type of the destination variable
       public Type.T ty;
       public Operand.T left;
@@ -152,7 +153,6 @@ public class Cfg {
     }
 
     public static class And extends T {
-      public String dst;
       public Type.T ty;
       public Operand.T left;
       public Operand.T right;
@@ -176,7 +176,6 @@ public class Cfg {
     }
 
     public static class ArraySelect extends T {
-      public String dst;
       public Type.T ty;
       public Operand.T array;
       public Operand.T index;
@@ -200,7 +199,6 @@ public class Cfg {
     }
 
     public static class Length extends T {
-      public String dst;
       public Type.T ty;
       public Operand.T array;
 
@@ -222,7 +220,6 @@ public class Cfg {
     }
 
     public static class InvokeVirtual extends T {
-      public String dst;
       public String obj;
       public String f;
       // type of the destination variable
@@ -254,7 +251,6 @@ public class Cfg {
     }
 
     public static class Lt extends T {
-      public String dst;
       // type of the destination variable
       public Type.T ty;
       public Operand.T left;
@@ -279,7 +275,6 @@ public class Cfg {
     }
 
     public static class Gt extends T {
-      public String dst;
       // type of the destination variable
       public Type.T ty;
       public Operand.T left;
@@ -304,7 +299,6 @@ public class Cfg {
     }
 
     public static class Move extends T {
-      public String dst;
       // type of the destination variable
       public Type.T ty;
       public Operand.T src;
@@ -327,7 +321,6 @@ public class Cfg {
     }
 
     public static class NewObject extends T {
-      public String dst;
       // type of the destination variable
       public String c;
 
@@ -348,7 +341,6 @@ public class Cfg {
     }
 
     public static class NewIntArray extends T {
-      public String dst;
       public Operand.T length;
 
       public NewIntArray(String dst, Operand.T length) {
@@ -386,7 +378,6 @@ public class Cfg {
     }
 
     public static class Sub extends T {
-      public String dst;
       // type of the destination variable
       public Type.T ty;
       public Operand.T left;
@@ -411,7 +402,6 @@ public class Cfg {
     }
 
     public static class Times extends T {
-      public String dst;
       // type of the destination variable
       public Type.T ty;
       public Operand.T left;

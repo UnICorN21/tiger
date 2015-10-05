@@ -1,20 +1,31 @@
 package cfg.optimizations;
 
+import cfg.Cfg;
 import cfg.Cfg.Program;
+
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class Main {
   public Program.T program;
+
+  private HashMap<Cfg.Stm.T, HashSet<String>> stmLiveIn = null;
+  private HashMap<Cfg.Stm.T, HashSet<String>> stmLiveOut = null;
+  private HashMap<Cfg.Transfer.T, HashSet<String>> transferLiveIn = null;
+  private HashMap<Cfg.Transfer.T, HashSet<String>> transferLiveOut = null;
 
   public void accept(Program.T cfg) {
     // liveness analysis
     LivenessVisitor liveness = new LivenessVisitor();
     control.CompilerPass livenessPass = new control.CompilerPass(
         "Liveness analysis", cfg, liveness);
-    if (!control.Control.skipPass("cfg.Linvess")) {
+    if (!control.Control.skipPass("cfg.liveness")) {
       livenessPass.doit();
-      // Export necessary data structures from the
-      // liveness analysis.
-      // Your code here:
+
+      stmLiveIn = liveness.getStmLiveIn();
+      stmLiveOut = liveness.getStmLiveOut();
+      transferLiveIn = liveness.getTransferLiveIn();
+      transferLiveOut = liveness.getTransferLiveOut();
     }
 
     // dead-code elimination
@@ -22,8 +33,14 @@ public class Main {
     control.CompilerPass deadCodePass = new control.CompilerPass(
         "Dead-code elimination", cfg, deadCode);
     if (!control.Control.skipPass("cfg.deadCode")) {
-      deadCodePass.doit();
-      cfg = deadCode.program;
+      if (control.Control.skipPass("cfg.liveness")) {
+        System.out.println("Warning: Dead code elimination was skipped because of insufficient liveness data.");
+      } else {
+        deadCode.setStmLiveOut(stmLiveOut);
+
+        deadCodePass.doit();
+        cfg = deadCode.program;
+      }
     }
 
     // reaching definition

@@ -210,6 +210,13 @@ public class Tiger {
       genCCodePass.doit();
       codegen.C.Ast.Program.T cAst = transC.program;
 
+      if (control.Control.ConAst.dumpC) {
+        codegen.C.PrettyPrintVisitor ppC = new codegen.C.PrettyPrintVisitor();
+        control.CompilerPass ppCCodePass = new control.CompilerPass(
+                "C code printing", cAst, ppC);
+        ppCCodePass.doit();
+      }
+
       // translation to control-flow graph
       cfg.TranslateVisitor transCfg = new cfg.TranslateVisitor();
       control.CompilerPass genCfgCodePass = new control.CompilerPass(
