@@ -298,6 +298,29 @@ public class Cfg {
       }
     }
 
+    public static class AssignArray extends T {
+      public Type.T ty;
+      public Operand.T index;
+      public Operand.T exp;
+
+      public AssignArray(String dst, Type.T ty, Operand.T index, Operand.T exp) {
+        this.dst = dst;
+        this.ty = ty;
+        this.index = index;
+        this.exp = exp;
+      }
+
+      @Override
+      public String toString() {
+        return String.format("%s[%s] = %s", dst, exp, index);
+      }
+
+      @Override
+      public void accept(Visitor v) {
+        v.visit(this);
+      }
+    }
+
     public static class Move extends T {
       // type of the destination variable
       public Type.T ty;
@@ -331,7 +354,7 @@ public class Cfg {
 
       @Override
       public String toString() {
-        return String.format("%s = new %s", dst, c);
+        return String.format("%s = new %s()", dst, c);
       }
 
       @Override
@@ -350,7 +373,7 @@ public class Cfg {
 
       @Override
       public String toString() {
-        return "new int[" + length + "]";
+        return dst + " = new int[" + length + "]";
       }
 
       @Override
@@ -363,6 +386,7 @@ public class Cfg {
       public Operand.T arg;
 
       public Print(Operand.T arg) {
+        this.dst = null;
         this.arg = arg;
       }
 
@@ -558,6 +582,9 @@ public class Cfg {
       public util.Label exit;
       public Operand.T retValue;
 
+      // used to avoid duplicate calculation
+      public boolean reverseTopoOrder;
+
       public MethodSingle(Type.T retType, String id, String classId,
           LinkedList<Dec.T> formals, LinkedList<Dec.T> locals,
           LinkedList<Block.T> blocks, util.Label entry, util.Label exit,
@@ -571,6 +598,7 @@ public class Cfg {
         this.entry = entry;
         this.exit = exit;
         this.retValue = retValue;
+        reverseTopoOrder = false;
       }
 
       @Override
@@ -590,10 +618,13 @@ public class Cfg {
       public LinkedList<Dec.T> locals;
       public LinkedList<Block.T> blocks;
 
+      public boolean reverseTopoOrder;
+
       public MainMethodSingle(LinkedList<Dec.T> locals,
           LinkedList<Block.T> blocks) {
         this.locals = locals;
         this.blocks = blocks;
+        reverseTopoOrder = false;
       }
 
       @Override

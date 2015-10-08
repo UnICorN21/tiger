@@ -15,7 +15,7 @@ import java.util.LinkedList;
 import java.util.stream.Collectors;
 
 public class DeadCode implements cfg.Visitor {
-  private HashMap<Cfg.Stm.T, HashSet<String>> stmLiveOut;
+  private HashMap<Cfg.Stm.T, HashSet<String>> livenessOut;
 
   private Cfg.MainMethod.T mainMethod;
   private Cfg.Method.T method;
@@ -31,8 +31,8 @@ public class DeadCode implements cfg.Visitor {
   }
 
   // setters
-  public void setStmLiveOut(HashMap<T, HashSet<String>> stmLiveOut) {
-    this.stmLiveOut = stmLiveOut;
+  public void setLivenessOut(HashMap<T, HashSet<String>> livenessOut) {
+    this.livenessOut = livenessOut;
   }
 
   // block
@@ -40,7 +40,7 @@ public class DeadCode implements cfg.Visitor {
   public void visit(BlockSingle b) {
     LinkedList<Cfg.Stm.T> stms = new LinkedList<>();
     stms.addAll(b.stms.stream()
-            .filter(stm -> stm instanceof Print || this.stmLiveOut.get(stm).contains(stm.dst))
+            .filter(stm -> stm instanceof Print || this.livenessOut.get(stm).contains(stm.dst))
             .collect(Collectors.toList()));
     this.block = new BlockSingle(b.label, stms, b.transfer);
   }

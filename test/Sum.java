@@ -9,16 +9,17 @@ class Doit {
         int sum;
         int i;
         int k;
+
+        int [] array;
         
         i = 0;
         sum = 0;
         k = 0;
+        array = new int[n];
         while (i<n){
         	sum = sum - i;
         	i = i+1;
-            while (k < n) {
-                k = k + 1;
-            }
+            array[n] = i;
         }
         return sum;
     }

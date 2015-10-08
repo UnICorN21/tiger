@@ -55,6 +55,8 @@ public interface Visitor {
 
   default void visit(Gt s) { /* null */ }
 
+  default void visit(AssignArray s) { /* null */ }
+
   default void visit(Move m) { /* null */ }
   
   default void visit(NewObject m) { /* null */ }

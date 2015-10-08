@@ -77,6 +77,11 @@ public class AvailExp implements cfg.Visitor {
   }
 
   @Override
+  public void visit(AssignArray s) {
+
+  }
+
+  @Override
   public void visit(Move s) {
   }
 

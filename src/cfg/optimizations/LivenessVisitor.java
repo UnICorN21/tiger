@@ -115,20 +115,8 @@ public class LivenessVisitor implements cfg.Visitor {
     return temp;
   }
 
-  public HashMap<T, HashSet<String>> getStmLiveIn() {
-    return stmLiveIn;
-  }
-
   public HashMap<T, HashSet<String>> getStmLiveOut() {
     return stmLiveOut;
-  }
-
-  public HashMap<Transfer.T, HashSet<String>> getTransferLiveIn() {
-    return transferLiveIn;
-  }
-
-  public HashMap<Transfer.T, HashSet<String>> getTransferLiveOut() {
-    return transferLiveOut;
   }
 
   // /////////////////////////////////////////////////////
@@ -201,6 +189,13 @@ public class LivenessVisitor implements cfg.Visitor {
   }
 
   @Override
+  public void visit(AssignArray s) {
+    this.oneStmGen.add(s.dst);
+    s.exp.accept(this);
+    s.index.accept(this);
+  }
+
+  @Override
   public void visit(Move s) {
     this.oneStmKill.add(s.dst);
     // Invariant: accept() of operand modifies "gen"
@@ -253,10 +248,6 @@ public class LivenessVisitor implements cfg.Visitor {
 
   // utility functions:
   private void calculateStmTransferGenKill(BlockSingle b) {
-    if (0 == b.stms.size()) {
-      this.oneStmGen = new HashSet<>();
-      this.oneStmKill = new HashSet<>();
-    }
     for (Stm.T s : b.stms) {
       this.oneStmGen = new HashSet<>();
       this.oneStmKill = new HashSet<>();
@@ -387,7 +378,7 @@ public class LivenessVisitor implements cfg.Visitor {
     }
   }
 
-  private List<BlockSingle> reverseTopoSort(List<Block.T> blocks) {
+  private LinkedList<Block.T> reverseTopoSort(List<Block.T> blocks) {
     List<BlockSingle> bss = blocks.stream().map(b -> (BlockSingle)b).collect(Collectors.toList());
     for (int i = 0; i < bss.size(); ++i) {
       Transfer.T transfer = bss.get(i).transfer;
@@ -406,7 +397,7 @@ public class LivenessVisitor implements cfg.Visitor {
       }
     }
 
-    List<BlockSingle> ret = new LinkedList<>();
+    LinkedList<Block.T> ret = new LinkedList<>();
 
     HashSet<BlockSingle> visited = new HashSet<>();
     Stack<BlockSingle> stack = new Stack<>();
@@ -468,14 +459,15 @@ public class LivenessVisitor implements cfg.Visitor {
 
     // Step 3: calculate the "liveIn" and "liveOut" sets for each block
     this.kind = Liveness_Kind_t.BlockInOut;
-    List<BlockSingle> rts = reverseTopoSort(m.blocks);
+    m.blocks = reverseTopoSort(m.blocks);
+    m.reverseTopoOrder = true;
     while (true) {
       boolean fixed = true;
-      for (BlockSingle b: rts) fixed = calculateBlockInOut(b) && fixed;
+      for (Block.T b: m.blocks) fixed = calculateBlockInOut((BlockSingle)b) && fixed;
       if (fixed) break;
     }
     if (control.Control.isTracing("liveness.step3")) {
-      rts.stream().forEach(b -> {
+      m.blocks.stream().map(b -> (BlockSingle)b).forEach(b -> {
         System.out.print("\nin, out for block " + b.label + ":");
         System.out.print("\n\tin: ");
         this.blockLiveIn.get(b).stream().forEach(e -> System.out.print(e + ", "));
@@ -505,11 +497,12 @@ public class LivenessVisitor implements cfg.Visitor {
 
     // Step 3: calculate the "liveIn" and "liveOut" sets for each block
     this.kind = Liveness_Kind_t.BlockInOut;
-    boolean fixed = false;
-    List<BlockSingle> rts = reverseTopoSort(m.blocks);
-    while (!fixed) {
-      for (BlockSingle b: rts)
-        fixed = calculateBlockInOut(b);
+    m.blocks = reverseTopoSort(m.blocks);
+    m.reverseTopoOrder = true;
+    while (true) {
+      boolean fixed = true;
+      for (Block.T b: m.blocks) fixed = calculateBlockInOut((BlockSingle)b) && fixed;
+      if (fixed) break;
     }
 
     // Step 4: calculate the "liveIn" and "liveOut" sets for each

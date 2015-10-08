@@ -19,8 +19,7 @@ import cfg.Cfg.Type.IntArrayType;
 import cfg.Cfg.Type.IntType;
 import cfg.Cfg.Vtable.VtableSingle;
 
-public class CopyProp implements cfg.Visitor
-{
+public class CopyProp implements cfg.Visitor {
   public Program.T program;
   
   public CopyProp()
@@ -77,6 +76,11 @@ public class CopyProp implements cfg.Visitor
 
   @Override
   public void visit(Cfg.Stm.Gt s) {
+
+  }
+
+  @Override
+  public void visit(AssignArray s) {
 
   }
 

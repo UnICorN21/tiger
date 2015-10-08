@@ -8,7 +8,7 @@ public class Main {
     control.CompilerPass deadClassPass = new control.CompilerPass(
         "Dead class elimination", ast, dceVisitor);
     if (!control.Control.skipPass("ast.DeadClass")){
-      deadClassPass.doit();
+      deadClassPass.exec();
       ast = dceVisitor.program;
     }
 
@@ -16,7 +16,7 @@ public class Main {
     control.CompilerPass algPass = new control.CompilerPass(
             "Algebraic simplification", ast, algVisitor);
     if (!control.Control.skipPass("ast.AlgSimp")){
-      algPass.doit();
+      algPass.exec();
       ast = algVisitor.program;
     }
 
@@ -24,7 +24,7 @@ public class Main {
     control.CompilerPass constFoldPass = new control.CompilerPass(
             "Const folding", ast, cfVisitor);
     if (!control.Control.skipPass("ast.ConstFold")){
-      constFoldPass.doit();
+      constFoldPass.exec();
       ast = cfVisitor.program;
     }
 
@@ -32,7 +32,7 @@ public class Main {
     control.CompilerPass deadCodePass = new control.CompilerPass(
         "Dead code elimination", ast, dcodeVisitor);
     if (!control.Control.skipPass("ast.DeadCode")){
-      deadCodePass.doit();
+      deadCodePass.exec();
       ast = dcodeVisitor.program;
     }
 

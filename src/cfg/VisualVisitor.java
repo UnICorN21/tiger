@@ -106,6 +106,11 @@ public class VisualVisitor implements Visitor {
   }
 
   @Override
+  public void visit(AssignArray s) {
+
+  }
+
+  @Override
   public void visit(Move s) {
     emit(s.dst + " = ");
     s.src.accept(this);

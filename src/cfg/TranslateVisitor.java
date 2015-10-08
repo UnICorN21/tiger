@@ -201,13 +201,13 @@ public class TranslateVisitor implements codegen.C.Visitor {
   public void visit(Ast.Exp.NewIntArray e) {
     e.exp.accept(this);
     Operand.T length = this.operand;
-    String dst = genVar();
-    emit(new NewIntArray(dst, length));
-    this.operand = new Var(dst);
+    emit(new NewIntArray(e.name, length));
+    this.operand = new Var(e.name);
   }
 
   @Override
   public void visit(Ast.Exp.NewObject e) {
+    // TODO: check whether the `genVar` can be supplant by e.name when re-add the gc support
     String dst = genVar(new ClassType(e.classType));
     emit(new NewObject(dst, e.classType));
     this.operand = new Var(dst);
@@ -256,8 +256,11 @@ public class TranslateVisitor implements codegen.C.Visitor {
 
   @Override
   public void visit(codegen.C.Ast.Stm.AssignArray s) {
+    s.index.accept(this);
+    Operand.T index = this.operand;
     s.exp.accept(this);
-    emit(new Move(s.id, null, this.operand));
+    Operand.T exp = this.operand;
+    emit(new AssignArray(s.id, null, index, exp));
   }
 
   @Override
@@ -349,6 +352,8 @@ public class TranslateVisitor implements codegen.C.Visitor {
   // method
   @Override
   public void visit(codegen.C.Ast.Method.MethodSingle m) {
+    util.Label.reset();
+    util.Temp.reset();
     this.newLocals = new java.util.LinkedList<>();
 
     m.retType.accept(this);
@@ -389,6 +394,8 @@ public class TranslateVisitor implements codegen.C.Visitor {
   // main method
   @Override
   public void visit(codegen.C.Ast.MainMethod.MainMethodSingle m) {
+    util.Label.reset();
+    util.Temp.reset();
     this.newLocals = new java.util.LinkedList<>();
 
     java.util.LinkedList<Dec.T> locals = new LinkedList<>();

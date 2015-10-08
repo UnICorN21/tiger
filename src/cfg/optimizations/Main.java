@@ -9,10 +9,9 @@ import java.util.HashSet;
 public class Main {
   public Program.T program;
 
-  private HashMap<Cfg.Stm.T, HashSet<String>> stmLiveIn = null;
-  private HashMap<Cfg.Stm.T, HashSet<String>> stmLiveOut = null;
-  private HashMap<Cfg.Transfer.T, HashSet<String>> transferLiveIn = null;
-  private HashMap<Cfg.Transfer.T, HashSet<String>> transferLiveOut = null;
+  private HashMap<Cfg.Stm.T, HashSet<String>> livenessOut = null;
+  private HashMap<Cfg.Stm.T, HashSet<Cfg.Stm.T>> reachingDefStmIn = null;
+  private HashMap<Cfg.Transfer.T, HashSet<Cfg.Stm.T>> reachingDefTransferIn = null;
 
   public void accept(Program.T cfg) {
     // liveness analysis
@@ -20,12 +19,9 @@ public class Main {
     control.CompilerPass livenessPass = new control.CompilerPass(
         "Liveness analysis", cfg, liveness);
     if (!control.Control.skipPass("cfg.liveness")) {
-      livenessPass.doit();
+      livenessPass.exec();
 
-      stmLiveIn = liveness.getStmLiveIn();
-      stmLiveOut = liveness.getStmLiveOut();
-      transferLiveIn = liveness.getTransferLiveIn();
-      transferLiveOut = liveness.getTransferLiveOut();
+      livenessOut = liveness.getStmLiveOut();
     }
 
     // dead-code elimination
@@ -34,11 +30,10 @@ public class Main {
         "Dead-code elimination", cfg, deadCode);
     if (!control.Control.skipPass("cfg.deadCode")) {
       if (control.Control.skipPass("cfg.liveness")) {
-        System.out.println("Warning: Dead code elimination was skipped because of insufficient liveness data.");
+        System.out.println("Warning: Dead code elimination was skipped because the lack of liveness analysis.");
       } else {
-        deadCode.setStmLiveOut(stmLiveOut);
-
-        deadCodePass.doit();
+        deadCode.setLivenessOut(livenessOut);
+        deadCodePass.exec();
         cfg = deadCode.program;
       }
     }
@@ -48,9 +43,10 @@ public class Main {
     control.CompilerPass reachingDefPass = new control.CompilerPass(
         "Reaching definition", cfg, reachingDef);
     if (!control.Control.skipPass("cfg.reaching")) {
-      reachingDefPass.doit();
-      // Export necessary data structures
-      // Your code here:
+      reachingDefPass.exec();
+
+      reachingDefStmIn = reachingDef.getStmIn();
+      reachingDefTransferIn = reachingDef.getTransferIn();
     }
 
     // constant propagation
@@ -58,8 +54,14 @@ public class Main {
     control.CompilerPass constPropPass = new control.CompilerPass(
         "Constant propagation", cfg, constProp);
     if (!control.Control.skipPass("cfg.constProp")) {
-      constPropPass.doit();
-      cfg = constProp.program;
+      if (control.Control.skipPass("cfg.reaching")) {
+        System.out.println("Warning: Constant propagation was skipped because the lack of reaching definition analysis.");
+      } else {
+        constProp.setReachingDefStmIn(reachingDefStmIn);
+        constProp.setReachingDefTransferIn(reachingDefTransferIn);
+        constPropPass.exec();
+        cfg = constProp.program;
+      }
     }
 
     // copy propagation
@@ -67,7 +69,7 @@ public class Main {
     control.CompilerPass copyPropPass = new control.CompilerPass(
         "Copy propagation", cfg, copyProp);
     if (!control.Control.skipPass("cfg.copyProp")) {
-      copyPropPass.doit();
+      copyPropPass.exec();
       cfg = copyProp.program;
     }
 
@@ -76,7 +78,7 @@ public class Main {
     control.CompilerPass availExpPass = new control.CompilerPass(
         "Available expression", cfg, availExp);
     if (!control.Control.skipPass("cfg.availExp")) {
-      availExpPass.doit();
+      availExpPass.exec();
       // Export necessary data structures
       // Your code here:
     }
@@ -86,7 +88,7 @@ public class Main {
     control.CompilerPass csePass = new control.CompilerPass(
         "Common subexpression elimination", cfg, cse);
     if (!control.Control.skipPass("cfg.cse")) {
-      csePass.doit();
+      csePass.exec();
       cfg = cse.program;
     }
 

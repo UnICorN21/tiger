@@ -75,6 +75,11 @@ public class Cse implements cfg.Visitor {
   }
 
   @Override
+  public void visit(AssignArray s) {
+
+  }
+
+  @Override
   public void visit(Cfg.Stm.Gt s) {
 
   }

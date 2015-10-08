@@ -76,7 +76,7 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(NewIntArray m) {
-    this.isayln(m.dst + " = new int[" + m.length + "];");
+    this.isayln(m.dst + " = Tiger_new_array(" + m.length + ");");
   }
 
   @Override
@@ -136,6 +136,16 @@ public class PrettyPrintVisitor implements Visitor {
     s.left.accept(this);
     this.say(" > ");
     s.right.accept(this);
+    this.say(";");
+  }
+
+  @Override
+  public void visit(AssignArray s) {
+    this.printSpaces();
+    this.say(s.dst + "[3 + ");
+    s.index.accept(this);
+    this.say("] = ");
+    s.exp.accept(this);
     this.say(";");
   }
 
@@ -208,7 +218,7 @@ public class PrettyPrintVisitor implements Visitor {
     this.printSpaces();
     this.say("return ");
     s.operand.accept(this);
-    this.say(";");
+    this.sayln(";");
   }
 
   // type
@@ -269,11 +279,14 @@ public class PrettyPrintVisitor implements Visitor {
       this.say(" " + dec.id + ";\n");
     }
     this.sayln("");
+    this.isayln("goto " + m.entry + ";");
+    this.sayln("");
+
     for (Block.T block : m.blocks){
       BlockSingle b = (BlockSingle)block;
       b.accept(this);
     }
-    this.sayln("\n}");
+    this.sayln("}");
   }
 
   @Override
@@ -292,7 +305,7 @@ public class PrettyPrintVisitor implements Visitor {
       BlockSingle b = (BlockSingle) block;
       b.accept(this);
     }
-    this.sayln("\n}\n");
+    this.sayln("}\n");
   }
 
   // vtables

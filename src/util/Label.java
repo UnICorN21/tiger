@@ -14,6 +14,8 @@ public class Label {
     return i == ((Label)obj).i;
   }
 
+  public static void reset() { count = 0; }
+
   @Override
   public String toString() {
     return "L_" + (Integer.toString(this.i));

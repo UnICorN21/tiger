@@ -42,7 +42,7 @@ public class Tiger {
       ast.PrettyPrintVisitor pp = new ast.PrettyPrintVisitor();
       control.CompilerPass ppPass = new control.CompilerPass(
           "Pretty printing AST", ast.Fac.prog, pp);
-      // ppPass.doit();
+      // ppPass.exec();
 
       // elaborate the given program, this step is necessary
       // for that it will annotate the AST with some
@@ -50,13 +50,13 @@ public class Tiger {
       elaborator.ElaboratorVisitor elab = new elaborator.ElaboratorVisitor();
       control.CompilerPass elabPass = new control.CompilerPass(
           "Elaborating the AST", ast.Fac.prog, elab);
-      elabPass.doit();
+      elabPass.exec();
 
       // optimize the AST
       ast.optimizations.Main optAstPasses = new ast.optimizations.Main();
       control.CompilerPass optAstPass = new control.CompilerPass(
           "Optimizing AST", optAstPasses, ast.Fac.prog);
-      optAstPass.doit();
+      optAstPass.exec();
       ast.Fac.prog = optAstPasses.program;
 
       // code generation
@@ -65,34 +65,34 @@ public class Tiger {
         codegen.bytecode.TranslateVisitor trans = new codegen.bytecode.TranslateVisitor();
         control.CompilerPass genBytecodePass = new control.CompilerPass(
             "Bytecode generation", ast.Fac.prog, trans);
-        genBytecodePass.doit();
+        genBytecodePass.exec();
         codegen.bytecode.Ast.Program.T bytecodeAst = trans.program;
 
         codegen.bytecode.PrettyPrintVisitor ppbc = new codegen.bytecode.PrettyPrintVisitor();
         control.CompilerPass ppBytecodePass = new control.CompilerPass(
             "Bytecode printing", bytecodeAst, ppbc);
-        ppBytecodePass.doit();
+        ppBytecodePass.exec();
         break;
       case C:
         // Compile this program to C.
         codegen.C.TranslateVisitor transC = new codegen.C.TranslateVisitor();
         control.CompilerPass genCCodePass = new control.CompilerPass(
                 "Translation to C code", ast.Fac.prog, transC);
-        genCCodePass.doit();
+        genCCodePass.exec();
         codegen.C.Ast.Program.T cAst = transC.program;
 
         if (control.Control.ConAst.dumpC) {
           codegen.C.PrettyPrintVisitor ppC = new codegen.C.PrettyPrintVisitor();
           control.CompilerPass ppCCodePass = new control.CompilerPass(
                   "C code printing", cAst, ppC);
-          ppCCodePass.doit();
+          ppCCodePass.exec();
         }
 
         // translation to control-flow graph
         cfg.TranslateVisitor transCfg = new cfg.TranslateVisitor();
         control.CompilerPass genCfgCodePass = new control.CompilerPass(
                 "Control-flow graph generation", cAst, transCfg);
-        genCfgCodePass.doit();
+        genCfgCodePass.exec();
         cfg.Cfg.Program.T cfgAst = transCfg.program;
 
         // visualize the control-flow graph, if necessary
@@ -100,31 +100,32 @@ public class Tiger {
           cfg.VisualVisitor toDot = new cfg.VisualVisitor();
           control.CompilerPass genDotPass = new control.CompilerPass(
                   "Draw control-flow graph", cfgAst, toDot);
-          genDotPass.doit();
+          genDotPass.exec();
         }
 
         // optimizations on the control-flow graph
         cfg.optimizations.Main cfgOpts = new cfg.optimizations.Main();
         control.CompilerPass cfgOptPass = new control.CompilerPass(
                 "Control-flow graph optimizations", cfgOpts, cfgAst);
-        cfgOptPass.doit();
+        cfgOptPass.exec();
+        cfgAst = cfgOpts.program;
 
         cfg.PrettyPrintVisitor ppCfg = new cfg.PrettyPrintVisitor();
         control.CompilerPass ppCfgCodePass = new control.CompilerPass(
             "C code printing", cfgAst, ppCfg);
-        ppCfgCodePass.doit();
+        ppCfgCodePass.exec();
         break;
       case Dalvik:
         codegen.dalvik.TranslateVisitor transDalvik = new codegen.dalvik.TranslateVisitor();
         control.CompilerPass genDalvikCodePass = new control.CompilerPass(
             "Dalvik code generation", ast.Fac.prog, transDalvik);
-        genDalvikCodePass.doit();
+        genDalvikCodePass.exec();
         codegen.dalvik.Ast.Program.T dalvikAst = transDalvik.program;
 
         codegen.dalvik.PrettyPrintVisitor ppDalvik = new codegen.dalvik.PrettyPrintVisitor();
         control.CompilerPass ppDalvikCodePass = new control.CompilerPass(
             "Dalvik code printing", dalvikAst, ppDalvik);
-        ppDalvikCodePass.doit();
+        ppDalvikCodePass.exec();
         break;
       case X86:
         // similar
@@ -174,14 +175,14 @@ public class Tiger {
       ast.PrettyPrintVisitor pp = new ast.PrettyPrintVisitor();
       control.CompilerPass ppAstPass = new control.CompilerPass(
           "Pretty printing the AST", theAst, pp);
-      ppAstPass.doit();
+      ppAstPass.exec();
     }
 
     // elaborate the AST, report all possible errors.
     elaborator.ElaboratorVisitor elab = new elaborator.ElaboratorVisitor();
     control.CompilerPass elabAstPass = new control.CompilerPass(
         "Elaborating the AST", theAst, elab);
-    elabAstPass.doit();
+    elabAstPass.exec();
 
     // optimize the AST
     ast.optimizations.Main optAstPasses = new ast.optimizations.Main();
@@ -196,32 +197,32 @@ public class Tiger {
       codegen.bytecode.TranslateVisitor trans = new codegen.bytecode.TranslateVisitor();
       control.CompilerPass genBytecodePass = new control.CompilerPass(
           "Bytecode generation", theAst, trans);
-      genBytecodePass.doit();
+      genBytecodePass.exec();
       codegen.bytecode.Ast.Program.T bytecodeAst = trans.program;
       codegen.bytecode.PrettyPrintVisitor ppbc = new codegen.bytecode.PrettyPrintVisitor();
       control.CompilerPass ppBytecodePass = new control.CompilerPass(
           "Bytecode printing", bytecodeAst, ppbc);
-      ppBytecodePass.doit();
+      ppBytecodePass.exec();
       break;
     case C:
       codegen.C.TranslateVisitor transC = new codegen.C.TranslateVisitor();
       control.CompilerPass genCCodePass = new control.CompilerPass(
           "C code generation", theAst, transC);
-      genCCodePass.doit();
+      genCCodePass.exec();
       codegen.C.Ast.Program.T cAst = transC.program;
 
       if (control.Control.ConAst.dumpC) {
         codegen.C.PrettyPrintVisitor ppC = new codegen.C.PrettyPrintVisitor();
         control.CompilerPass ppCCodePass = new control.CompilerPass(
                 "C code printing", cAst, ppC);
-        ppCCodePass.doit();
+        ppCCodePass.exec();
       }
 
       // translation to control-flow graph
       cfg.TranslateVisitor transCfg = new cfg.TranslateVisitor();
       control.CompilerPass genCfgCodePass = new control.CompilerPass(
               "Control-flow graph generation", cAst, transCfg);
-      genCfgCodePass.doit();
+      genCfgCodePass.exec();
       cfg.Cfg.Program.T cfgAst = transCfg.program;
 
       // visualize the control-flow graph, if necessary
@@ -229,32 +230,32 @@ public class Tiger {
         cfg.VisualVisitor toDot = new cfg.VisualVisitor();
         control.CompilerPass genDotPass = new control.CompilerPass(
                 "Draw control-flow graph", cfgAst, toDot);
-        genDotPass.doit();
+        genDotPass.exec();
       }
 
       // optimizations on the control-flow graph
       cfg.optimizations.Main cfgOpts = new cfg.optimizations.Main();
       control.CompilerPass cfgOptPass = new control.CompilerPass(
               "Control-flow graph optimizations", cfgOpts, cfgAst);
-      cfgOptPass.doit();
+      cfgOptPass.exec();
+      cfgAst = cfgOpts.program;
 
-
-      codegen.C.PrettyPrintVisitor ppc = new codegen.C.PrettyPrintVisitor();
-      control.CompilerPass ppCCodePass = new control.CompilerPass(
-          "C code printing", cAst, ppc);
-      ppCCodePass.doit();
+      cfg.PrettyPrintVisitor ppCfg = new cfg.PrettyPrintVisitor();
+      control.CompilerPass ppCfgCodePass = new control.CompilerPass(
+              "C code printing", cfgAst, ppCfg);
+      ppCfgCodePass.exec();
       break;
     case Dalvik:
       codegen.dalvik.TranslateVisitor transDalvik = new codegen.dalvik.TranslateVisitor();
       control.CompilerPass genDalvikCodePass = new control.CompilerPass(
           "Dalvik code generation", theAst, transDalvik);
-      genDalvikCodePass.doit();
+      genDalvikCodePass.exec();
       codegen.dalvik.Ast.Program.T dalvikAst = transDalvik.program;
 
       codegen.dalvik.PrettyPrintVisitor ppDalvik = new codegen.dalvik.PrettyPrintVisitor();
       control.CompilerPass ppDalvikCodePass = new control.CompilerPass(
           "Dalvik code printing", dalvikAst, ppDalvik);
-      ppDalvikCodePass.doit();
+      ppDalvikCodePass.exec();
       break;
     case X86:
       // similar

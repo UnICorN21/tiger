@@ -28,7 +28,7 @@ public class CompilerPass {
     this.x = x;
   }
 
-  public void doit() {
+  public void exec() {
     if (Control.verbose != Control.Verbose_t.Silent) {
       printSpaces();
       indent += nest;

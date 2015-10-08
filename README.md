@@ -2,7 +2,7 @@
 
 ----
 ### Status
-Complete part A, B, C(ex14, ex15)
+Complete part A, B, C(ex14 - ex17)
 
 ### Notes
 + Don't trust the official code.
