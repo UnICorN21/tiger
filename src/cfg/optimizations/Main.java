@@ -14,30 +14,6 @@ public class Main {
   private HashMap<Cfg.Transfer.T, HashSet<Cfg.Stm.T>> reachingDefTransferIn = null;
 
   public void accept(Program.T cfg) {
-    // liveness analysis
-    LivenessVisitor liveness = new LivenessVisitor();
-    control.CompilerPass livenessPass = new control.CompilerPass(
-        "Liveness analysis", cfg, liveness);
-    if (!control.Control.skipPass("cfg.liveness")) {
-      livenessPass.exec();
-
-      livenessOut = liveness.getStmLiveOut();
-    }
-
-    // dead-code elimination
-    DeadCode deadCode = new DeadCode();
-    control.CompilerPass deadCodePass = new control.CompilerPass(
-        "Dead-code elimination", cfg, deadCode);
-    if (!control.Control.skipPass("cfg.deadCode")) {
-      if (control.Control.skipPass("cfg.liveness")) {
-        System.out.println("Warning: Dead code elimination was skipped because the lack of liveness analysis.");
-      } else {
-        deadCode.setLivenessOut(livenessOut);
-        deadCodePass.exec();
-        cfg = deadCode.program;
-      }
-    }
-
     // reaching definition
     ReachingDefinition reachingDef = new ReachingDefinition();
     control.CompilerPass reachingDefPass = new control.CompilerPass(
@@ -90,6 +66,30 @@ public class Main {
     if (!control.Control.skipPass("cfg.cse")) {
       csePass.exec();
       cfg = cse.program;
+    }
+
+    // liveness analysis
+    LivenessVisitor liveness = new LivenessVisitor();
+    control.CompilerPass livenessPass = new control.CompilerPass(
+            "Liveness analysis", cfg, liveness);
+    if (!control.Control.skipPass("cfg.liveness")) {
+      livenessPass.exec();
+
+      livenessOut = liveness.getStmLiveOut();
+    }
+
+    // dead-code elimination
+    DeadCode deadCode = new DeadCode();
+    control.CompilerPass deadCodePass = new control.CompilerPass(
+            "Dead-code elimination", cfg, deadCode);
+    if (!control.Control.skipPass("cfg.deadCode")) {
+      if (control.Control.skipPass("cfg.liveness")) {
+        System.out.println("Warning: Dead code elimination was skipped because the lack of liveness analysis.");
+      } else {
+        deadCode.setLivenessOut(livenessOut);
+        deadCodePass.exec();
+        cfg = deadCode.program;
+      }
     }
 
     program = cfg;

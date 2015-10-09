@@ -40,7 +40,7 @@ public class DeadCode implements cfg.Visitor {
   public void visit(BlockSingle b) {
     LinkedList<Cfg.Stm.T> stms = new LinkedList<>();
     stms.addAll(b.stms.stream()
-            .filter(stm -> stm instanceof Print || this.livenessOut.get(stm).contains(stm.dst))
+            .filter(stm -> stm instanceof Print || stm instanceof Cfg.Stm.InvokeVirtual || this.livenessOut.get(stm).contains(stm.dst))
             .collect(Collectors.toList()));
     this.block = new BlockSingle(b.label, stms, b.transfer);
   }
