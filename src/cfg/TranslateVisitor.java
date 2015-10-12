@@ -335,7 +335,7 @@ public class TranslateVisitor implements codegen.C.Visitor {
       }
       newTuples.add(new cfg.Ftuple(t.classs, ret, args, t.id));
     }
-    this.vtable = new VtableSingle(v.id, newTuples);
+    this.vtable = new VtableSingle(v.id, v.gcMap, newTuples);
   }
 
   // class

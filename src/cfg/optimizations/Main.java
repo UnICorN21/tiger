@@ -9,9 +9,10 @@ import java.util.HashSet;
 public class Main {
   public Program.T program;
 
-  private HashMap<Cfg.Stm.T, HashSet<String>> livenessOut = null;
-  private HashMap<Cfg.Stm.T, HashSet<Cfg.Stm.T>> reachingDefStmIn = null;
-  private HashMap<Cfg.Transfer.T, HashSet<Cfg.Stm.T>> reachingDefTransferIn = null;
+  public HashMap<Cfg.Stm.T, HashSet<String>> livenessIn = null;
+  public HashMap<Cfg.Stm.T, HashSet<String>> livenessOut = null;
+  public HashMap<Cfg.Stm.T, HashSet<Cfg.Stm.T>> reachingDefStmIn = null;
+  public HashMap<Cfg.Transfer.T, HashSet<Cfg.Stm.T>> reachingDefTransferIn = null;
 
   public void accept(Program.T cfg) {
     // reaching definition
@@ -75,6 +76,7 @@ public class Main {
     if (!control.Control.skipPass("cfg.liveness")) {
       livenessPass.exec();
 
+      livenessIn = liveness.getStmLiveIn();
       livenessOut = liveness.getStmLiveOut();
     }
 

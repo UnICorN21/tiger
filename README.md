@@ -2,7 +2,7 @@
 
 ----
 ### Status
-Complete part A, B, C(ex14 - ex18)
+Complete part A, B, C(Except `Available Expression` and `CSE`).
 
 ### Notes
 + Don't trust the official code.

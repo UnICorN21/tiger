@@ -20,8 +20,22 @@ import cfg.Cfg.Type.IntType;
 import cfg.Cfg.Vtable.VtableSingle;
 import control.Control;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 public class PrettyPrintVisitor implements Visitor {
   private java.io.BufferedWriter writer;
+  private HashMap<T, HashSet<String>> livenessStmIn;
+  private HashSet<DecSingle> curMethodFormals;
+  private HashSet<DecSingle> curMethodLocalRefs;
+
+  public PrettyPrintVisitor(HashMap<T, HashSet<String>> livenessStmIn) {
+    this.livenessStmIn = livenessStmIn;
+    curMethodFormals = new HashSet<>();
+    curMethodLocalRefs = new HashSet<>();
+  }
 
   private void printSpaces() {
     this.say("  ");
@@ -109,6 +123,27 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(InvokeVirtual s) {
+    // print frame info of safe points
+    HashSet<String> aliveVarSet = livenessStmIn.get(s);
+    String argGcMap = this.curMethodFormals.stream().map(e -> {
+      if (aliveVarSet.contains(e.id) && (e.type instanceof ClassType || e.type instanceof IntArrayType)) return "1";
+      else return "0";
+    }).reduce("", String::concat);
+    Set<DecSingle> aliveLocalRefs = this.curMethodLocalRefs.stream()
+            .filter(e -> aliveVarSet.contains(e.id)).collect(Collectors.toSet());
+
+    this.isayln(String.format("int *frame = (int*)malloc(sizeof(int*) * (4 + %s));", aliveLocalRefs.size()));
+    this.isayln("fprev = prev; prev = frame;");
+    this.isayln("*(void**)frame = fprev; // prev");
+    this.isayln("++frame; *(char**)frame = \"" + argGcMap + "\"; // arguments_gc_map");
+    this.isayln("++frame; *(int**)frame = &this; // arguments_base_addr");
+    this.isayln("++frame; frame = " + aliveLocalRefs.size() + "; // local_refs_cnt");
+    aliveLocalRefs.forEach(ref -> {
+      this.isayln("++frame; *(void**)frame = &" + ref.id + ";");
+    });
+    this.sayln("");
+
+    // print normal info
     this.printSpaces();
     this.say(s.dst + " = " + s.obj);
     this.say("->vptr->" + s.f + "("+s.obj);
@@ -116,7 +151,11 @@ public class PrettyPrintVisitor implements Visitor {
       this.say(", ");
       x.accept(this);
     }
-    this.say(");");
+    this.sayln(");\n");
+
+    // pop up the frame
+    this.isayln("free(prev);");
+    this.isayln("prev = fprev;");
   }
 
   @Override
@@ -258,6 +297,12 @@ public class PrettyPrintVisitor implements Visitor {
   // method
   @Override
   public void visit(MethodSingle m) {
+    this.curMethodFormals.clear();
+    this.curMethodLocalRefs.clear();
+    m.formals.stream().map(e -> (DecSingle)e).forEach(this.curMethodFormals::add);
+    m.locals.stream().map(e -> (DecSingle)e).filter(e -> e.type instanceof ClassType || e.type instanceof IntArrayType)
+            .forEach(this.curMethodLocalRefs::add);
+
     m.retType.accept(this);
     this.say(" " + m.classId + "_" + m.id + "(");
     int size = m.formals.size();
@@ -279,8 +324,8 @@ public class PrettyPrintVisitor implements Visitor {
       this.say(" " + dec.id + ";\n");
     }
     this.sayln("");
+    this.isayln("void* fprev;");
     this.isayln("goto " + m.entry + ";");
-    this.sayln("");
 
     for (Block.T block : m.blocks){
       BlockSingle b = (BlockSingle)block;
@@ -291,6 +336,11 @@ public class PrettyPrintVisitor implements Visitor {
 
   @Override
   public void visit(MainMethodSingle m) {
+    this.curMethodFormals.clear();
+    this.curMethodLocalRefs.clear();
+    m.locals.stream().map(e -> (DecSingle)e).filter(e -> e.type instanceof ClassType || e.type instanceof IntArrayType)
+            .forEach(this.curMethodLocalRefs::add);
+
     this.sayln("int Tiger_main ()");
     this.sayln("{");
     for (Dec.T dec : m.locals) {
@@ -313,6 +363,7 @@ public class PrettyPrintVisitor implements Visitor {
   public void visit(VtableSingle v) {
     this.sayln("struct " + v.id + "_vtable");
     this.sayln("{");
+    this.isayln("char *gc_map;");
     for (cfg.Ftuple t : v.ms) {
       this.say("  ");
       t.ret.accept(this);
@@ -324,6 +375,7 @@ public class PrettyPrintVisitor implements Visitor {
   private void outputVtable(VtableSingle v) {
     this.sayln("struct " + v.id + "_vtable " + v.id + "_vtable_ = ");
     this.sayln("{");
+    this.isayln(String.format("\"%s\"", v.gcMap) + ",");
     for (cfg.Ftuple t : v.ms) {
       this.say("  ");
       this.sayln(t.classs + "_" + t.id + ",");
@@ -337,6 +389,8 @@ public class PrettyPrintVisitor implements Visitor {
     this.sayln("struct " + c.id);
     this.sayln("{");
     this.sayln("  struct " + c.id + "_vtable *vptr;");
+    this.isayln("int size;");
+    this.isayln("void *forwarding;");
     for (cfg.Tuple t : c.decs) {
       this.say("  ");
       t.type.accept(this);

@@ -115,6 +115,10 @@ public class LivenessVisitor implements cfg.Visitor {
     return temp;
   }
 
+  public HashMap<T, HashSet<String>> getStmLiveIn() {
+    return stmLiveIn;
+  }
+
   public HashMap<T, HashSet<String>> getStmLiveOut() {
     return stmLiveOut;
   }

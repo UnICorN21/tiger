@@ -110,7 +110,7 @@ public class Tiger {
         cfgOptPass.exec();
         cfgAst = cfgOpts.program;
 
-        cfg.PrettyPrintVisitor ppCfg = new cfg.PrettyPrintVisitor();
+        cfg.PrettyPrintVisitor ppCfg = new cfg.PrettyPrintVisitor(cfgOpts.livenessIn);
         control.CompilerPass ppCfgCodePass = new control.CompilerPass(
             "C code printing", cfgAst, ppCfg);
         ppCfgCodePass.exec();
@@ -240,7 +240,7 @@ public class Tiger {
       cfgOptPass.exec();
       cfgAst = cfgOpts.program;
 
-      cfg.PrettyPrintVisitor ppCfg = new cfg.PrettyPrintVisitor();
+      cfg.PrettyPrintVisitor ppCfg = new cfg.PrettyPrintVisitor(cfgOpts.livenessIn);
       control.CompilerPass ppCfgCodePass = new control.CompilerPass(
               "C code printing", cfgAst, ppCfg);
       ppCfgCodePass.exec();

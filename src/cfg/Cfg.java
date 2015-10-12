@@ -642,10 +642,12 @@ public class Cfg {
 
     public static class VtableSingle extends T {
       public String id; // name of the class
+      public String gcMap; // class gc map
       public LinkedList<cfg.Ftuple> ms; // all methods
 
-      public VtableSingle(String id, LinkedList<cfg.Ftuple> ms) {
+      public VtableSingle(String id, String gcMap, LinkedList<cfg.Ftuple> ms) {
         this.id = id;
+        this.gcMap = gcMap;
         this.ms = ms;
       }
 

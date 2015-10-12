@@ -377,6 +377,10 @@ public class PrettyPrintVisitor implements Visitor {
     if (0 != localRefCnt) this.sayln("");
 
     m.stm.accept(this);
+
+    // pop the gc frame
+    this.isayln("prev = frame.prev;");
+
     this.isayln("return 0;");
     this.sayln("}");
   }
