@@ -9,7 +9,6 @@ import codegen.bytecode.Ast.Method.MethodSingle;
 import codegen.bytecode.Ast.Program.ProgramSingle;
 import codegen.bytecode.Ast.Stm.*;
 import codegen.bytecode.Ast.Type.Int;
-import org.jetbrains.annotations.NotNull;
 import util.Label;
 
 import java.util.Hashtable;
@@ -42,7 +41,6 @@ public class TranslateVisitor implements ast.Visitor {
 
   private String getFieldSpec(String id) { return String.format("%s/%s", classId, id); }
 
-  @NotNull
   private Type.T transformType(ast.Ast.Type.T type) {
     switch (type.getNum()) {
       case -1:case 0: return new Type.Int();

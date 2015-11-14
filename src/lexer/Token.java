@@ -3,13 +3,6 @@ package lexer;
 import java.util.HashMap;
 
 public class Token {
-  // Lab 1, exercise 1: read the MiniJava specification
-  // carefully, and answer these two questions:
-  //   1. whether or not one should add other token kinds?
-  //   2. which tokens come with an extra "lexeme", and
-  //      which don't?
-  // It's highly recommended that these token names are
-  // alphabetically ordered, if you add new ones.
   public enum Kind {
     TOKEN_ADD, // "+"
     TOKEN_AND, // "&&"
@@ -108,10 +101,6 @@ public class Token {
   @Override
   public String toString() {
     String s;
-
-    // to check that the "lineRow" field has been properly set.
-    if (this.lineRow == null)
-      new util.Todo();
 
     s = ": " + ((this.lexeme == null) ? "<NONE>" : this.lexeme) + " : at (" + this.lineRow + ", " + this.lineCol + ")";
     return this.kind.toString() + s;

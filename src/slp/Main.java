@@ -1,9 +1,6 @@
 package slp;
 
-import java.io.FileWriter;
-import java.util.HashMap;
-import java.util.HashSet;
-
+import control.Control;
 import slp.Slp.Exp;
 import slp.Slp.Exp.Eseq;
 import slp.Slp.Exp.Id;
@@ -12,8 +9,10 @@ import slp.Slp.Exp.Op;
 import slp.Slp.ExpList;
 import slp.Slp.Stm;
 import util.Bug;
-import util.Todo;
-import control.Control;
+
+import java.io.FileWriter;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class Main {
   // ///////////////////////////////////////////
