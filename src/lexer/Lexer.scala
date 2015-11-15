@@ -4,7 +4,7 @@ import java.io.InputStream
 
 import control.Control.ConLexer
 import lexer.Token.Kind
-import util.Bug
+import util.BugString
 
 import scala.util.{Failure, Success, Try}
 
@@ -18,8 +18,6 @@ import scala.util.{Failure, Success, Try}
   * @param fstream input stream for the above file
   */
 class Lexer(fname: String, fstream: InputStream) {
-  implicit def bug2Throwable(bug: Bug): Throwable = new Throwable("Compile error")
-
   private var buffer = List[Token]()
   private var lineRow = 1
   private var lineCol = 0
@@ -56,7 +54,7 @@ class Lexer(fname: String, fstream: InputStream) {
       } while ('/' != read)
       read
     case _ =>
-      Bug
+      bug"found unrecognized token at ($lineRow, $lineCol)"
       -1;
   }
 
@@ -99,7 +97,7 @@ class Lexer(fname: String, fstream: InputStream) {
       case '=' => Token(Kind.TOKEN_ASSIGN)
       case '&' => read match {
         case '&' => Token(Kind.TOKEN_AND)
-        case '_' => Failure(Bug)
+        case '_' => Failure(bug"found unrecognized token at ($lineRow, $lineCol)")
       }
       case c if Character.isDigit(c) =>
         def build(all: String): String = {

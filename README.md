@@ -1,11 +1,7 @@
-## Lab5
+## A custom version
 
-----
-### Status
-Complete part A, B, C(Except `Available Expression` and `CSE`).
+I try to refactor the whole compiler with scala and add more modern language features.
 
-### Notes
-+ Don't trust the official code.
-+ Refers to chapter [10](http://staff.cs.upt.ro/~chirila/teaching/upt/c51-pt/aamcij/7113/Fly0067.html),
-                    [17](http://staff.cs.upt.ro/~chirila/teaching/upt/c51-pt/aamcij/7113/Fly0127.html)
-                    if you feel it's intricate.
+**Note**: I used `HashSet` in many visitors which provide no order guarantee in old versions.
+Although it works fine with them but they deteriorate to bugs when meeting with scala code.
+Therefore, it'd better be replaced with `LinkedHashSet` even in older versions.

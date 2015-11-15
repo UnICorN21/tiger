@@ -22,19 +22,20 @@ import control.Control;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class PrettyPrintVisitor implements Visitor {
   private java.io.BufferedWriter writer;
   private HashMap<T, HashSet<String>> livenessStmIn;
-  private HashSet<DecSingle> curMethodFormals;
-  private HashSet<DecSingle> curMethodLocalRefs;
+  private LinkedHashSet<DecSingle> curMethodFormals;
+  private LinkedHashSet<DecSingle> curMethodLocalRefs;
 
   public PrettyPrintVisitor(HashMap<T, HashSet<String>> livenessStmIn) {
     this.livenessStmIn = livenessStmIn;
-    curMethodFormals = new HashSet<>();
-    curMethodLocalRefs = new HashSet<>();
+    curMethodFormals = new LinkedHashSet<>();
+    curMethodLocalRefs = new LinkedHashSet<>();
   }
 
   private void printSpaces() {
