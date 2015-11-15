@@ -14,6 +14,7 @@ public class Token {
     TOKEN_DOT, // "."
     TOKEN_ELSE, // "else"
     TOKEN_EOF, // EOF
+    TOKEN_EQ, // "=="
     TOKEN_EXTENDS, // "extends"
     TOKEN_FALSE, // "false"
     TOKEN_GT, // ">"
@@ -50,6 +51,7 @@ public class Token {
     TOKEN_THIS, // "this"
     TOKEN_TIMES, // "*"
     TOKEN_TRUE, // "true"
+    TOKEN_UNEQ, // "!="
     TOKEN_VOID, // "void"
     TOKEN_WHILE, // "while"
   }

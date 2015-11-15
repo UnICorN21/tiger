@@ -204,7 +204,7 @@ public class TranslateVisitor implements ast.Visitor {
   // statements
   @Override
   public void visit(ast.Ast.Stm.Assign s) {
-    emit(new Debug.Line(s.exp.pos.lineRow));
+    emit(new Debug.Line(s.exp.pos.lineRow()));
     if (s.isField) {
       emit(new This());
       s.exp.accept(this);
@@ -222,7 +222,7 @@ public class TranslateVisitor implements ast.Visitor {
 
   @Override
   public void visit(ast.Ast.Stm.AssignArray s) {
-    emit(new Debug.Line(s.exp.pos.lineRow));
+    emit(new Debug.Line(s.exp.pos.lineRow()));
     if (s.isField) {
       emit(new This());
       emit(new GetField(getFieldSpec(s.id), "[I"));
@@ -242,7 +242,7 @@ public class TranslateVisitor implements ast.Visitor {
 
   @Override
   public void visit(ast.Ast.Stm.If s) {
-    emit(new Debug.Line(s.condition.pos.lineRow));
+    emit(new Debug.Line(s.condition.pos.lineRow()));
     Label tl = new Label(), fl = new Label(), el = new Label();
     s.condition.accept(this);
 
@@ -258,14 +258,14 @@ public class TranslateVisitor implements ast.Visitor {
 
   @Override
   public void visit(ast.Ast.Stm.Print s) {
-    emit(new Debug.Line(s.exp.pos.lineRow));
+    emit(new Debug.Line(s.exp.pos.lineRow()));
     s.exp.accept(this);
     emit(new Print());
   }
 
   @Override
   public void visit(ast.Ast.Stm.While s) {
-    emit(new Debug.Line(s.condition.pos.lineRow));
+    emit(new Debug.Line(s.condition.pos.lineRow()));
     Label wl = new Label(), el = new Label();
     emit(new LabelJ(wl));
     s.condition.accept(this);

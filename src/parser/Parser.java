@@ -35,7 +35,7 @@ public class Parser {
       ret = null;
       System.out.println("Expects: " + kind.toString());
       System.out.println("But got: " + current.kind.toString() +
-              " at (" + current.lineRow + ", " + current.lineCol + ") in " + lexer.getFname());
+              " at (" + current.lineRow + ", " + current.lineCol + ") in " + lexer.fname());
       advance();
 //      System.exit(1);
     }

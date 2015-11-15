@@ -11,13 +11,10 @@ import scala.util.{Failure, Success, Try}
 /**
   * ScalaLexer is a substitute of the current `Lexer` class.
   * It'll be renamed to `Lexer` someday.
-  *
-  * Maybe exists some bugs in gc part through it doesn't participate in it directly.
-  *
   * @param fname the input file name to be compiled
   * @param fstream input stream for the above file
   */
-class Lexer(fname: String, fstream: InputStream) {
+class Lexer(val fname: String, fstream: InputStream) {
   private var buffer = List[Token]()
   private var lineRow = 1
   private var lineCol = 0
@@ -91,10 +88,24 @@ class Lexer(fname: String, fstream: InputStream) {
       case '}' => Token(Kind.TOKEN_RBRACE)
       case ',' => Token(Kind.TOKEN_COMMER)
       case '.' => Token(Kind.TOKEN_DOT)
-      case '!' => Token(Kind.TOKEN_NOT)
+      case '!' =>
+        mark()
+        read match {
+          case '=' => Token(Kind.TOKEN_UNEQ)
+          case _ =>
+            reset()
+            Token(Kind.TOKEN_NOT)
+        }
       case ':' => Token(Kind.TOKEN_COLON)
       case ';' => Token(Kind.TOKEN_SEMI)
-      case '=' => Token(Kind.TOKEN_ASSIGN)
+      case '=' =>
+        mark()
+        read match {
+          case '=' => Token(Kind.TOKEN_EQ)
+          case _ =>
+            reset()
+            Token(Kind.TOKEN_ASSIGN)
+        }
       case '&' => read match {
         case '&' => Token(Kind.TOKEN_AND)
         case '_' => Failure(bug"found unrecognized token at ($lineRow, $lineCol)")
@@ -125,8 +136,6 @@ class Lexer(fname: String, fstream: InputStream) {
           Token(lexer.Token.keywords.get(unresolved))
         else Token(Kind.TOKEN_ID, unresolved)
     }
-
-  def getFname = fname
 
   def lookAhead() = {
     val token = nextToken()
