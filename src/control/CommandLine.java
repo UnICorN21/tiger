@@ -5,20 +5,16 @@ import java.util.LinkedList;
 import util.Bug;
 import control.Control.ConSlp;
 
-public class CommandLine
-{
-  static interface F<X>
-  {
-    public void f(X x);
+public class CommandLine {
+  interface F<X> {
+    void f(X x);
   }
 
-  static enum Kind
-  {
+  enum Kind {
     Empty, Bool, Int, String, StringList,
   }
 
-  static class Arg<X>
-  {
+  static class Arg<X> {
     String name;
     String option;
     String desription;
@@ -26,8 +22,7 @@ public class CommandLine
     F<X> action;
 
     public Arg(String name, String option, String description, Kind kind,
-        F<X> action)
-    {
+        F<X> action) {
       this.name = name;
       this.option = option;
       this.desription = description;
@@ -39,11 +34,10 @@ public class CommandLine
   private LinkedList<Arg<Object>> args;
 
   @SuppressWarnings("unchecked")
-  public CommandLine()
-  {
+  public CommandLine() {
     this.args = new util.Flist<Arg<Object>>()
         .list(
-            new Arg<Object>(
+            new Arg<>(
                 "codegen",
                 "{bytecode|C|dalvik|x86}",
                 "which code generator to use",
@@ -63,12 +57,10 @@ public class CommandLine
                     output();
                     System.exit(1);
                   }
-                  return;
-                }), new Arg<Object>("dump", "<ir>",
+                }), new Arg<>("dump", "<ir>",
                 "dump information about the ir", Kind.String, new F<Object>() {
                   @Override
-                  public void f(Object ss)
-                  {
+                  public void f(Object ss) {
                     String s = (String) ss;
                     if (s.equals("ast")) {
                       control.Control.ConAst.dumpAst = true;
@@ -83,9 +75,8 @@ public class CommandLine
                       output();
                       System.exit(1);
                     }
-                    return;
                   }
-                }), new Arg<Object>("elab", "<arg>",
+                }), new Arg<>("elab", "<arg>",
                 "dump information about elaboration", Kind.String, (ss) -> {
                   String s = (String) ss;
                   if (s.equals("classTable")) {
@@ -97,17 +88,14 @@ public class CommandLine
                     output();
                     System.exit(1);
                   }
-                  return;
-                }), new Arg<Object>("help", null, "show this help information",
+                }), new Arg<>("help", null, "show this help information",
                 Kind.Empty, (s) -> {
                   usage();
                   System.exit(1);
-                  return;
-                }), new Arg<Object>("lex", null,
+                }), new Arg<>("lex", null,
                 "dump the result of lexical analysis", Kind.Empty, (s) -> {
                   Control.ConLexer.dump = true;
-                  return;
-                }), new Arg<Object>("slp", "{args|interp|compile}",
+                }), new Arg<>("slp", "{args|interp|compile}",
                 "run the SLP interpreter", Kind.String, (ss) -> {
                   String s = (String) ss;
 
@@ -126,36 +114,29 @@ public class CommandLine
                     output();
                     System.exit(1);
                   }
-                }), new Arg<Object>("output", "<outfile>",
+                }), new Arg<>("output", "<outfile>",
                 "set the name of the output file", Kind.String, (Object s) -> {
                   Control.ConCodeGen.outputName = (String) s;
-                  return;
-                }), new Arg<Object>("skip", "<pass>",
+                }), new Arg<>("skip", "<pass>",
                 "which compile pass to skip", Kind.String, (s) -> {
                   Control.addPass((String) s);
-                  return;
-                }), new Arg<Object>("testFac", null,
+                }), new Arg<>("testFac", null,
                 "whether or not to test the Tiger compiler on Fac.java",
                 Kind.Empty, (s) -> {
                   Control.ConAst.testFac = true;
-                  return;
-                }), new Arg<Object>("testlexer", null,
+                }), new Arg<>("testlexer", null,
                 "whether or not to test the lexer", Kind.Empty, (s) -> {
                   Control.ConLexer.test = true;
-                  return;
-                }), new Arg<Object>("trace", "<method>",
+                }), new Arg<>("trace", "<method>",
                 "which method to trace", Kind.String, new F<Object>() {
                   @Override
-                  public void f(Object s)
-                  {
+                  public void f(Object s) {
                     Control.addTrace((String) s);
-                    return;
                   }
-                }), new Arg<Object>("verbose", "{0|1|2}", "how verbose to be",
+                }), new Arg<>("verbose", "{0|1|2}", "how verbose to be",
                 Kind.Int, new F<Object>() {
                   @Override
-                  public void f(Object n)
-                  {
+                  public void f(Object n) {
                     int i = (Integer) n;
                     switch (i) {
                     case 0:
@@ -168,13 +149,11 @@ public class CommandLine
                       Control.verbose = Control.Verbose_t.Detailed;
                       break;
                     }
-                    return;
                   }
-                }), new Arg<Object>("visualize", "<bmp|pdf|ps|jpg>",
+                }), new Arg<>("visualize", "<bmp|pdf|ps|jpg>",
                 "to visualize a graph", Kind.String, new F<Object>() {
                   @Override
-                  public void f(Object ss)
-                  {
+                  public void f(Object ss) {
                     String s = (String) ss;
                     if (s.equals("bmp")) {
                       control.Control.visualize = control.Control.Visualize_Kind_t.Bmp;
@@ -189,15 +168,13 @@ public class CommandLine
                       output();
                       System.exit(1);
                     }
-                    return;
                   }
                 }));
   }
 
   // scan the command line arguments, return the file name
   // in it. The file name should be unique.
-  public String scan(String[] cargs)
-  {
+  public String scan(String[] cargs) {
     String filename = null;
 
     for (int i = 0; i < cargs.length; i++) {
@@ -209,7 +186,6 @@ public class CommandLine
           System.out.println("Error: can only compile one Java file a time");
           System.exit(1);
         }
-      } else {
       }
 
       boolean found = false;
@@ -237,9 +213,9 @@ public class CommandLine
         switch (arg.kind) {
         case Bool:
           if (theArg.equals("true"))
-            arg.action.f(new Boolean(true));
+            arg.action.f(true);
           else if (theArg.equals("false"))
-            arg.action.f(new Boolean(false));
+            arg.action.f(false);
           else {
             System.out.println("Error: " + arg.name + ": requires a boolean");
             this.output();
@@ -278,29 +254,21 @@ public class CommandLine
     return filename;
   }
 
-  private void outputSpace(int n)
-  {
-    if (n < 0)
-      new Bug();
+  private void outputSpace(int n) {
+    if (n < 0) new Bug();
 
     while (n-- != 0)
       System.out.print(" ");
-    return;
   }
 
-  public void output()
-  {
+  public void output() {
     int max = 0;
     for (Arg<Object> a : this.args) {
       int current = a.name.length();
       if (a.option != null)
         current += a.option.length();
-      else
-        ;
       if (current > max)
         max = current;
-      else
-        ;
     }
     System.out.println("Available options:");
     for (Arg<Object> a : this.args) {
@@ -309,20 +277,16 @@ public class CommandLine
       if (a.option != null) {
         current += a.option.length();
         System.out.print(a.option);
-      } else
-        ;
+      }
       outputSpace(max - current + 1);
       System.out.println(a.desription);
     }
-    return;
   }
 
-  public void usage()
-  {
+  public void usage() {
     System.out
         .println("The Tiger compiler. Copyright (C) 2013-, SSE of USTC.\n"
             + "Usage: java Tiger [options] <filename>\n");
     output();
-    return;
   }
 }
