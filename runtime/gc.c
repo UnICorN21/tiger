@@ -34,11 +34,9 @@ struct JavaHeap {
 // "heap_init" function.
 struct JavaHeap heap;
 
-// Lab 4, exercise 10:
 // Given the heap size (in bytes), allocate a Java heap
 // in the C heap, initialize the relevant fields.
 void Tiger_heap_init (int heapSize) {
-  // You should write 7 statement here:
   // #1: allocate a chunk of memory of size "heapSize" using "malloc"
   if (0 >= heapSize) {
     printf("Warning: try to create a heap space less than 0.\n");
@@ -62,7 +60,6 @@ void Tiger_heap_init (int heapSize) {
 }
 
 // The "prev" pointer, pointing to the top frame on the GC stack. 
-// (see part A of Lab 4)
 void *prev = 0;
 
 //===============================================================//
@@ -70,7 +67,6 @@ void *prev = 0;
 
 const int HEAD_SZ = sizeof(void*) * 3;
 
-// Lab 4: exercise 11:
 // "new" a new object, do necessary initializations, and
 // return the pointer (reference).
 /*    ----------------
@@ -190,8 +186,6 @@ void *Tiger_new_array (int length) {
 
 //===============================================================//
 // The Gimple Garbage Collector
-
-// Lab 4, exercise 12:
 // A copying collector based-on Cheney's algorithm.
 
 inline static void swap(void * *a, void * *b) {

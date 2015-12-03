@@ -137,7 +137,7 @@ public class PrettyPrintVisitor implements Visitor {
     this.isayln("fprev = prev; prev = frame;");
     this.isayln("*(void**)frame = fprev; // prev");
     this.isayln("++frame; *(char**)frame = \"" + argGcMap + "\"; // arguments_gc_map");
-    this.isayln("++frame; *(int**)frame = &this; // arguments_base_addr");
+    this.isayln("++frame; *(int**)frame = " + (this.curMethodFormals.isEmpty() ? "NULL" : "&this") + "; // arguments_base_addr");
     this.isayln("++frame; frame = " + aliveLocalRefs.size() + "; // local_refs_cnt");
     aliveLocalRefs.forEach(ref -> {
       this.isayln("++frame; *(void**)frame = &" + ref.id + ";");
@@ -352,6 +352,8 @@ public class PrettyPrintVisitor implements Visitor {
       this.sayln(d.id + ";");
     }
     this.sayln("");
+    this.isayln("void* fprev;");
+    this.isayln("goto L_0;");
     for (Block.T block : m.blocks) {
       BlockSingle b = (BlockSingle) block;
       b.accept(this);
