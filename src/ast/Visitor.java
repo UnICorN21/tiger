@@ -39,6 +39,8 @@ public interface Visitor {
 
    void visit(Num e);
 
+   default void visit(StringLiteral e) { /* Stub currently. */}
+
    void visit(Sub e);
 
    void visit(This e);

@@ -88,6 +88,15 @@ class Lexer(val fname: String, fstream: InputStream) {
       case '}' => Token(Kind.TOKEN_RBRACE)
       case ',' => Token(Kind.TOKEN_COMMER)
       case '.' => Token(Kind.TOKEN_DOT)
+      case '"' =>
+        def build(all: String = ""): String = {
+          mark()
+          read match {
+            case '"' => all
+            case c => build(all + c.toChar)
+          }
+        }
+        Token(Kind.TOKEN_STR_LITERAL, build())
       case '!' =>
         mark()
         read match {

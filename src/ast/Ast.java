@@ -364,6 +364,21 @@ public class Ast {
       }
     }
 
+    // string literal
+    public static class StringLiteral extends T {
+      public String literal;
+
+      public StringLiteral(String literal, Pos pos) {
+        super(pos);
+        this.literal = literal;
+      }
+
+      @Override
+      public void accept(ast.Visitor v) {
+        v.visit(this);
+      }
+    }
+
     // -
     public static class Sub extends T {
       public T left;

@@ -48,9 +48,6 @@ public class PrettyPrintVisitor implements Visitor {
   // expressions
   @Override
   public void visit(Add e) {
-    // Lab2, exercise4: filling in missing code.
-    // Similar for other methods with empty bodies.
-    // Your code here:
     this.say("(");
     e.left.accept(this);
     this.say(" + ");

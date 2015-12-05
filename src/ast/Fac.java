@@ -10,9 +10,6 @@ import ast.Ast.Stm.Print;
 import util.Pos;
 
 public class Fac {
-  // Lab2, exercise 2: read the following code and make
-  // sure you understand how the sample program "test/Fac.java" is represented.
-
   // /////////////////////////////////////////////////////
   // To represent the "Fac.java" program in memory manually
   // this is for demonstration purpose only, and
@@ -52,10 +49,4 @@ public class Fac {
   // program
   public static Program.T prog = new ProgramSingle(factorial,
           new util.Flist<ast.Ast.Class.T>().list(fac));
-
-  // Lab2, exercise 2: you should write some code to
-  // represent the program "test/Sum.java".
-  // Your code here:
-
-
 }

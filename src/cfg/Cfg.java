@@ -553,7 +553,6 @@ public class Cfg {
       public String toString() {
         StringBuffer strb = new StringBuffer();
         strb.append(this.label.toString() + ":\\n");
-        // Lab5. Your code here:
         stms.stream().forEach(s -> strb.append(s + "\\n"));
         strb.append(transfer);
         return strb.toString();

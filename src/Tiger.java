@@ -265,12 +265,32 @@ public class Tiger {
     }
   }
 
-  public void assemble(String str) {
-    // Your code here:
-  }
-
   public void link(String str) {
-    // Your code here:
+    System.out.println("Start linking...");
+    switch (control.Control.ConCodeGen.codegen) {
+      case C:
+        String outName = str.substring(str.lastIndexOf('/') + 1, str.lastIndexOf(".java"));
+        try {
+          Process proc = Runtime.getRuntime().exec("gcc " + str + ".c -I runtime -o " + outName);
+          int exitVal = proc.waitFor();
+          if (0 == exitVal) System.out.println("Link succeed.");
+          else throw new RuntimeException("ExitVal is not zero.");
+        } catch (Exception e) {
+          System.out.println("Link failed.");
+          e.printStackTrace();
+        }
+        break;
+      case Bytecode:
+        try {
+          Process proc = Runtime.getRuntime().exec("java -jar jasmin.jar *.j");
+          int exitVal = proc.waitFor();
+          if (0 == exitVal) System.out.println("Link succeed.");
+          else throw new RuntimeException("ExitVal is not zero.");
+        } catch (Exception e) {
+          System.out.println("Link failed.");
+          e.printStackTrace();
+        }
+    }
   }
 
   public void compileAndLink(String fname) {
@@ -278,11 +298,6 @@ public class Tiger {
     control.CompilerPass compilePass = new control.CompilerPass("Compile",
         tiger, fname);
     compilePass.doitName("compile");
-
-    // assembling
-    control.CompilerPass assemblePass = new control.CompilerPass("Assembling",
-        tiger, fname);
-    assemblePass.doitName("assemble");
 
     // linking
     control.CompilerPass linkPass = new control.CompilerPass("Linking", tiger,

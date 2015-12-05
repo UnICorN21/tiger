@@ -46,6 +46,7 @@ public class Token {
     TOKEN_SEMI, // ";"
     TOKEN_STATIC, // "static"
     TOKEN_STRING, // "String"
+    TOKEN_STR_LITERAL, // string literal
     TOKEN_SUB, // "-"
     TOKEN_SYSTEM, // "System"
     TOKEN_THIS, // "this"

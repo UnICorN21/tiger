@@ -76,6 +76,7 @@ public class Parser {
 
   // AtomExp -> (exp)
   // -> INTEGER_LITERAL
+  // -> STRING_LITERAL
   // -> true
   // -> false
   // -> this
@@ -95,6 +96,11 @@ public class Parser {
     case TOKEN_NUM: {
       String num = eatToken(Kind.TOKEN_NUM);
       ret = new Ast.Exp.Num(Integer.valueOf(num), pos);
+      break;
+    }
+    case TOKEN_STR_LITERAL: {
+      String literal = eatToken(Kind.TOKEN_STR_LITERAL);
+      ret = new Ast.Exp.StringLiteral(literal, pos);
       break;
     }
     case TOKEN_TRUE: {

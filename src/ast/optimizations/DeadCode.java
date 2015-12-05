@@ -185,11 +185,7 @@ public class DeadCode implements ast.Visitor {
     this.mset.clear();
     this.stms.clear();
     m.stms.forEach(stm -> stm.accept(this));
-    LinkedList<Ast.Dec.T> locals = new LinkedList<>();
-    m.locals.stream().map(l -> (DecSingle)l).forEach(l -> {
-      if (this.mset.contains(l.id)) locals.add(l);
-    });
-    this.method = new MethodSingle(m.retType, m.id, m.formals, locals, this.stms, m.retExp);
+    this.method = new MethodSingle(m.retType, m.id, m.formals, m.locals, this.stms, m.retExp);
   }
 
   // class
