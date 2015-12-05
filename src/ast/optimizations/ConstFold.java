@@ -132,6 +132,9 @@ public class ConstFold implements ast.Visitor {
   }
 
   @Override
+  public void visit(StringLiteral e) { this.exp = e; }
+
+  @Override
   public void visit(Sub e) {
     e.left.accept(this);
     Ast.Exp.T left = this.exp;

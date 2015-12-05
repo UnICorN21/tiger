@@ -8,6 +8,7 @@ import cfg.Cfg.Dec.DecSingle;
 import cfg.Cfg.MainMethod.MainMethodSingle;
 import cfg.Cfg.Method.MethodSingle;
 import cfg.Cfg.Operand.Int;
+import cfg.Cfg.Operand.Str;
 import cfg.Cfg.Operand.Var;
 import cfg.Cfg.Program.ProgramSingle;
 import cfg.Cfg.Stm.*;
@@ -223,6 +224,11 @@ public class TranslateVisitor implements codegen.C.Visitor {
   }
 
   @Override
+  public void visit(Ast.Exp.StringLiteral e) {
+    this.operand = new Str(e.literal);
+  }
+
+  @Override
   public void visit(Ast.Exp.Sub e) {
     String dst = genVar();
     e.left.accept(this);
@@ -313,6 +319,9 @@ public class TranslateVisitor implements codegen.C.Visitor {
 
   @Override
   public void visit(codegen.C.Ast.Type.IntArray t) { this.type = new Type.IntArrayType(); }
+
+  @Override
+  public void visit(Ast.Type.StringType t) { this.type = new Type.StringType(); }
 
   // dec
   @Override

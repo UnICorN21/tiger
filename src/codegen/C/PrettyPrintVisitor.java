@@ -153,6 +153,11 @@ public class PrettyPrintVisitor implements Visitor {
   }
 
   @Override
+  public void visit(StringLiteral e) {
+    this.say("\"" + e.literal + "\"");
+  }
+
+  @Override
   public void visit(Sub e) {
     e.left.accept(this);
     this.say(" - ");
@@ -218,7 +223,8 @@ public class PrettyPrintVisitor implements Visitor {
   @Override
   public void visit(Print s) {
     this.printSpaces();
-    this.say("System_out_println(");
+    if (s.exp instanceof Num) this.say("System_out_println_int(");
+    else this.say("System_out_println_string(");
     s.exp.accept(this);
     this.sayln(");");
   }
@@ -247,6 +253,9 @@ public class PrettyPrintVisitor implements Visitor {
   public void visit(IntArray t) {
     this.say("int *");
   }
+
+  @Override
+  public void visit(Ast.Type.StringType t) { this.say("char *"); }
 
   // dec
   @Override

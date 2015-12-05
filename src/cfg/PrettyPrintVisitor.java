@@ -8,6 +8,7 @@ import cfg.Cfg.Dec.DecSingle;
 import cfg.Cfg.MainMethod.MainMethodSingle;
 import cfg.Cfg.Method.MethodSingle;
 import cfg.Cfg.Operand.Int;
+import cfg.Cfg.Operand.Str;
 import cfg.Cfg.Operand.Var;
 import cfg.Cfg.Program.ProgramSingle;
 import cfg.Cfg.Stm.*;
@@ -72,6 +73,9 @@ public class PrettyPrintVisitor implements Visitor {
   public void visit(Int operand) {
     this.say(Integer.toString(operand.i));
   }
+
+  @Override
+  public void visit(Str operand) { this.say("\"" + operand.literal + "\""); }
 
   @Override
   public void visit(Var operand) {
@@ -207,7 +211,8 @@ public class PrettyPrintVisitor implements Visitor {
   @Override
   public void visit(Print s) {
     this.printSpaces();
-    this.say("System_out_println (");
+    if (s.arg instanceof Int) this.say("System_out_println_int(");
+    else this.say("System_out_println_string(");
     s.arg.accept(this);
     this.sayln(");");
   }

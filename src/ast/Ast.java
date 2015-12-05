@@ -14,6 +14,7 @@ public class Ast {
       // int: 0
       // int[]: 1
       // class: 2
+      // string: 3
       // Such that one can easily tell who is who
       public abstract int getNum();
     }
@@ -102,6 +103,22 @@ public class Ast {
       }
     }
 
+    public static class StringType extends T { // Not use `String` to avoid name conflict.
+      public StringType() { /* null */ }
+
+      @Override
+      public String toString() {
+        return "@String";
+      }
+
+      @Override
+      public int getNum() {
+        return 3;
+      }
+
+      @Override
+      public void accept(Visitor v) { v.visit(this); }
+    }
   }
 
   // ///////////////////////////////////////////////////

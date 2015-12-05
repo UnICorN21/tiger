@@ -12,12 +12,14 @@ import ast.Ast.Type.ClassType;
 import control.Control.ConAst;
 import util.Pos;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 
 public class ElaboratorVisitor implements ast.Visitor {
   private static final Type.Int TYPE_INT = new Type.Int();
   private static final Type.IntArray TYPE_INTARRAY = new Type.IntArray();
   private static final Type.Boolean TYPE_BOOLEAN = new Type.Boolean();
+  private static final Type.StringType TYPE_STRING = new Type.StringType();
 
   public ClassTable classTable; // symbol table for class
   public MethodTable methodTable; // symbol table for each method
@@ -41,6 +43,10 @@ public class ElaboratorVisitor implements ast.Visitor {
 
   private void error(Type.T found, Type.T excepted, Pos pos) {
     error(String.format("Except %s, found %s", excepted, found), pos);
+  }
+
+  private void error(Type.T found, Type.T [] excepted, Pos pos) {
+    error(String.format("Except %s, found %s", Arrays.stream(excepted).map(Type.T::toString), found), pos);
   }
 
   private void warn(String msg) {
@@ -204,6 +210,11 @@ public class ElaboratorVisitor implements ast.Visitor {
   }
 
   @Override
+  public void visit(StringLiteral s) {
+    this.type = TYPE_STRING;
+  }
+
+  @Override
   public void visit(Sub e) {
     e.left.accept(this);
     Type.T leftty = this.type;
@@ -277,7 +288,8 @@ public class ElaboratorVisitor implements ast.Visitor {
   @Override
   public void visit(Print s) {
     s.exp.accept(this);
-    if (!this.type.toString().equals("@int")) error(this.type, TYPE_INT, s.exp.pos);
+    Type.T [] exptypes = new Type.T[] {TYPE_INT, TYPE_STRING};
+    if (!this.type.toString().equals("@int") && !this.type.toString().equals("@String")) error(this.type, exptypes, s.exp.pos);
   }
 
   @Override
@@ -305,6 +317,11 @@ public class ElaboratorVisitor implements ast.Visitor {
 
   @Override
   public void visit(Type.IntArray t) {
+    this.type = t;
+  }
+
+  @Override
+  public void visit(Type.StringType t) {
     this.type = t;
   }
 

@@ -106,6 +106,9 @@ public class DeadClass implements ast.Visitor {
   public void visit(Num e) { /* null */ }
 
   @Override
+  public void visit(StringLiteral e) { /* null */ }
+
+  @Override
   public void visit(Sub e) {
     e.left.accept(this);
     e.right.accept(this);

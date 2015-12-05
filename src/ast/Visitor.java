@@ -39,7 +39,7 @@ public interface Visitor {
 
    void visit(Num e);
 
-   default void visit(StringLiteral e) { /* Stub currently. */}
+   void visit(StringLiteral e);
 
    void visit(Sub e);
 
@@ -70,6 +70,8 @@ public interface Visitor {
    void visit(Int t);
 
    void visit(IntArray t);
+
+   default void visit(Ast.Type.StringType t) { /* Stub currently. */ }
 
   // dec
    void visit(Dec.DecSingle d);

@@ -162,6 +162,11 @@ public class TranslateVisitor implements ast.Visitor {
   }
 
   @Override
+  public void visit(ast.Ast.Exp.StringLiteral e) {
+    this.exp = new StringLiteral(e.literal);
+  }
+
+  @Override
   public void visit(ast.Ast.Exp.Sub e) {
     e.left.accept(this);
     Exp.T left = this.exp;

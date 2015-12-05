@@ -54,6 +54,18 @@ public class Cfg {
       }
     }
 
+    public static class StringType extends T {
+      public StringType() { /* null */ }
+
+      @Override
+      public String toString() {
+        return "@String";
+      }
+
+      @Override
+      public void accept(Visitor v) { v.visit(this); }
+    }
+
   }// end of type
 
   // //////////////////////////////////////////////////
@@ -99,6 +111,18 @@ public class Cfg {
       public void accept(Visitor v) {
         v.visit(this);
       }
+    }
+
+    public static class Str extends T {
+      public String literal;
+
+      public Str(String literal) { this.literal = literal; }
+
+      @Override
+      public String toString() { return literal; }
+
+      @Override
+      public void accept(Visitor v) { v.visit(this); }
     }
 
     public static class Var extends T {

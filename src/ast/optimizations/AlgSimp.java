@@ -128,9 +128,10 @@ public class AlgSimp implements ast.Visitor {
   }
 
   @Override
-  public void visit(Num e) {
-    this.exp = e;
-  }
+  public void visit(Num e) { this.exp = e; }
+
+  @Override
+  public void visit(StringLiteral e) { this.exp = e; }
 
   @Override
   public void visit(Sub e) {

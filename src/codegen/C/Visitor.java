@@ -38,6 +38,8 @@ public interface Visitor {
 
   void visit(Num e);
 
+  void visit(StringLiteral e);
+
   void visit(Sub e);
 
   void visit(This e);
@@ -63,6 +65,8 @@ public interface Visitor {
   void visit(Int t);
 
   void visit(IntArray t);
+
+  void visit(Ast.Type.StringType t);
 
   // dec
   void visit(DecSingle d);

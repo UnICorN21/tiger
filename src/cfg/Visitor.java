@@ -6,6 +6,7 @@ import cfg.Cfg.Dec.DecSingle;
 import cfg.Cfg.MainMethod.MainMethodSingle;
 import cfg.Cfg.Method.MethodSingle;
 import cfg.Cfg.Operand.Int;
+import cfg.Cfg.Operand.Str;
 import cfg.Cfg.Operand.Var;
 import cfg.Cfg.Program.ProgramSingle;
 import cfg.Cfg.Stm.*;
@@ -15,11 +16,14 @@ import cfg.Cfg.Transfer.Return;
 import cfg.Cfg.Type.ClassType;
 import cfg.Cfg.Type.IntArrayType;
 import cfg.Cfg.Type.IntType;
+import cfg.Cfg.Type.StringType;
 import cfg.Cfg.Vtable.VtableSingle;
 
 public interface Visitor {
   // operand
   default void visit(Int o) { /* null */ }
+
+  default void visit(Str o) { /* null */ }
 
   default void visit(Var o) { /* null */ }
 
@@ -29,6 +33,8 @@ public interface Visitor {
   default void visit(IntType t) { /* null */ }
 
   default void visit(IntArrayType t) { /* null */ }
+
+  default void visit(StringType t) { /* null */ }
 
   // dec
   default void visit(DecSingle d) { /* null */ }

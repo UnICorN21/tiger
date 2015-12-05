@@ -130,9 +130,9 @@ public class PrettyPrintVisitor implements Visitor {
   }
 
   @Override
-  public void visit(Num e) {
-    System.out.print(e.num);
-  }
+  public void visit(Num e) { System.out.print(e.num);}
+
+  public void visit(StringLiteral e) { System.out.print(e.literal); }
 
   @Override
   public void visit(Sub e) {
@@ -244,6 +244,11 @@ public class PrettyPrintVisitor implements Visitor {
   @Override
   public void visit(IntArray t) {
     this.say("int[]");
+  }
+
+  @Override
+  public void visit(Type.StringType t) {
+    this.say("string");
   }
 
   // dec

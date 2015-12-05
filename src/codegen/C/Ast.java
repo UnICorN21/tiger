@@ -31,8 +31,7 @@ public class Ast {
     }
 
     public static class Int extends T {
-      public Int() {
-      }
+      public Int() { /* null */ }
 
       @Override
       public String toString() {
@@ -46,8 +45,7 @@ public class Ast {
     }
 
     public static class IntArray extends T {
-      public IntArray() {
-      }
+      public IntArray() { /* null */ }
 
       @Override
       public String toString() {
@@ -59,6 +57,20 @@ public class Ast {
         v.visit(this);
       }
 
+    }
+
+    public static class StringType extends T {
+      public StringType() { /* null */ }
+
+      @Override
+      public String toString() {
+        return "@String";
+      }
+
+      @Override
+      public void accept(Visitor v) {
+        v.visit(this);
+      }
     }
 
   }// end of type
@@ -262,6 +274,19 @@ public class Ast {
 
       public Num(int num) {
         this.num = num;
+      }
+
+      @Override
+      public void accept(Visitor v) {
+        v.visit(this);
+      }
+    }
+
+    public static class StringLiteral extends T {
+      public String literal;
+
+      public StringLiteral(String literal) {
+        this.literal = literal;
       }
 
       @Override

@@ -1,9 +1,9 @@
 package control;
 
-import java.util.LinkedList;
-
-import util.Bug;
 import control.Control.ConSlp;
+import util.Bug;
+
+import java.util.LinkedList;
 
 public class CommandLine {
   interface F<X> {
