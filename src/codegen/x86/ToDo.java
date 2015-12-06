@@ -8,5 +8,4 @@ public class ToDo {
   // To keep things simple, you can abuse
   // the x86 ISA as a stack machine, which leads to
   // an AST very similar to the Java bytecode AST...
-  
 }

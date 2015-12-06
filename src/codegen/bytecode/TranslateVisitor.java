@@ -173,13 +173,11 @@ public class TranslateVisitor implements ast.Visitor {
 
   @Override
   public void visit(ast.Ast.Exp.Num e) {
-    emit(new Ldc(e.num));
+    emit(new LdcInt(e.num));
   }
 
   @Override
-  public void visit(ast.Ast.Exp.StringLiteral e) {
-    // TODO
-  }
+  public void visit(ast.Ast.Exp.StringLiteral e) { emit(new LdcString(e.literal)); }
 
   @Override
   public void visit(ast.Ast.Exp.Sub e) {
@@ -265,7 +263,8 @@ public class TranslateVisitor implements ast.Visitor {
   public void visit(ast.Ast.Stm.Print s) {
     emit(new Debug.Line(s.exp.pos.lineRow()));
     s.exp.accept(this);
-    emit(new Print());
+    if (s.exp instanceof ast.Ast.Exp.StringLiteral) emit(new Print("Ljava/lang/String;"));
+    else emit(new Print("I"));
   }
 
   @Override

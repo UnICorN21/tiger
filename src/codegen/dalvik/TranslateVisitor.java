@@ -217,6 +217,8 @@ public class TranslateVisitor implements ast.Visitor {
   @Override
   public void visit(ast.Ast.Exp.StringLiteral e) {
     // TODO
+    System.err.println("Not support String yet.");
+    System.exit(1);
   }
 
   @Override
@@ -404,11 +406,10 @@ public class TranslateVisitor implements ast.Visitor {
       emit(new ReturnObject(retName));
     else
       emit(new Return(retName));
-    // in the second pass, you should rename all method
+    // TODO
+    // in the second pass, rename all method
     // parameters according to the "p"-convention; and
     // rename all method locals according to the "v"-convention.
-    // Your code here:
-    // TODO
     // cook the final method.
     this.method = new MethodSingle(newRetType, m.id, this.classId, newFormals,
         locals, this.stms, 0, 0, Temp.getCount());

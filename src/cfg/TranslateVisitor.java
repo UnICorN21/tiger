@@ -208,7 +208,6 @@ public class TranslateVisitor implements codegen.C.Visitor {
 
   @Override
   public void visit(Ast.Exp.NewObject e) {
-    // TODO: check whether the `genVar` can be supplant by e.name when re-add the gc support
     String dst = genVar(new ClassType(e.classType));
     emit(new NewObject(dst, e.classType));
     this.operand = new Var(dst);

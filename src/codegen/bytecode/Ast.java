@@ -377,10 +377,10 @@ public class Ast {
      * other than the index of the constant pool.
      * It'll generate a `bipush` only if the value is in [-128, 127].
      */
-    public static class Ldc extends T {
+    public static class LdcInt extends T {
       public int i; // a constant number
 
-      public Ldc(int i) {
+      public LdcInt(int i) {
         this.i = i;
       }
 
@@ -388,6 +388,17 @@ public class Ast {
       public void accept(Visitor v) {
         v.visit(this);
       }
+    }
+
+    public static class LdcString extends T {
+      public String literal;
+
+      public LdcString(String literal) {
+        this.literal = literal;
+      }
+
+      @Override
+      public void accept(Visitor v) { v.visit(this); }
     }
 
     /**
@@ -424,7 +435,9 @@ public class Ast {
      * Stands for a compensate of instructions.
      */
     public static class Print extends T {
-      public Print() { /* null */ }
+      String argType;
+
+      public Print(String argType) { this.argType = argType; }
 
       @Override
       public void accept(Visitor v) {

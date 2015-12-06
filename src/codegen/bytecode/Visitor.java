@@ -60,7 +60,9 @@ public interface Visitor {
 
   void visit(LabelJ s);
 
-  void visit(Ldc s);
+  void visit(LdcInt s);
+
+  void visit(LdcString s);
 
   void visit(Print s);
 

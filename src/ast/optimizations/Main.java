@@ -28,7 +28,6 @@ public class Main {
       ast = cfVisitor.program;
     }
 
-    // TODO: Fix a bug here(May cause some locals missing).
     DeadCode dcodeVisitor = new DeadCode();
     control.CompilerPass deadCodePass = new control.CompilerPass(
         "Dead code elimination", ast, dcodeVisitor);
