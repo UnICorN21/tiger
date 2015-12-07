@@ -211,11 +211,58 @@ public class Ast {
       }
     }
 
+    public static class Le extends T {
+      public T left;
+      public T right;
+
+      public Le(T left, T right) {
+        this.left = left;
+        this.right = right;
+      }
+
+      @Override
+      public void accept(Visitor v) {
+        v.visit(this);
+      }
+    }
+
     public static class Gt extends T {
       public T left;
       public T right;
 
       public Gt(T left, T right) {
+        this.left = left;
+        this.right = right;
+      }
+
+      @Override
+      public void accept(Visitor v) {
+        v.visit(this);
+      }
+    }
+
+
+    public static class Ge extends T {
+      public T left;
+      public T right;
+
+      public Ge(T left, T right) {
+        this.left = left;
+        this.right = right;
+      }
+
+      @Override
+      public void accept(Visitor v) {
+        v.visit(this);
+      }
+    }
+
+
+    public static class Eq extends T {
+      public T left;
+      public T right;
+
+      public Eq(T left, T right) {
         this.left = left;
         this.right = right;
       }

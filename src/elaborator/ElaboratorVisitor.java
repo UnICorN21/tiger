@@ -177,7 +177,34 @@ public class ElaboratorVisitor implements ast.Visitor {
   }
 
   @Override
+  public void visit(Le e) {
+    e.left.accept(this);
+    Type.T ty = this.type;
+    e.right.accept(this);
+    if (!this.type.toString().equals(ty.toString())) error(this.type, ty, e.right.pos);
+    this.type = TYPE_BOOLEAN;
+  }
+
+  @Override
   public void visit(Gt e) {
+    e.left.accept(this);
+    Type.T ty = this.type;
+    e.right.accept(this);
+    if (!this.type.toString().equals(ty.toString())) error(this.type, ty, e.right.pos);
+    this.type = TYPE_BOOLEAN;
+  }
+
+  @Override
+  public void visit(Ge e) {
+    e.left.accept(this);
+    Type.T ty = this.type;
+    e.right.accept(this);
+    if (!this.type.toString().equals(ty.toString())) error(this.type, ty, e.right.pos);
+    this.type = TYPE_BOOLEAN;
+  }
+
+  @Override
+  public void visit(Eq e) {
     e.left.accept(this);
     Type.T ty = this.type;
     e.right.accept(this);

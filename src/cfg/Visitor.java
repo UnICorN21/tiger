@@ -59,7 +59,13 @@ public interface Visitor {
 
   default void visit(Lt s) { /* null */ }
 
+  default void visit(Le s) { /* null */ }
+
   default void visit(Gt s) { /* null */ }
+
+  default void visit(Ge s) { /* null */ }
+
+  default void visit(Eq s) { /* null */ }
 
   default void visit(AssignArray s) { /* null */ }
 

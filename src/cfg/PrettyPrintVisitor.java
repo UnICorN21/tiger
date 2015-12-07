@@ -184,6 +184,36 @@ public class PrettyPrintVisitor implements Visitor {
   }
 
   @Override
+  public void visit(Le s) {
+    this.printSpaces();
+    this.say(s.dst + " = ");
+    s.left.accept(this);
+    this.say(" <= ");
+    s.right.accept(this);
+    this.say(";");
+  }
+
+  @Override
+  public void visit(Ge s) {
+    this.printSpaces();
+    this.say(s.dst + " = ");
+    s.left.accept(this);
+    this.say(" >= ");
+    s.right.accept(this);
+    this.say(";");
+  }
+
+  @Override
+  public void visit(Eq s) {
+    this.printSpaces();
+    this.say(s.dst + " = ");
+    s.left.accept(this);
+    this.say(" == ");
+    s.right.accept(this);
+    this.say(";");
+  }
+
+  @Override
   public void visit(AssignArray s) {
     this.printSpaces();
     this.say(s.dst + "[3 + ");

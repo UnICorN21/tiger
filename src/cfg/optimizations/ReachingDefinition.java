@@ -124,6 +124,21 @@ public class ReachingDefinition implements cfg.Visitor {
   }
 
   @Override
+  public void visit(Le s) {
+    processStm(s);
+  }
+
+  @Override
+  public void visit(Ge s) {
+    processStm(s);
+  }
+
+  @Override
+  public void visit(Eq s) {
+    processStm(s);
+  }
+
+  @Override
   public void visit(Move s) {
     processStm(s);
   }
@@ -290,28 +305,16 @@ public class ReachingDefinition implements cfg.Visitor {
   @Override
   public void visit(MethodSingle m) {
     defs.clear();
-    // Five steps:
-    // Step 0: for each argument or local variable "x" in the
-    // method m, calculate x's definition site set def(x).
+
     currentStep = RDStepKind.Step0;
     m.blocks.forEach(b -> b.accept(this));
 
-    // Step 1: calculate the "gen" and "kill" sets for each
-    // statement and transfer
     currentStep = RDStepKind.Step1;
     m.blocks.forEach(b -> b.accept(this));
 
-    // Step 2: calculate the "gen" and "kill" sets for each block.
-    // For this, you should visit statements and transfers in a
-    // block sequentially.
     currentStep = RDStepKind.Step2;
     m.blocks.forEach(b -> b.accept(this));
 
-    // Step 3: calculate the "in" and "out" sets for each block
-    // Note that to speed up the calculation, you should use
-    // a topo-sort order of the CFG blocks, and
-    // crawl through the blocks in that order.
-    // And also you should loop until a fix-point is reached.
     currentStep = RDStepKind.Step3;
     Collections.reverse(m.blocks);
     while (true) {
@@ -323,8 +326,6 @@ public class ReachingDefinition implements cfg.Visitor {
       m.blocks.forEach(b -> trace((BlockSingle)b));
     }
 
-    // Step 4: calculate the "in" and "out" sets for each
-    // statement and transfer
     currentStep = RDStepKind.Step4;
     m.blocks.forEach(b -> b.accept(this));
   }
@@ -332,28 +333,16 @@ public class ReachingDefinition implements cfg.Visitor {
   @Override
   public void visit(MainMethodSingle m) {
     defs.clear();
-    // Five steps:
-    // Step 0: for each argument or local variable "x" in the
-    // method m, calculate x's definition site set def(x).
+
     currentStep = RDStepKind.Step0;
     m.blocks.forEach(b -> b.accept(this));
 
-    // Step 1: calculate the "gen" and "kill" sets for each
-    // statement and transfer
     currentStep = RDStepKind.Step1;
     m.blocks.forEach(b -> b.accept(this));
 
-    // Step 2: calculate the "gen" and "kill" sets for each block.
-    // For this, you should visit statements and transfers in a
-    // block sequentially.
     currentStep = RDStepKind.Step2;
     m.blocks.forEach(b -> b.accept(this));
 
-    // Step 3: calculate the "in" and "out" sets for each block
-    // Note that to speed up the calculation, you should use
-    // a topo-sort order of the CFG blocks, and
-    // crawl through the blocks in that order.
-    // And also you should loop until a fix-point is reached.
     currentStep = RDStepKind.Step3;
     Collections.reverse(m.blocks);
     while (true) {
@@ -365,8 +354,6 @@ public class ReachingDefinition implements cfg.Visitor {
       m.blocks.forEach(b -> trace((BlockSingle)b));
     }
 
-    // Step 4: calculate the "in" and "out" sets for each
-    // statement and transfer
     currentStep = RDStepKind.Step4;
     m.blocks.forEach(b -> b.accept(this));
   }

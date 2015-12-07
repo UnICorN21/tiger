@@ -189,12 +189,42 @@ public class TranslateVisitor implements codegen.C.Visitor {
   }
 
   @Override
+  public void visit(Ast.Exp.Le e) {
+    String dst = genVar();
+    e.left.accept(this);
+    Operand.T left = this.operand;
+    e.right.accept(this);
+    emit(new Le(dst, null, left, this.operand));
+    this.operand = new Var(dst);
+  }
+
+  @Override
   public void visit(Ast.Exp.Gt e) {
     String dst = genVar();
     e.left.accept(this);
     Operand.T left = this.operand;
     e.right.accept(this);
     emit(new Gt(dst, null, left, this.operand));
+    this.operand = new Var(dst);
+  }
+
+  @Override
+  public void visit(Ast.Exp.Ge e) {
+    String dst = genVar();
+    e.left.accept(this);
+    Operand.T left = this.operand;
+    e.right.accept(this);
+    emit(new Ge(dst, null, left, this.operand));
+    this.operand = new Var(dst);
+  }
+
+  @Override
+  public void visit(Ast.Exp.Eq e) {
+    String dst = genVar();
+    e.left.accept(this);
+    Operand.T left = this.operand;
+    e.right.accept(this);
+    emit(new Eq(dst, null, left, this.operand));
     this.operand = new Var(dst);
   }
 

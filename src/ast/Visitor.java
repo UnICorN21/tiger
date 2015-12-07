@@ -29,7 +29,13 @@ public interface Visitor {
 
    void visit(Lt e);
 
+   void visit(Le e);
+
    void visit(Gt e);
+
+   void visit(Ge e);
+
+   void visit(Eq e);
 
    void visit(NewIntArray e);
 

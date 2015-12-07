@@ -160,6 +160,11 @@ public class TranslateVisitor implements ast.Visitor {
   }
 
   @Override
+  public void visit(ast.Ast.Exp.Le e) {
+    // TODO
+  }
+
+  @Override
   public void visit(ast.Ast.Exp.Gt e) {
     Label tl = new Label(), fl = new Label(), el = new Label();
     e.left.accept(this);
@@ -177,6 +182,16 @@ public class TranslateVisitor implements ast.Visitor {
     emit(new Const(newname, 1));
     emit(new Goto32(el));
     emit(new LabelJ(el));
+  }
+
+  @Override
+  public void visit(ast.Ast.Exp.Eq e) {
+    // TODO
+  }
+
+  @Override
+  public void visit(ast.Ast.Exp.Ge e) {
+    // TODO
   }
 
   @Override

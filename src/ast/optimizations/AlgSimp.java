@@ -111,6 +111,33 @@ public class AlgSimp implements ast.Visitor {
   }
 
   @Override
+  public void visit(Eq e) {
+    e.left.accept(this);
+    Ast.Exp.T left = this.exp;
+    e.right.accept(this);
+    Ast.Exp.T right = this.exp;
+    this.exp = new Eq(left, right, e.pos);
+  }
+
+  @Override
+  public void visit(Ge e) {
+    e.left.accept(this);
+    Ast.Exp.T left = this.exp;
+    e.right.accept(this);
+    Ast.Exp.T right = this.exp;
+    this.exp = new Ge(left, right, e.pos);
+  }
+
+  @Override
+  public void visit(Le e) {
+    e.left.accept(this);
+    Ast.Exp.T left = this.exp;
+    e.right.accept(this);
+    Ast.Exp.T right = this.exp;
+    this.exp = new Le(left, right, e.pos);
+  }
+
+  @Override
   public void visit(NewIntArray e) {
     e.exp.accept(this);
     this.exp = new NewIntArray(this.exp, e.pos);

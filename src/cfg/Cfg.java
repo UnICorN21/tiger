@@ -298,6 +298,30 @@ public class Cfg {
       }
     }
 
+    public static class Le extends T {
+      // type of the destination variable
+      public Type.T ty;
+      public Operand.T left;
+      public Operand.T right;
+
+      public Le(String dst, Type.T ty, Operand.T left, Operand.T right) {
+        this.dst = dst;
+        this.ty = ty;
+        this.left = left;
+        this.right = right;
+      }
+
+      @Override
+      public String toString() {
+        return String.format("%s = %s <= %s", dst, left, right);
+      }
+
+      @Override
+      public void accept(Visitor v) {
+        v.visit(this);
+      }
+    }
+
     public static class Gt extends T {
       // type of the destination variable
       public Type.T ty;
@@ -314,6 +338,54 @@ public class Cfg {
       @Override
       public String toString() {
         return String.format("%s = %s > %s", dst, left, right);
+      }
+
+      @Override
+      public void accept(Visitor v) {
+        v.visit(this);
+      }
+    }
+
+    public static class Ge extends T {
+      // type of the destination variable
+      public Type.T ty;
+      public Operand.T left;
+      public Operand.T right;
+
+      public Ge(String dst, Type.T ty, Operand.T left, Operand.T right) {
+        this.dst = dst;
+        this.left = left;
+        this.right = right;
+        this.ty = ty;
+      }
+
+      @Override
+      public String toString() {
+        return String.format("%s = %s >= %s", dst, left, right);
+      }
+
+      @Override
+      public void accept(Visitor v) {
+        v.visit(this);
+      }
+    }
+
+    public static class Eq extends T {
+      // type of the destination variable
+      public Type.T ty;
+      public Operand.T left;
+      public Operand.T right;
+
+      public Eq(String dst, Type.T ty, Operand.T left, Operand.T right) {
+        this.dst = dst;
+        this.left = left;
+        this.right = right;
+        this.ty = ty;
+      }
+
+      @Override
+      public String toString() {
+        return String.format("%s = %s == %s", dst, left, right);
       }
 
       @Override

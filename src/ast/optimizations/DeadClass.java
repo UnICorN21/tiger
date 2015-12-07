@@ -85,6 +85,24 @@ public class DeadClass implements ast.Visitor {
   }
 
   @Override
+  public void visit(Eq e) {
+    e.left.accept(this);
+    e.right.accept(this);
+  }
+
+  @Override
+  public void visit(Ge e) {
+    e.left.accept(this);
+    e.right.accept(this);
+  }
+
+  @Override
+  public void visit(Le e) {
+    e.left.accept(this);
+    e.right.accept(this);
+  }
+
+  @Override
   public void visit(NewIntArray e) {
     e.exp.accept(this);
   }

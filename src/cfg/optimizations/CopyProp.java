@@ -22,52 +22,43 @@ import cfg.Cfg.Vtable.VtableSingle;
 public class CopyProp implements cfg.Visitor {
   public Program.T program;
   
-  public CopyProp()
-  {
+  public CopyProp() {
     this.program = null;
   } 
 
   // /////////////////////////////////////////////////////
   // operand
   @Override
-  public void visit(Int operand)
-  {
+  public void visit(Int operand) {
   }
 
   @Override
-  public void visit(Var operand)
-  {
+  public void visit(Var operand) {
   }
 
   // statements
   @Override
-  public void visit(Add s)
-  {
+  public void visit(Add s) {
   }
 
   @Override
   public void visit(Cfg.Stm.NewIntArray m) {
-
   }
 
   @Override
   public void visit(Cfg.Stm.And s) {
-
   }
 
   @Override
   public void visit(Cfg.Stm.ArraySelect s) {
-
   }
 
   @Override
   public void visit(Cfg.Stm.Length s) {
-
   }
 
   @Override
-  public void visit(InvokeVirtual s)
-  {
+  public void visit(InvokeVirtual s) {
   }
 
   @Override
@@ -76,12 +67,10 @@ public class CopyProp implements cfg.Visitor {
 
   @Override
   public void visit(Cfg.Stm.Gt s) {
-
   }
 
   @Override
   public void visit(AssignArray s) {
-
   }
 
   @Override
@@ -89,97 +78,79 @@ public class CopyProp implements cfg.Visitor {
   }
 
   @Override
-  public void visit(NewObject s)
-  {
+  public void visit(NewObject s) {
   }
 
   @Override
-  public void visit(Print s)
-  {
+  public void visit(Print s) {
   }
 
   @Override
-  public void visit(Sub s)
-  {
+  public void visit(Sub s) {
   }
 
   @Override
-  public void visit(Times s)
-  {
+  public void visit(Times s) {
   }
 
   // transfer
   @Override
-  public void visit(If s)
-  {
+  public void visit(If s) {
   }
 
   @Override
-  public void visit(Goto s)
-  {
+  public void visit(Goto s) {
   }
 
   @Override
-  public void visit(Return s)
-  {
+  public void visit(Return s) {
   }
 
   // type
   @Override
-  public void visit(ClassType t)
-  {
+  public void visit(ClassType t) {
   }
 
   @Override
-  public void visit(IntType t)
-  {
+  public void visit(IntType t) {
   }
 
   @Override
-  public void visit(IntArrayType t)
-  {
+  public void visit(IntArrayType t) {
   }
 
   // dec
   @Override
-  public void visit(DecSingle d)
-  {
+  public void visit(DecSingle d) {
   }
 
   // block
   @Override
-  public void visit(BlockSingle b)
-  {
+  public void visit(BlockSingle b) {
   }
 
   // method
   @Override
-  public void visit(MethodSingle m)
-  {
+  public void visit(MethodSingle m) {
   }
 
   @Override
-  public void visit(MainMethodSingle m)
-  {
+  public void visit(MainMethodSingle m) {
   }
 
   // vtables
   @Override
-  public void visit(VtableSingle v)
-  {
+  public void visit(VtableSingle v) {
   }
 
   // class
   @Override
-  public void visit(ClassSingle c)
-  {
+  public void visit(ClassSingle c) {
   }
 
   // program
   @Override
-  public void visit(ProgramSingle p)
-  {
+  public void visit(ProgramSingle p) {
     this.program = p;
   }
-
 }

@@ -105,9 +105,30 @@ public class PrettyPrintVisitor implements Visitor {
   }
 
   @Override
+  public void visit(Le e) {
+    e.left.accept(this);
+    this.say(" <= ");
+    e.right.accept(this);
+  }
+
+  @Override
   public void visit(Gt e) {
     e.left.accept(this);
     this.say(" > ");
+    e.right.accept(this);
+  }
+
+  @Override
+  public void visit(Ge e) {
+    e.left.accept(this);
+    this.say(" >= ");
+    e.right.accept(this);
+  }
+
+  @Override
+  public void visit(Eq e) {
+    e.left.accept(this);
+    this.say(" == ");
     e.right.accept(this);
   }
 

@@ -232,7 +232,11 @@ public class Parser {
   }
 
   // AndExp -> LtExp < LtExp
-  // -> LtExp
+  //        -> LtExp <= LtExp
+  //        -> LtExp > LtExp
+  //        -> LtExp >= LtExp
+  //        -> LtExp == LtExp
+  //        -> LtExp
   private Ast.Exp.T parseAndExp() {
     Ast.Exp.T ret = parseLtExp();
     while (current.kind == Kind.TOKEN_LT || current.kind == Kind.TOKEN_LE
@@ -243,7 +247,10 @@ public class Parser {
       Ast.Exp.T exp = parseLtExp();
       switch (tokenKind) {
         case TOKEN_LT: ret = new Ast.Exp.Lt(ret, exp, pos); break;
+        case TOKEN_LE: ret = new Ast.Exp.Le(ret, exp, pos); break;
         case TOKEN_GT: ret = new Ast.Exp.Gt(ret, exp, pos); break;
+        case TOKEN_GE: ret = new Ast.Exp.Ge(ret, exp, pos); break;
+        case TOKEN_EQ: ret = new Ast.Exp.Eq(ret, exp, pos); break;
         default: break;
       }
     }

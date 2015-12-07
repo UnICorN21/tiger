@@ -107,6 +107,36 @@ public class ConstFold implements ast.Visitor {
   }
 
   @Override
+  public void visit(Le e) {
+    e.left.accept(this);
+    Ast.Exp.T left = this.exp;
+    e.right.accept(this);
+    Ast.Exp.T right = this.exp;
+    if (left instanceof Num && right instanceof Num && ((Num)left).num <= ((Num)right).num) this.exp = new True(e.pos);
+    else this.exp = new Lt(left, right, e.pos);
+  }
+
+  @Override
+  public void visit(Ge e) {
+    e.left.accept(this);
+    Ast.Exp.T left = this.exp;
+    e.right.accept(this);
+    Ast.Exp.T right = this.exp;
+    if (left instanceof Num && right instanceof Num && ((Num)left).num >= ((Num)right).num) this.exp = new True(e.pos);
+    else this.exp = new Lt(left, right, e.pos);
+  }
+
+  @Override
+  public void visit(Eq e) {
+    e.left.accept(this);
+    Ast.Exp.T left = this.exp;
+    e.right.accept(this);
+    Ast.Exp.T right = this.exp;
+    if (left instanceof Num && right instanceof Num && ((Num)left).num == ((Num)right).num) this.exp = new True(e.pos);
+    else this.exp = new Lt(left, right, e.pos);
+  }
+
+  @Override
   public void visit(NewIntArray e) {
     e.exp.accept(this);
     this.exp = new NewIntArray(this.exp, e.pos);

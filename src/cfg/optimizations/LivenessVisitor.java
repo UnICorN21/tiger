@@ -186,7 +186,28 @@ public class LivenessVisitor implements cfg.Visitor {
   }
 
   @Override
+  public void visit(Le s) {
+    this.oneStmKill.add(s.dst);
+    s.left.accept(this);
+    s.right.accept(this);
+  }
+
+  @Override
   public void visit(Stm.Gt s) {
+    this.oneStmKill.add(s.dst);
+    s.left.accept(this);
+    s.right.accept(this);
+  }
+
+  @Override
+  public void visit(Ge s) {
+    this.oneStmKill.add(s.dst);
+    s.left.accept(this);
+    s.right.accept(this);
+  }
+
+  @Override
+  public void visit(Eq s) {
     this.oneStmKill.add(s.dst);
     s.left.accept(this);
     s.right.accept(this);
