@@ -266,6 +266,7 @@ public class Tiger {
   }
 
   public void link(String str) {
+    if (null == str) return;
     System.out.println("Start linking...");
     switch (control.Control.ConCodeGen.codegen) {
       case C:
