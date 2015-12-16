@@ -241,7 +241,7 @@ public class PrettyPrintVisitor implements Visitor {
   @Override
   public void visit(Print s) {
     this.printSpaces();
-    if (s.arg instanceof Int) this.say("System_out_println_int(");
+    if (s.arg instanceof Int || s.arg instanceof Var) this.say("System_out_println_int(");
     else this.say("System_out_println_string(");
     s.arg.accept(this);
     this.sayln(");");
