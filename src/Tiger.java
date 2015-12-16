@@ -277,7 +277,7 @@ public class Tiger {
           if (0 == exitVal) System.out.println("Link succeed.");
           else throw new RuntimeException("ExitVal is not zero.");
         } catch (Exception e) {
-          System.out.println("Link failed.\nPlease try `gcc" + str + ".c -I runtime -o " + outName + "` yourself.");
+          System.out.println("Link failed.\nPlease try `gcc " + str + ".c -I runtime -o " + outName + "` yourself.");
           e.printStackTrace();
         }
         break;
