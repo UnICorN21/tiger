@@ -39,7 +39,7 @@ public class CommandLine {
         .list(
             new Arg<>(
                 "codegen",
-                "{bytecode|C|dalvik|x86}",
+                "{bytecode|C|dalvik}",
                 "which code generator to use",
                 Kind.String,
                 (ss) -> {
@@ -120,10 +120,6 @@ public class CommandLine {
                 }), new Arg<>("skip", "<pass>",
                 "which compile pass to skip", Kind.String, (s) -> {
                   Control.addPass((String) s);
-                }), new Arg<>("testFac", null,
-                "whether or not to test the Tiger compiler on Fac.java",
-                Kind.Empty, (s) -> {
-                  Control.ConAst.testFac = true;
                 }), new Arg<>("testlexer", null,
                 "whether or not to test the lexer", Kind.Empty, (s) -> {
                   Control.ConLexer.test = true;
